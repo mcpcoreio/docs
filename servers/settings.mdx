@@ -1,33 +1,71 @@
 ---
 title: "Server Settings"
-description: "Rename your server, change its security mode, or delete it from the Settings tab."
+description: "Manage your server's active state, restart it, change its security mode, or delete it."
 ---
 
 ## Accessing settings
 
-Open the server detail page and click the **Settings** tab.
+Server controls are available directly on the **Overview** tab of the server detail page. There is also an **Edit** button in the top-right corner that opens the full settings form.
 
 <Frame>
-  <img src="/images/screenshots/server-settings-tab.png" alt="Server Settings tab" />
+  <img src="/images/screenshots/server-settings-tab.png" alt="Server detail page header with Edit and Restart buttons" />
 </Frame>
 
 ---
 
-## Rename a server
+## Activate / Deactivate a server
 
-Update the server's **name** and **description** at any time. The name is only used in the dashboard — it does not appear in the MCP endpoint URL, so renaming never breaks existing client configurations.
+Every server has an **Active** toggle switch visible at the top of the Overview tab.
+
+- **Active (on):** The server accepts incoming MCP requests normally.
+- **Inactive (off):** The server rejects all incoming requests with a `503 Service Unavailable` response. Your tools, secrets, and configuration are preserved.
+
+Use this to temporarily disable a server without deleting it — for maintenance, billing concerns, or while debugging a production issue. Toggle it back on when you're ready.
+
+<Note>
+  Deactivating a server takes effect immediately. Connected AI clients will lose access until the server is re-activated.
+</Note>
+
+---
+
+## Restart a server
+
+The **Restart** button (visible in the server header) stops all active connections, clears the runtime state, and brings the server back online with a fresh execution environment.
+
+**When to restart:**
+- After updating secrets — to ensure the new values are loaded immediately
+- If the server appears unresponsive without a clear error in the logs
+- After making significant changes to multiple tools at once
+
+<Warning>
+  Restarting terminates all in-flight tool executions. Any requests currently being processed will receive an error response. Restart during a low-traffic period when possible.
+</Warning>
+
+---
+
+## Edit server details
+
+Click the **Edit** button to open the full server form where you can update:
+
+- **Title** and **Description**
+- **Category**
+- **Instructions** (AI system prompt)
+- **Rate limit per minute**
+- **Security mode**
+
+The **Code** and **Subdomain** fields cannot be changed after creation — they are permanent identifiers.
 
 ---
 
 ## Change the security mode
 
-You can switch between security modes at any time without modifying any tool code. The endpoint URL stays the same.
+You can switch security modes at any time from the edit form. The subdomain URL stays the same.
 
 <Warning>
-  Changing the security mode takes effect immediately. Existing clients that no longer provide the correct credentials will receive a `401 Unauthorized` response.
+  Changing the security mode takes effect immediately. Connected AI clients that no longer provide valid credentials will receive `401 Unauthorized`.
 </Warning>
 
-See [Security Overview](/servers/security-overview) for a full description of each mode and when to use it.
+See [Security Overview](/servers/security-overview) for a full description of each mode.
 
 ---
 
@@ -35,19 +73,23 @@ See [Security Overview](/servers/security-overview) for a full description of ea
 
 Deleting a server is permanent and removes:
 
-- The server and its endpoint URL
+- The server and its subdomain endpoint
 - All tools on the server
 - All secrets stored on the server
-- All traffic logs associated with the server
+- All traffic and error logs associated with the server
 
 <Warning>
-  This action cannot be undone. Connected AI clients will immediately lose access to the server's tools.
+  This action cannot be undone. Connected AI clients will immediately lose access to the server's tools. The subdomain is released and may become available to others.
 </Warning>
 
 To confirm, you'll be asked to type the server name before the delete button becomes active.
 
 ---
 
-## Server status
+## Blocking access without deleting
 
-Servers are always on — there is no start/stop mechanism. If you need to temporarily block access without deleting the server, switch the security mode to **API Key** and revoke or change the key. This is simpler than deleting and recreating the server.
+If you need to temporarily block all access:
+
+1. **Deactivate** the server (toggle switch) — simplest option, fully reversible
+2. **Switch to API Key mode** and keep the key secret — clients without the key get `401`
+3. **Set rate limit to 0 and deactivate** — belt and suspenders for critical servers

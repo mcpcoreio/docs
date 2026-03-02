@@ -1,0 +1,82 @@
+---
+title: "Cline"
+description: "Connect your MCPCore server to the Cline VS Code extension."
+---
+
+## Prerequisites
+
+- [VS Code](https://code.visualstudio.com) with the [Cline extension](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev) installed
+- A MCPCore server with at least one tool
+- The config snippet from your server's **Integration** tab
+
+---
+
+## Step 1 — Get your config snippet
+
+Open your server's detail page, click the **Integration** tab, and select **Cline**. Copy the generated snippet.
+
+```json
+{
+  "mcpServers": {
+    "your-server-code": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote@latest", "https://your-subdomain.mcpcore.io/mcp"]
+    }
+  }
+}
+```
+
+For API Key mode:
+
+```json
+{
+  "mcpServers": {
+    "your-server-code": {
+      "command": "npx",
+      "args": [
+        "-y", "mcp-remote@latest",
+        "https://your-subdomain.mcpcore.io/mcp",
+        "--header", "Authorization: Bearer <your-api-key>"
+      ]
+    }
+  }
+}
+```
+
+---
+
+## Step 2 — Open Cline's MCP config
+
+In VS Code, open the Cline extension panel (sidebar icon or Command Palette → **Cline: Open**).
+
+Navigate to **MCP Servers** and click **Configure MCP Servers**. This opens Cline's `mcp_settings.json` file.
+
+<Frame>
+  <img src="/images/screenshots/cline-mcp-settings.png" alt="Cline extension panel showing MCP Servers section" />
+</Frame>
+
+---
+
+## Step 3 — Merge the snippet
+
+Add your server entry to the `mcpServers` object in `mcp_settings.json`.
+
+---
+
+## Step 4 — Save and verify
+
+Save the file. Cline reloads MCP servers automatically. Your MCPCore tools will appear in the Cline MCP Servers list with a green status indicator.
+
+<Frame>
+  <img src="/images/screenshots/cline-tool-call.png" alt="Cline extension with MCPCore tools listed" />
+</Frame>
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| Server shows as error | Verify the URL is correct and the Cline extension can reach the internet |
+| `401 Unauthorized` | Confirm the `--header` argument contains the correct API key |
+| Tools visible but failing | Check [Traffic Logs](/observability/traffic-logs) for the error detail |

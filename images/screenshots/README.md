@@ -48,9 +48,17 @@ Place screenshot images here. Each filename corresponds to a `<Frame>` image ref
 - `analytics-tool-breakdown.png` — Tool breakdown chart
 - `analytics-heatmap.png` — Traffic heatmap
 
+### Security
+- `security-unlisted-settings.png` — Unlisted mode selected with full URL preview
+
 ### Connect
 - `connect-endpoint-url.png` — Endpoint URL on Overview tab
+- `server-integration-tab.png` — Integration tab with client selector
+- `connect-integration-snippet.png` — Integration tab with copy button
+- `integration-claude.png` — Claude Desktop selected in Integration tab
 - `claude-desktop-tools-icon.png` — Claude Desktop with Tools icon
-- `cursor-mcp-settings.png` — Cursor MCP settings panel
 - `cursor-tool-call.png` — Cursor Agent mode tool call
+- `vscode-tool-call.png` — VS Code Copilot chat tool call
 - `windsurf-tool-call.png` — Windsurf Cascade tool call
+- `cline-mcp-settings.png` — Cline MCP Servers panel
+- `cline-tool-call.png` — Cline with MCPCore tools listed

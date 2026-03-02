@@ -1,0 +1,98 @@
+---
+title: "Unlisted Mode"
+description: "Access is controlled by a secret key embedded directly in the server URL — no auth headers required."
+---
+
+## How it works
+
+In **Unlisted** mode, MCPCore generates a 48-character random secret key and embeds it into your server's endpoint URL:
+
+```
+https://your-subdomain.mcpcore.io/mcp/{secretKey}
+```
+
+Any request that includes the correct URL (with the key) is allowed through. Requests to the base URL without the key are rejected with `404`.
+
+There are no auth headers to configure, no key rotation ceremony, and no client-side setup beyond using the full URL. The key is opaque — it is not displayed in the dashboard after creation; it is always accessed through the complete connection URL.
+
+---
+
+## When to use it
+
+- **Quick internal sharing** — share the full URL with a teammate or AI client and they're connected, no key distribution dance needed
+- **Lightweight protection** — the URL is unguessable (48 random characters), providing security through obscurity without the overhead of API key management
+- **Testing environments** — share a test server URL temporarily without creating and managing named keys
+
+<Note>
+  Unlisted is not public — the URL is not guessable — but it is also not revocable on a per-client basis. If you need the ability to revoke access for individual integrations, use **API Key** mode instead.
+</Note>
+
+---
+
+## Configure
+
+<Steps>
+  <Step title="Open the server creation form or edit an existing server">
+    Create a new server or click **Edit** on an existing server's detail page.
+  </Step>
+  <Step title="Select Unlisted">
+    Under **Security Mode**, select **Unlisted**.
+
+    MCPCore automatically generates a 48-character secret key and shows a preview of the full endpoint URL.
+
+    <Frame>
+      <img src="/images/screenshots/security-unlisted-settings.png" alt="Unlisted mode selected, showing the full URL with embedded key" />
+    </Frame>
+  </Step>
+  <Step title="Save">
+    Click **Save**. The full endpoint URL (including the embedded key) is displayed on the Overview tab — copy it from there to use in your AI clients.
+  </Step>
+</Steps>
+
+---
+
+## Client configuration
+
+Use the full URL (with the embedded key) — no additional headers needed:
+
+<CodeGroup>
+  ```json Claude Desktop / Windsurf / Cline
+  {
+    "mcpServers": {
+      "my-server": {
+        "command": "npx",
+        "args": ["-y", "mcp-remote@latest", "https://your-subdomain.mcpcore.io/mcp/{secretKey}"]
+      }
+    }
+  }
+  ```
+
+  ```json Cursor
+  {
+    "mcpServers": {
+      "my-server": {
+        "url": "https://your-subdomain.mcpcore.io/mcp/{secretKey}"
+      }
+    }
+  }
+  ```
+
+  ```json VS Code
+  {
+    "servers": {
+      "my-server": {
+        "type": "http",
+        "url": "https://your-subdomain.mcpcore.io/mcp/{secretKey}"
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+The MCPCore dashboard's **Integration** tab generates these snippets with your actual key pre-filled. Copy from there to avoid typos.
+
+---
+
+## Revoking access
+
+If the secret URL is compromised, switch the server to **API Key** mode (which generates a new key and changes the URL scheme) or temporarily **deactivate** the server. There is no per-client revocation in Unlisted mode — the URL is either valid or it isn't.

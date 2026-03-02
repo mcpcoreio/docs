@@ -16,17 +16,9 @@ You write the code that matters. MCPCore handles everything else:
 
 ## How it fits together
 
-```
-AI Client (Claude, Cursor, Windsurf…)
-         │
-         │  MCP protocol (JSON-RPC over HTTP/SSE)
-         ▼
-MCPCore — your MCP server
-         │  tools: fetch_repo, query_db, send_notification…
-         │
-         ▼
-External services (REST APIs, databases, third-party SaaS)
-```
+<Frame>
+  <img src="/images/flow-diagram.svg" alt="MCPCore architecture: AI clients connect to MCPCore which calls external services" />
+</Frame>
 
 The AI model never touches your database or external APIs directly. It calls your MCPCore tool, which runs your sandboxed code and returns a structured result. This separation keeps your infrastructure secure and your integrations composable.
 

@@ -1,0 +1,90 @@
+---
+title: "VS Code"
+description: "Connect your MCPCore server to VS Code using the native MCP HTTP transport."
+---
+
+## Prerequisites
+
+- [VS Code](https://code.visualstudio.com) with MCP support (VS Code 1.99+)
+- A MCPCore server with at least one tool
+- The config snippet from your server's **Integration** tab
+
+---
+
+## Step 1 — Get your config snippet
+
+Open your server's detail page, click the **Integration** tab, and select **VS Code**. Copy the generated snippet.
+
+VS Code uses a `servers` key (not `mcpServers`) and a `type: "http"` field:
+
+```json
+{
+  "servers": {
+    "your-server-code": {
+      "type": "http",
+      "url": "https://your-subdomain.mcpcore.io/mcp"
+    }
+  }
+}
+```
+
+For API Key mode:
+
+```json
+{
+  "servers": {
+    "your-server-code": {
+      "type": "http",
+      "url": "https://your-subdomain.mcpcore.io/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-api-key>"
+      }
+    }
+  }
+}
+```
+
+---
+
+## Step 2 — Add to your workspace config
+
+Create or open `.vscode/mcp.json` in your workspace root and paste the snippet:
+
+```
+your-project/
+└── .vscode/
+    └── mcp.json    ← create this file
+```
+
+If you want the server available across all workspaces, add it to your VS Code User Settings instead:
+
+1. Open Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`)
+2. Search for **Preferences: Open User Settings (JSON)**
+3. Add the `servers` block at the top level
+
+---
+
+## Step 3 — Reload VS Code
+
+Save the config file. VS Code picks up MCP configuration changes automatically — you may need to open a new chat to see the updated tools.
+
+---
+
+## Step 4 — Verify
+
+Open **Copilot Chat** or **Agent mode** in VS Code and reference one of your tools. Your MCPCore tools are available in any AI-powered feature.
+
+<Frame>
+  <img src="/images/screenshots/vscode-tool-call.png" alt="VS Code Copilot chat showing a MCPCore tool call" />
+</Frame>
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| Tools not appearing | Ensure VS Code 1.99+ and that the `servers` key (not `mcpServers`) is used |
+| `401 Unauthorized` | Verify the `Authorization` header value |
+| JSON parse error | Validate `.vscode/mcp.json` syntax |
+| Tool calls fail | Check [Traffic Logs](/observability/traffic-logs) |

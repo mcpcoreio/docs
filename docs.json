@@ -47,9 +47,9 @@
                 "group": "Security Modes",
                 "pages": [
                   "servers/security/public",
+                  "servers/security/unlisted",
                   "servers/security/api-key",
-                  "servers/security/oauth2",
-                  "servers/security/bearer-token"
+                  "servers/security/oauth2"
                 ]
               }
             ]
@@ -78,7 +78,9 @@
               "connect/overview",
               "connect/claude-desktop",
               "connect/cursor",
-              "connect/windsurf"
+              "connect/vscode",
+              "connect/windsurf",
+              "connect/cline"
             ]
           }
         ]

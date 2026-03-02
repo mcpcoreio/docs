@@ -1,51 +1,52 @@
 ---
 title: "Cursor"
-description: "Add your MCPCore server to Cursor to give the AI access to your tools in the editor."
+description: "Connect your MCPCore server to Cursor using its native HTTP MCP transport."
 ---
 
 ## Prerequisites
 
 - [Cursor](https://cursor.com) installed
 - A MCPCore server with at least one tool
-- The server's **Endpoint URL** (from the server Overview tab)
+- The config snippet from your server's **Integration** tab
 
 ---
 
-## Step 1 — Copy your endpoint URL
+## Step 1 — Get your config snippet
 
-Go to your server's **Overview** tab in the MCPCore dashboard and copy the endpoint URL:
+Open your server's detail page, click the **Integration** tab, and select **Cursor**. Copy the generated snippet.
 
+Cursor supports native HTTP transport — no `npx` bridge needed:
+
+```json
+{
+  "mcpServers": {
+    "your-server-code": {
+      "url": "https://your-subdomain.mcpcore.io/mcp"
+    }
+  }
+}
 ```
-https://mcp.mcpcore.io/s/<your-server-id>
+
+For API Key mode:
+
+```json
+{
+  "mcpServers": {
+    "your-server-code": {
+      "url": "https://your-subdomain.mcpcore.io/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-api-key>"
+      }
+    }
+  }
+}
 ```
 
 ---
 
-## Step 2 — Open Cursor MCP settings
+## Step 2 — Open the MCP config file
 
-In Cursor, open **Settings** → **MCP** (or press `Cmd+Shift+J` / `Ctrl+Shift+J` and search for "MCP").
-
-You can add servers through the UI panel or by editing the config file directly.
-
-<Frame>
-  <img src="/images/screenshots/cursor-mcp-settings.png" alt="Cursor MCP settings panel" />
-</Frame>
-
----
-
-## Step 3 — Add your server
-
-### Via the settings UI
-
-Click **Add MCP Server** in the MCP settings panel and enter:
-
-- **Name:** A label for the server (e.g. `mcpcore-tools`)
-- **URL:** Your MCPCore endpoint URL
-- **Headers:** Add `X-API-Key` if your server uses API Key mode
-
-### Via the config file
-
-Cursor's MCP config is stored at:
+Cursor's MCP config is at:
 
 **macOS / Linux:**
 ```
@@ -57,15 +58,21 @@ Cursor's MCP config is stored at:
 %USERPROFILE%\.cursor\mcp.json
 ```
 
-Edit the file to add your server:
+Create the file if it doesn't exist.
+
+---
+
+## Step 3 — Merge the snippet
+
+Add your server entry to the `mcpServers` object. If the file is new:
 
 ```json
 {
   "mcpServers": {
-    "my-mcpcore-server": {
-      "url": "https://mcp.mcpcore.io/s/<your-server-id>",
+    "your-server-code": {
+      "url": "https://your-subdomain.mcpcore.io/mcp",
       "headers": {
-        "X-API-Key": "sk-xxxxxxxxxxxxxxxxxx"
+        "Authorization": "Bearer <your-api-key>"
       }
     }
   }
@@ -74,22 +81,18 @@ Edit the file to add your server:
 
 ---
 
-## Step 4 — Reload Cursor
+## Step 4 — Reload MCP in Cursor
 
-Save the config file. Cursor picks up MCP config changes automatically; you may need to close and reopen the MCP settings panel to see the new server listed.
+Save the file. You can reload without restarting Cursor: open the Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`) and search for **MCP: Reload**.
 
 ---
 
-## Step 5 — Use tools in the editor
+## Step 5 — Verify
 
-Your MCPCore tools are now available to Cursor's AI features (Agent mode, Composer, inline chat). You can reference tools explicitly:
-
-> "Use fetch_repo_stats to check the current star count for this project's repository."
-
-Or let the AI call them when relevant to your current task.
+Open Cursor's Agent mode or a chat and ask it to use one of your tools. Your MCPCore tools are available in any AI feature.
 
 <Frame>
-  <img src="/images/screenshots/cursor-tool-call.png" alt="Cursor Agent mode showing a tool call to MCPCore" />
+  <img src="/images/screenshots/cursor-tool-call.png" alt="Cursor Agent mode showing a MCPCore tool call" />
 </Frame>
 
 ---
@@ -98,7 +101,6 @@ Or let the AI call them when relevant to your current task.
 
 | Problem | Solution |
 |---|---|
-| Server shows as offline | Verify the endpoint URL is correct; check internet connectivity |
-| `401 Unauthorized` | Confirm the API key in the headers matches one generated in MCPCore |
-| Tools visible but failing | Check [Traffic Logs](/observability/traffic-logs) for the full error |
-| JSON parse error | Validate `~/.cursor/mcp.json` syntax before saving |
+| Server shows as offline | Confirm the URL is correct and internet access is available |
+| `401 Unauthorized` | Verify the `Authorization` header value |
+| Tools fail silently | Check [Traffic Logs](/observability/traffic-logs) |

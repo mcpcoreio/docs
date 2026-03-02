@@ -1,6 +1,6 @@
 ---
 title: "Creating a Server"
-description: "An MCP server is the container that groups your tools under a single endpoint URL."
+description: "An MCP server is the container that groups your tools under a single subdomain endpoint."
 ---
 
 ## What is an MCP server?
@@ -9,19 +9,19 @@ An MCP server is a named, hosted process that exposes one or more tools to any M
 
 Each server gets its own:
 
-- **Endpoint URL** — a unique HTTPS URL your AI clients connect to
-- **Security mode** — independent auth configuration (Public, API Key, OAuth 2.0, or Bearer Token)
+- **Subdomain URL** — `https://your-subdomain.mcpcore.io/mcp` (chosen by you at creation time)
+- **Security mode** — independent auth configuration (Public, Unlisted, API Key, or OAuth)
 - **Tool collection** — the functions the AI can call
 - **Environment secrets** — encrypted key-value pairs referenced as `env.KEY_NAME`
 
 You can create as many servers as you need. Common patterns:
 
-| Pattern | Example |
+| Pattern | Example subdomain |
 |---|---|
 | One server per project | `github-tools`, `jira-tools`, `slack-bot` |
 | One server per environment | `my-api-dev`, `my-api-prod` |
-| One server per team | `data-team-tools`, `infra-tools` |
-| One server per customer | `acme-corp-tools`, `example-inc-tools` |
+| One server per team | `data-team`, `infra-tools` |
+| One server per customer | `acme-corp`, `example-inc` |
 
 ---
 
@@ -35,19 +35,72 @@ You can create as many servers as you need. Common patterns:
       <img src="/images/screenshots/server-create-button.png" alt="New Server button in the My Servers list" />
     </Frame>
   </Step>
-  <Step title="Fill in the details">
-    | Field | Description |
+  <Step title="Fill in the server details">
+    The creation form has the following fields:
+
+    ### Code
+    A unique machine identifier for your server (5–100 characters). Used internally and in integration configs. Must be in `snake_case` or `camelCase` format.
+
+    > Example: `github_tools`, `slackBot`, `inventory_api`
+
+    ### Title
+    A human-readable name displayed in the dashboard (5–255 characters).
+
+    > Example: `GitHub Tools`, `Slack Bot`, `Inventory API`
+
+    ### Description *(optional)*
+    A short description of what this server does (max 255 characters).
+
+    ### Category
+    Select the category that best describes your server's purpose:
+
+    | Category | Use for |
     |---|---|
-    | **Name** | A short identifier. Used in the dashboard and visible to AI clients. |
-    | **Description** | Optional. Shown in the dashboard to help you identify the server's purpose. |
-    | **Security mode** | How incoming requests are authenticated. [Learn more](/servers/security-overview). |
+    | Data & Database | Database connections, SQL, NoSQL, data warehouses |
+    | Files & Documents | File systems, cloud storage, document management |
+    | Web & Search | Web scraping, search engines, external APIs |
+    | DevTools & Repositories | Git, version control, CI/CD, code hosting |
+    | Messaging & Collaboration | Slack, Teams, email, communication platforms |
+    | Business & Productivity | CRM, ERP, project management, analytics |
+    | AI & ML Services | Machine learning APIs, AI models, NLP services |
+    | Automation & Workflows | Zapier, workflow engines, task automation |
+    | Security & Auth | Authentication, authorization, security tools |
+    | Custom & Internal | Internal tools, custom integrations |
+    | Other | Uncategorized or specialized services |
+
+    ### Subdomain
+    The subdomain for your server's endpoint (1–63 characters). Must contain only lowercase letters, numbers, and hyphens; cannot start or end with a hyphen.
+
+    Your server will be reachable at `https://your-subdomain.mcpcore.io/mcp`. Choose something short and memorable.
+
+    > Example: `github-tools` → `https://github-tools.mcpcore.io/mcp`
+
+    <Warning>
+      Subdomains must be globally unique across all MCPCore accounts. If your preferred subdomain is taken, try adding a suffix (e.g. `my-github-tools`).
+    </Warning>
+
+    ### Instructions *(optional)*
+    Custom system-level instructions sent to the AI when it connects to this server. Use this to give the AI context about your tools' intended scope, tone, or constraints.
+
+    > Example: `Only use these tools for read-only operations. Never modify data unless explicitly asked.`
+
+    ### Transport Type
+    Currently only **Streamable** is available — the default real-time streaming transport for MCP.
+
+    ### Rate Limit Per Minute
+    Maximum number of tool calls per minute (0 = unlimited, max 5000). Use this to protect backend services from excessive AI-driven calls.
+
+    > Default: 60 requests/minute
+
+    ### Security Mode
+    How incoming requests are authenticated. See [Security Overview](/servers/security-overview) for a full comparison.
 
     <Frame>
-      <img src="/images/screenshots/server-create-form.png" alt="Create server form" />
+      <img src="/images/screenshots/server-create-form.png" alt="Create server form with all fields" />
     </Frame>
   </Step>
   <Step title="Click Create server">
-    You'll be redirected to the server detail page. The server is live immediately — there are no deploy steps.
+    Your server is live immediately. You'll be redirected to the server detail page where you can start adding tools.
   </Step>
 </Steps>
 
@@ -58,31 +111,34 @@ You can create as many servers as you need. Common patterns:
 Once created, the server detail page is your central hub:
 
 <Frame>
-  <img src="/images/screenshots/server-detail-page.png" alt="Server detail page with tabs: Overview, Tools, Secrets, Settings" />
+  <img src="/images/screenshots/server-detail-page.png" alt="Server detail page showing Overview, Analytics, and Integration tabs" />
 </Frame>
+
+The page is organised into three tabs:
 
 | Tab | What's here |
 |---|---|
-| **Overview** | Endpoint URL, security mode, live request counter |
-| **Tools** | Create and manage the tools this server exposes |
-| **Secrets** | Encrypted environment variables for your tool code |
-| **Settings** | Rename, change security mode, or delete the server |
+| **Overview** | Subdomain URL, security info, tools list, environment secrets, recent logs and traffic |
+| **Analytics** | Request volume, error rate, latency, tool breakdown, session and hourly trends |
+| **Integration** | Ready-to-paste config snippets for Claude Desktop, Cursor, VS Code, Windsurf, and Cline |
 
 ---
 
-## The endpoint URL
+## Your server's endpoint URL
 
-Every server gets a permanent HTTPS endpoint URL:
+Your server's MCP endpoint URL is based on the subdomain you chose:
 
 ```
-https://mcp.mcpcore.io/s/<your-server-id>
+https://your-subdomain.mcpcore.io/mcp
 ```
 
-This is what you paste into Claude Desktop, Cursor, Windsurf, or any other MCP client. The URL never changes — even if you rename your server or change its security mode.
+For **Unlisted** mode, the URL includes an embedded secret key:
 
-<Note>
-  Copy the endpoint URL from the **Overview** tab of the server detail page.
-</Note>
+```
+https://your-subdomain.mcpcore.io/mcp/{secretKey}
+```
+
+Copy the endpoint URL from the **Overview** section of the server detail page. This URL is permanent — it never changes if you rename the server or update its settings.
 
 ---
 

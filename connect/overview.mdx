@@ -1,17 +1,21 @@
 ---
 title: "Connecting AI Clients"
-description: "Add your MCPCore server endpoint to any MCP-compatible AI client."
+description: "Add your MCPCore server to any MCP-compatible AI client in under a minute."
 ---
 
 ## How connecting works
 
-Every MCPCore server has a permanent HTTPS endpoint URL:
+Every MCPCore server has a permanent subdomain endpoint:
 
 ```
-https://mcp.mcpcore.io/s/<your-server-id>
+https://your-subdomain.mcpcore.io/mcp
 ```
 
-You copy this URL from the server's **Overview** tab and paste it into your AI client's MCP configuration. The client connects, calls `tools/list` to discover your tools and their schemas, and is ready to use them in conversations.
+You copy the ready-to-use config snippet from the server's **Integration** tab and paste it into your AI client's config file. The client connects, discovers your tools, and is ready to use them.
+
+<Frame>
+  <img src="/images/screenshots/server-integration-tab.png" alt="Integration tab showing client selector and config snippet" />
+</Frame>
 
 ---
 
@@ -19,63 +23,68 @@ You copy this URL from the server's **Overview** tab and paste it into your AI c
 
 <CardGroup cols={2}>
   <Card title="Claude Desktop" icon="robot" href="/connect/claude-desktop">
-    Anthropic's desktop app. Add MCPCore via the `claude_desktop_config.json` file.
+    Anthropic's desktop app. Config file at `~/Library/Application Support/Claude/claude_desktop_config.json`.
   </Card>
   <Card title="Cursor" icon="code" href="/connect/cursor">
-    The AI-powered code editor. Add MCPCore via the MCP settings panel or config file.
+    AI-powered code editor. Direct HTTP transport — no `npx` needed.
+  </Card>
+  <Card title="VS Code" icon="code" href="/connect/vscode">
+    Native MCP support via `.vscode/mcp.json` or User Settings.
   </Card>
   <Card title="Windsurf" icon="wind" href="/connect/windsurf">
-    Codeium's AI editor. Add MCPCore via the MCP config file.
+    Codeium's AI editor. Config at `~/.codeium/windsurf/mcp_config.json`.
   </Card>
-  <Card title="Other clients" icon="plug" href="/connect/overview#other-clients">
-    Any client that supports the MCP specification works.
+  <Card title="Cline" icon="terminal" href="/connect/cline">
+    VS Code extension with MCP support. Config via the Cline extension UI.
   </Card>
 </CardGroup>
 
 ---
 
-## Auth headers
+## Config formats at a glance
 
-If your server uses an authenticated security mode, include the appropriate header in the client configuration:
-
-| Security mode | Header |
-|---|---|
-| Public | None needed |
-| API Key | `X-API-Key: sk-xxxxxxxxxx` |
-| OAuth 2.0 | Handled automatically by the client's OAuth flow |
-| Bearer Token | `Authorization: Bearer <your_jwt>` |
-
----
-
-## Other clients
-
-MCPCore implements the standard MCP protocol over HTTP/SSE. Any MCP-compatible client can connect to your server using the endpoint URL.
-
-The generic configuration pattern is:
+Most clients use a **command-based** config that runs `mcp-remote` to bridge HTTP/SSE:
 
 ```json
 {
   "mcpServers": {
-    "my-server": {
-      "url": "https://mcp.mcpcore.io/s/<your-server-id>",
-      "headers": {
-        "X-API-Key": "sk-xxxxxxxxxx"
-      }
+    "your-server-code": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote@latest", "https://your-subdomain.mcpcore.io/mcp"]
     }
   }
 }
 ```
 
-Consult your client's documentation for the exact config file path and field names.
+**Cursor** and **VS Code** support native HTTP transport and don't need `npx`:
+
+```json
+{
+  "mcpServers": {
+    "your-server-code": {
+      "url": "https://your-subdomain.mcpcore.io/mcp"
+    }
+  }
+}
+```
 
 ---
 
-## Finding your endpoint URL
+## Auth headers by security mode
 
-The endpoint URL is always visible on the server **Overview** tab:
+| Security mode | What to add to the config |
+|---|---|
+| Public | Nothing extra |
+| Unlisted | Use the full URL with the embedded key |
+| API Key | Add `--header "Authorization: Bearer <key>"` (command) or `headers.Authorization` (URL-based) |
+| OAuth | Not yet supported in all clients — check client-specific docs |
+
+---
+
+## The Integration tab
+
+The easiest way to get the right config is to use the **Integration** tab on your server's detail page. Select your client, and the tab generates the correct snippet with your subdomain and API key pre-filled — just copy and paste.
 
 <Frame>
-  <img src="/images/screenshots/connect-endpoint-url.png" alt="Server Overview tab with endpoint URL highlighted and copy button" />
+  <img src="/images/screenshots/connect-integration-snippet.png" alt="Integration tab with client selector and copy button" />
 </Frame>
-
-The URL never changes — it's stable across renames, security mode changes, and tool additions.

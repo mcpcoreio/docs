@@ -1,11 +1,11 @@
 ---
-title: "Sandbox Environment"
-description: "Every MCPCore tool runs in a secure JavaScript sandbox with a built-in SDK for HTTP, databases, and utilities."
+title: "Tool Runtime"
+description: "Every MCPCore tool runs in an isolated JavaScript runtime with a built-in SDK for HTTP, databases, and utilities."
 ---
 
 ## Overview
 
-Your tool code runs in an isolated V8 sandbox. There is no file system access, no `require()`, no `import`, and no access to the Node.js standard library. Instead, MCPCore injects a curated set of globals:
+Your tool code runs in an isolated V8 runtime. There is no file system access, no `require()`, no `import`, and no access to the Node.js standard library. Instead, MCPCore injects a curated set of globals:
 
 | Global | What it is |
 |---|---|
@@ -81,7 +81,7 @@ return { status: res.status() };
 
 ## `sdk.db()` — Database queries
 
-Connect to a relational database and run queries.
+Connect to a relational database and run queries. `sdk.db()` is powered by **[Knex.js](https://knexjs.org)** under the hood — a battle-tested SQL query builder for Node.js. If you're familiar with Knex, the API will feel natural. MCPCore wraps it with a simplified interface for the most common operations.
 
 ```javascript
 const db = await sdk.db({

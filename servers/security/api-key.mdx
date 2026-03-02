@@ -1,45 +1,47 @@
 ---
 title: "API Key Mode"
-description: "Clients authenticate by including a static API key in the X-API-Key request header."
+description: "Clients authenticate by including a long-lived token in the Authorization header."
 ---
 
 ## How it works
 
-In **API Key** mode, MCPCore checks every incoming request for a valid `X-API-Key` header. Requests that omit the header or provide an unrecognised key receive a `401 Unauthorized` response before any tool code runs.
+In **API Key** mode, MCPCore checks every incoming request for a valid `Authorization: Bearer` header. Requests that omit the header or provide an unrecognised key receive a `401 Unauthorized` response before any tool code runs.
 
-You generate keys from the dashboard. Keys are shown once at creation time — store them securely.
+MCPCore generates the key for you when you select this mode. The key is shown once at creation — store it securely. It remains valid until you explicitly revoke it; there is no automatic expiry.
+
+You can create multiple keys — one per integration, team member, or client — and revoke them individually without affecting the others.
 
 ---
 
 ## When to use it
 
 - **Internal tooling** — you control all the clients and can distribute the key securely
-- **CI/CD and automation** — fixed credentials that don't expire or require OAuth flows
-- **Team tools** — a single shared key for the whole team (or one key per integration)
+- **CI/CD and automation pipelines** — a non-expiring credential that doesn't require OAuth flows
+- **Team tools** — issue one key per team or one key per integration and revoke per-client when needed
+- **Server-to-server integrations** — your backend includes the key on every request
 
 ---
 
 ## Configure
 
 <Steps>
-  <Step title="Open Server Settings">
-    Go to your server's **Settings** tab.
+  <Step title="Create or edit a server">
+    Open the server creation form (New Server) or click **Edit** on an existing server.
   </Step>
   <Step title="Select API Key">
-    Under **Security mode**, select **API Key** and click **Save**.
+    Under **Security Mode**, select **API Key**.
+
+    MCPCore automatically generates an API key and displays it in the form.
 
     <Frame>
-      <img src="/images/screenshots/security-apikey-settings.png" alt="API Key security mode selected" />
+      <img src="/images/screenshots/security-apikey-settings.png" alt="API Key security mode selected with generated key" />
     </Frame>
   </Step>
-  <Step title="Generate a key">
-    On the **Overview** tab, click **Add API key**. Give it a label (e.g. `cursor-dev`, `ci-pipeline`) and click **Generate**.
-
-    Copy the key immediately — it is shown only once.
-
-    <Frame>
-      <img src="/images/screenshots/security-apikey-generate.png" alt="Generated API key with copy button" />
-    </Frame>
+  <Step title="Copy the key">
+    Copy the key immediately — it is shown only once. Store it securely (a password manager, vault, or environment variable in your CI system).
+  </Step>
+  <Step title="Save">
+    Click **Save**. The server now requires the `Authorization: Bearer` header for all requests.
   </Step>
 </Steps>
 
@@ -47,29 +49,45 @@ You generate keys from the dashboard. Keys are shown once at creation time — s
 
 ## Client configuration
 
-Include the API key in the `X-API-Key` header for every MCP request:
+Include the key in the `Authorization: Bearer` header:
 
 <CodeGroup>
-  ```json Claude Desktop
+  ```json Claude Desktop / Windsurf / Cline
   {
     "mcpServers": {
       "my-server": {
-        "url": "https://mcp.mcpcore.io/s/<your-server-id>",
+        "command": "npx",
+        "args": [
+          "-y", "mcp-remote@latest",
+          "https://your-subdomain.mcpcore.io/mcp",
+          "--header", "Authorization: Bearer <your-api-key>"
+        ]
+      }
+    }
+  }
+  ```
+
+  ```json Cursor
+  {
+    "mcpServers": {
+      "my-server": {
+        "url": "https://your-subdomain.mcpcore.io/mcp",
         "headers": {
-          "X-API-Key": "sk-xxxxxxxxxxxxxxxxxx"
+          "Authorization": "Bearer <your-api-key>"
         }
       }
     }
   }
   ```
 
-  ```json Cursor / Windsurf
+  ```json VS Code
   {
-    "mcpServers": {
+    "servers": {
       "my-server": {
-        "url": "https://mcp.mcpcore.io/s/<your-server-id>",
+        "type": "http",
+        "url": "https://your-subdomain.mcpcore.io/mcp",
         "headers": {
-          "X-API-Key": "sk-xxxxxxxxxxxxxxxxxx"
+          "Authorization": "Bearer <your-api-key>"
         }
       }
     }
@@ -77,18 +95,20 @@ Include the API key in the `X-API-Key` header for every MCP request:
   ```
 </CodeGroup>
 
+The **Integration** tab on your server's detail page generates these snippets with your actual key pre-filled.
+
 ---
 
-## Managing keys
+## Key management
 
-From the server **Overview** tab you can:
+From the server's **Overview** section you can:
 
-- **Generate** additional keys (useful for isolating access per integration)
+- **Generate** additional keys (one per integration or environment)
 - **Revoke** individual keys without affecting others
-- **Label** keys to track which integration uses each one
+- **Label** keys so you know which integration uses each one
 
 <Note>
-  Revoking a key takes effect immediately. Any client using that key will receive `401` until it is reconfigured with a valid key.
+  Revoking a key takes effect immediately. Clients using that key will receive `401` until they are reconfigured with a valid key.
 </Note>
 
 ---
@@ -97,7 +117,7 @@ From the server **Overview** tab you can:
 
 To rotate a key without downtime:
 
-1. Generate a new key
-2. Update the client configuration with the new key
-3. Verify the client is working correctly
+1. Generate a new key from the dashboard
+2. Update your client configurations with the new key
+3. Verify the clients are working
 4. Revoke the old key
