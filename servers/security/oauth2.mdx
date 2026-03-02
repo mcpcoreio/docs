@@ -1,0 +1,198 @@
+---
+title: "OAuth 2.0 Mode"
+description: "Clients authenticate through an OAuth 2.0 authorization flow, enabling per-user identity and fine-grained scopes."
+---
+
+## How it works
+
+In **OAuth 2.0** mode, MCPCore acts as an OAuth 2.0 client on behalf of your MCP server. When a user connects their AI client to your server for the first time, MCPCore initiates an OAuth authorization flow with the external provider (GitHub, Google, your own auth server, etc.).
+
+After the user grants access, MCPCore stores the access token and automatically refreshes it when it expires. Your tool code receives a valid token through `env` — you never handle token management in code.
+
+```
+User's AI client
+      │  "connect to MCP server"
+      ▼
+MCPCore
+      │  redirect to OAuth provider
+      ▼
+OAuth Provider (GitHub, Google, etc.)
+      │  user grants access
+      ▼
+MCPCore receives access_token + refresh_token
+      │  stores encrypted tokens per user
+      ▼
+Tool runs with env.OAUTH_ACCESS_TOKEN available
+```
+
+---
+
+## When to use it
+
+- **User-facing integrations** — tools that act on behalf of the individual user (read their repos, post to their calendar)
+- **Fine-grained permissions** — OAuth scopes let the user (or your app) control exactly what the AI can access
+- **Compliance** — consent is explicit and auditable
+
+---
+
+## Concepts you need to understand
+
+### Authorization URL
+
+The **Authorization URL** is the endpoint on the OAuth provider where users are redirected to approve access. This URL starts the OAuth flow.
+
+Examples:
+- GitHub: `https://github.com/login/oauth/authorize`
+- Google: `https://accounts.google.com/o/oauth2/v2/auth`
+- Your own server: `https://auth.yourapp.com/oauth/authorize`
+
+### Token URL
+
+The **Token URL** is the endpoint MCPCore calls (server-to-server) to exchange an authorization code for access and refresh tokens.
+
+Examples:
+- GitHub: `https://github.com/login/oauth/access_token`
+- Google: `https://oauth2.googleapis.com/token`
+- Your own server: `https://auth.yourapp.com/oauth/token`
+
+### Client ID and Client Secret
+
+When you create an OAuth app with the provider, you receive a **Client ID** (public identifier) and a **Client Secret** (private credential). MCPCore uses these to identify itself to the provider during the token exchange.
+
+<Warning>
+  Never put your Client Secret in tool code. Store it as a server secret and reference it as `env.MY_OAUTH_SECRET`.
+</Warning>
+
+### Scopes
+
+**Scopes** are the specific permissions you're requesting. They are defined by the OAuth provider. Always request the minimum scopes needed.
+
+Examples:
+- GitHub: `repo`, `read:user`
+- Google Calendar: `https://www.googleapis.com/auth/calendar.readonly`
+- Custom: `read:orders write:orders`
+
+### Callback URL (Redirect URI)
+
+The **Callback URL** is the URL the OAuth provider redirects back to after the user grants access. MCPCore provides this URL — you do not set it yourself. You must register it with your OAuth provider when creating the OAuth app.
+
+Your MCPCore callback URL is:
+
+```
+https://mcp.mcpcore.io/auth/callback
+```
+
+Register this exact URL in your OAuth provider's app settings.
+
+---
+
+## Configure
+
+<Steps>
+  <Step title="Create an OAuth app with your provider">
+    In your OAuth provider's developer settings, create a new OAuth application and set the **Redirect URI** to:
+
+    ```
+    https://mcp.mcpcore.io/auth/callback
+    ```
+
+    Note the **Client ID** and **Client Secret** that are generated.
+  </Step>
+  <Step title="Open Server Settings">
+    Go to your server's **Settings** tab in the MCPCore dashboard.
+  </Step>
+  <Step title="Select OAuth 2.0">
+    Under **Security mode**, select **OAuth 2.0**.
+
+    <Frame>
+      <img src="/images/screenshots/security-oauth-settings.png" alt="OAuth 2.0 security mode settings form" />
+    </Frame>
+  </Step>
+  <Step title="Fill in the OAuth configuration">
+    | Field | What to enter |
+    |---|---|
+    | **Authorization URL** | The provider's authorization endpoint |
+    | **Token URL** | The provider's token exchange endpoint |
+    | **Client ID** | From your OAuth app |
+    | **Client Secret** | From your OAuth app |
+    | **Scopes** | Space-separated list of scopes to request |
+
+    <Frame>
+      <img src="/images/screenshots/security-oauth-form.png" alt="OAuth 2.0 configuration form filled in" />
+    </Frame>
+  </Step>
+  <Step title="Save">
+    Click **Save**. MCPCore will now require OAuth authentication for all requests to this server.
+  </Step>
+</Steps>
+
+---
+
+## Using the access token in tools
+
+Once a user has completed the OAuth flow, their access token is available in your tool code as a server secret. You can access it using:
+
+```javascript
+// The access token is automatically injected by MCPCore after OAuth completes
+const res = await sdk.http({
+  method: "GET",
+  url: "https://api.github.com/user/repos",
+  headers: {
+    Authorization: `Bearer ${env.OAUTH_ACCESS_TOKEN}`,
+  },
+});
+
+const repos = JSON.parse(res.body());
+return { count: repos.length, repos: repos.map(r => r.full_name) };
+```
+
+<Note>
+  MCPCore automatically refreshes the access token before it expires. Your code always receives a valid token.
+</Note>
+
+---
+
+## Provider-specific examples
+
+<AccordionGroup>
+  <Accordion title="GitHub">
+    | Field | Value |
+    |---|---|
+    | Authorization URL | `https://github.com/login/oauth/authorize` |
+    | Token URL | `https://github.com/login/oauth/access_token` |
+    | Common scopes | `repo read:user user:email` |
+    | Register callback at | github.com → Settings → Developer settings → OAuth Apps |
+  </Accordion>
+
+  <Accordion title="Google">
+    | Field | Value |
+    |---|---|
+    | Authorization URL | `https://accounts.google.com/o/oauth2/v2/auth` |
+    | Token URL | `https://oauth2.googleapis.com/token` |
+    | Common scopes | `https://www.googleapis.com/auth/calendar.readonly openid email` |
+    | Register callback at | console.cloud.google.com → APIs & Services → Credentials |
+
+    <Note>
+      Google requires `access_type=offline` for refresh tokens. MCPCore adds this automatically.
+    </Note>
+  </Accordion>
+
+  <Accordion title="Custom / self-hosted auth server">
+    If you run your own OAuth 2.0-compliant authorization server, enter your server's endpoints in the Authorization URL and Token URL fields. Any RFC 6749-compliant server will work.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## User connection flow
+
+When a user connects an AI client to your OAuth-protected server for the first time:
+
+1. The AI client attempts to connect to your server endpoint
+2. MCPCore responds with a redirect to the OAuth Authorization URL
+3. The user approves access in the provider's UI
+4. The provider redirects to `https://mcp.mcpcore.io/auth/callback`
+5. MCPCore exchanges the authorization code for tokens
+6. The AI client is now connected; tools are available
+
+Subsequent connections use the stored (and auto-refreshed) token — no re-authorization needed.

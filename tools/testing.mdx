@@ -1,0 +1,107 @@
+---
+title: "Testing Tools"
+description: "Run your tools with real parameters from the dashboard's Run panel — no AI client needed."
+---
+
+## The Run panel
+
+Every tool has a built-in **Run panel** that lets you execute the tool with custom input and inspect the result in real time. Use it to:
+
+- Verify tool logic before connecting an AI client
+- Debug parameter handling
+- Inspect the exact JSON structure returned to the AI
+- Test edge cases with specific inputs
+
+<Frame>
+  <img src="/images/screenshots/tool-run-panel.png" alt="Run panel with parameter inputs and response section" />
+</Frame>
+
+---
+
+## Running a tool
+
+<Steps>
+  <Step title="Open the Run tab">
+    In the tool editor, click the **Run** tab (or the play button in the toolbar).
+  </Step>
+  <Step title="Fill in parameters">
+    The Run panel renders a form field for each parameter you've defined. Required parameters are marked.
+
+    Enter real values — the code runs with exactly what you provide.
+
+    <Frame>
+      <img src="/images/screenshots/tool-run-params.png" alt="Run panel parameter form with filled-in values" />
+    </Frame>
+  </Step>
+  <Step title="Click Run tool">
+    Click the **Run tool** button. The tool executes in the sandbox with your inputs.
+  </Step>
+  <Step title="Inspect the result">
+    The response section shows:
+    - **Return value** — the JSON the AI would receive
+    - **Console output** — any `console.log()` / `console.error()` calls your code made
+    - **Execution time** — how long the tool took to run
+    - **Error** — if the tool threw an exception, the full stack trace
+
+    <Frame>
+      <img src="/images/screenshots/tool-run-result.png" alt="Run panel showing successful result with JSON output and console logs" />
+    </Frame>
+  </Step>
+</Steps>
+
+---
+
+## Reading console output
+
+`console.log()`, `console.info()`, `console.warn()`, `console.error()`, and `console.debug()` all appear in the Run panel's **Logs** section during a test run. Use them liberally while developing:
+
+```javascript
+console.log("Fetching data for user:", params.userId);
+
+const rows = await db.select("orders", { user_id: params.userId });
+
+console.log("Found", rows.length, "orders");
+
+if (rows.length === 0) {
+  console.warn("No orders found — returning empty result");
+  return { orders: [] };
+}
+
+return { orders: rows };
+```
+
+---
+
+## Debugging failures
+
+When a tool throws an error, the Run panel shows:
+
+- The error message
+- The full stack trace
+- The log output that ran before the failure
+
+Common failure patterns:
+
+| Symptom | Likely cause |
+|---|---|
+| `env.MY_KEY is undefined` | Secret not added to this server, or key name typo |
+| `res.status()` is `401` / `403` | Wrong or expired credentials in secret |
+| `JSON.parse()` throws | Upstream API returned non-JSON (check `res.body()` in a log) |
+| `db.select()` throws | Wrong DB host/port/credentials, or table doesn't exist |
+| Execution timeout | Tool taking > 30s — inspect what step is slow with `console.time()` |
+
+---
+
+## Testing vs production
+
+Runs from the Run panel are **real executions** — they consume API credits, write to databases, and send real requests to external services. Keep this in mind when testing tools that perform write operations or send notifications.
+
+<Note>
+  Test runs appear in [Traffic Logs](/observability/traffic-logs) with the source `dashboard-run` so you can distinguish them from AI-initiated calls.
+</Note>
+
+---
+
+## Testing with secrets
+
+Secrets (`env.*`) are available during Run panel executions — no special setup needed. The same encrypted values your production code uses are injected into test runs.

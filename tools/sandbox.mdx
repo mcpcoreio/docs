@@ -1,0 +1,267 @@
+---
+title: "Sandbox Environment"
+description: "Every MCPCore tool runs in a secure JavaScript sandbox with a built-in SDK for HTTP, databases, and utilities."
+---
+
+## Overview
+
+Your tool code runs in an isolated V8 sandbox. There is no file system access, no `require()`, no `import`, and no access to the Node.js standard library. Instead, MCPCore injects a curated set of globals:
+
+| Global | What it is |
+|---|---|
+| `sdk` | Built-in helpers: HTTP client, database client, Lodash |
+| `params` | The input parameters the AI passed at call time |
+| `env` | Your encrypted server secrets, accessible by name |
+| `console` | Structured log output visible in Traffic Logs |
+
+---
+
+## `sdk.http()` — HTTP requests
+
+Make outbound HTTP requests to any external API or service.
+
+```javascript
+const res = await sdk.http({
+  method:  "GET",           // "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
+  url:     "https://...",   // Full URL. Use template literals with params.*
+  headers: { },             // Key-value header object
+  body:    "...",           // String body for POST/PUT/PATCH
+});
+```
+
+### Response methods
+
+```javascript
+res.status()          // HTTP status code (number)  e.g. 200
+res.body()            // Response body as a string — parse with JSON.parse()
+res.headers()         // Response headers as an object
+```
+
+### Example — GET with auth
+
+```javascript
+const res = await sdk.http({
+  method: "GET",
+  url: `https://api.github.com/repos/${params.owner}/${params.repo}`,
+  headers: {
+    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+    "User-Agent":  "MCPCore-Tool/1.0",
+  },
+});
+
+if (res.status() !== 200) {
+  throw new Error(`GitHub API error: ${res.status()}`);
+}
+
+return JSON.parse(res.body());
+```
+
+### Example — POST with JSON body
+
+```javascript
+const res = await sdk.http({
+  method:  "POST",
+  url:     "https://api.sendgrid.com/v3/mail/send",
+  headers: {
+    Authorization:  `Bearer ${env.SENDGRID_API_KEY}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    personalizations: [{ to: [{ email: params.to }] }],
+    from:    { email: "noreply@yourapp.com" },
+    subject: params.subject,
+    content: [{ type: "text/plain", value: params.body }],
+  }),
+});
+
+return { status: res.status() };
+```
+
+---
+
+## `sdk.db()` — Database queries
+
+Connect to a relational database and run queries.
+
+```javascript
+const db = await sdk.db({
+  type:       "pg",          // "pg" | "mysql" | "mssql"
+  connection: {
+    host:     env.DB_HOST,
+    port:     env.DB_PORT,
+    database: env.DB_NAME,
+    user:     env.DB_USER,
+    password: env.DB_PASSWORD,
+  },
+});
+```
+
+<Note>
+  Always store connection credentials as secrets and reference them as `env.*`. Never hardcode passwords in tool code.
+</Note>
+
+### `db.select(table, where?)`
+
+Fetch rows from a table, optionally filtered by column values.
+
+```javascript
+// All rows
+const allUsers = await db.select("users");
+
+// Filtered rows
+const pendingOrders = await db.select("orders", {
+  user_id: params.userId,
+  status:  "pending",
+});
+
+return { count: pendingOrders.length, orders: pendingOrders };
+```
+
+### `db.insert(table, data)`
+
+Insert a single row and return the inserted record.
+
+```javascript
+const record = await db.insert("events", {
+  user_id:    params.userId,
+  event_type: params.type,
+  created_at: new Date().toISOString(),
+});
+
+return { id: record.id };
+```
+
+### `db.update(table, data, where)`
+
+Update rows matching the `where` condition.
+
+```javascript
+const updated = await db.update(
+  "subscriptions",
+  { status: "cancelled", cancelled_at: new Date().toISOString() },
+  { id: params.subscriptionId }
+);
+
+return { affected: updated.rowCount };
+```
+
+### `db.delete(table, where)`
+
+Delete rows matching the `where` condition.
+
+```javascript
+const result = await db.delete("sessions", { user_id: params.userId });
+return { deleted: result.rowCount };
+```
+
+### `db.query(sql, values?)`
+
+Run a raw parameterised SQL query for complex operations.
+
+```javascript
+const result = await db.query(
+  "SELECT product_id, SUM(quantity) as total FROM order_items WHERE created_at > $1 GROUP BY product_id ORDER BY total DESC LIMIT 10",
+  [params.since]
+);
+
+return { topProducts: result.rows };
+```
+
+<Warning>
+  Always use parameterised queries (`$1`, `$2`, …) when embedding user input in SQL. Never concatenate `params.*` values directly into a SQL string.
+</Warning>
+
+---
+
+## `sdk.lodash` — Utility functions
+
+A subset of [Lodash](https://lodash.com) is available for data manipulation.
+
+```javascript
+const _ = sdk.lodash;
+
+const grouped = _.groupBy(rows, "category");
+const sorted  = _.orderBy(rows, ["created_at"], ["desc"]);
+const top5    = _.take(sorted, 5);
+const unique  = _.uniqBy(rows, "user_id");
+const flat    = _.flatMap(groups, group => group.items);
+```
+
+---
+
+## `params` — Tool inputs
+
+`params` is a plain object containing the values the AI passed when calling the tool. The keys are the parameter names you defined in the tool schema.
+
+```javascript
+// If you defined a parameter named "userId" of type "string":
+const id = params.userId;
+
+// If you defined "limit" of type "number" with default 10:
+const limit = params.limit ?? 10;
+
+// If you defined "filters" of type "object":
+const { status, category } = params.filters;
+```
+
+Parameters are validated against the schema you defined before the code runs. If a required parameter is missing or has the wrong type, the tool returns a schema error without executing your code.
+
+---
+
+## `env` — Secrets
+
+`env` contains the encrypted secrets you stored in the server's **Secrets** tab. Reference them by their key name:
+
+```javascript
+const token    = env.GITHUB_TOKEN;
+const password = env.DB_PASSWORD;
+const apiKey   = env.OPENAI_API_KEY;
+```
+
+`env` is read-only. Values are strings. See [Secrets](/tools/secrets) for how to create and manage them.
+
+---
+
+## `console` — Structured logging
+
+Log messages from your tool code. All output is captured and visible in the [Traffic Logs](/observability/traffic-logs) dashboard.
+
+```javascript
+console.log("Processing request for user:", params.userId);
+console.info("Fetched", rows.length, "rows from database");
+console.warn("Rate limit approaching:", remaining, "requests left");
+console.error("Database query failed:", error.message);
+console.debug("Raw response:", res.body());
+```
+
+| Method | Log level | When to use |
+|---|---|---|
+| `console.log` | INFO | General progress messages |
+| `console.info` | INFO | Important milestones |
+| `console.warn` | WARN | Recoverable issues, degraded operation |
+| `console.error` | ERROR | Failures that affect the result |
+| `console.debug` | DEBUG | Verbose detail for development |
+
+<Note>
+  Log output is truncated at 10 KB per entry. For large payloads, log a summary rather than the full object.
+</Note>
+
+---
+
+## Error handling
+
+Throw an error to signal a failure to the AI:
+
+```javascript
+const res = await sdk.http({ method: "GET", url: `...` });
+
+if (res.status() === 404) {
+  throw new Error(`Repository not found: ${params.repo}`);
+}
+
+if (res.status() !== 200) {
+  throw new Error(`Upstream API returned ${res.status()}: ${res.body()}`);
+}
+```
+
+Uncaught errors are captured, logged with the full stack trace, and returned to the AI as a tool error. The request is recorded in [Error Logs](/observability/error-logs).

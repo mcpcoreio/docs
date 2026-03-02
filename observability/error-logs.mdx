@@ -1,0 +1,139 @@
+---
+title: "Error Logs"
+description: "Every failed tool call captured with the full error message, stack trace, and input parameters."
+---
+
+## What are Error Logs?
+
+Error Logs are a filtered view of your Traffic Logs that shows only the requests that resulted in an error. Instead of scanning through all requests, you get a focused list of failures — with everything you need to reproduce and fix the problem.
+
+A request is classified as an error when your tool code throws an uncaught exception, or when MCPCore rejects the request before your code runs (e.g. invalid parameters, authentication failure).
+
+Access Error Logs from **Observability → Error Logs** in the sidebar.
+
+<Frame>
+  <img src="/images/screenshots/error-logs-list.png" alt="Error Logs list showing failed requests with error type labels" />
+</Frame>
+
+---
+
+## Error types
+
+| Type | Cause |
+|---|---|
+| **Tool error** | Your code threw an uncaught exception |
+| **Timeout** | Tool execution exceeded 30 seconds |
+| **Parameter validation error** | The AI passed invalid or missing required parameters |
+| **Authentication error** | The request failed the server's security check (wrong API key, expired token, etc.) |
+| **Sandbox error** | An internal error in the MCPCore execution environment |
+
+---
+
+## Error detail
+
+Click any error row to open the full detail view:
+
+<Frame>
+  <img src="/images/screenshots/error-log-detail.png" alt="Error log detail showing error message, stack trace, input params, and console logs" />
+</Frame>
+
+### Error message
+
+The exception message thrown by your code, or the MCPCore-generated error for validation/auth failures.
+
+```
+Error: GitHub API returned 401: Bad credentials
+    at Object.<anonymous> (tool.js:12:9)
+```
+
+### Stack trace
+
+The full call stack at the point of failure. Use this to identify the exact line in your tool code that threw the error.
+
+```
+Error: GitHub API returned 401: Bad credentials
+    at tool.js:12:9
+    at async MCPCore.executeTool (runtime.js:84:5)
+```
+
+### Input parameters
+
+The `params` payload that caused the error — useful for reproducing the issue in the [Run panel](/tools/testing).
+
+```json
+{
+  "owner": "example",
+  "repo":  "private-repo"
+}
+```
+
+### Console output
+
+Any `console.*` calls your code made before the failure — often the most useful debugging signal.
+
+```
+[INFO]  Fetching repo: example/private-repo
+[ERROR] GitHub API returned status 401
+```
+
+---
+
+## Common errors and fixes
+
+### `env.MY_KEY is undefined`
+
+Your code references a secret that doesn't exist on this server.
+
+**Fix:** Go to the **Secrets** tab, check that the secret exists with exactly the name used in code (case-sensitive), and add it if missing.
+
+---
+
+### HTTP 401 / 403 from external API
+
+Your credentials are wrong, expired, or don't have permission for the requested resource.
+
+**Fix:** Verify the secret value in the dashboard (you can delete and re-add it with the correct value), and check the permission scopes for the API key in the external service's settings.
+
+---
+
+### `JSON.parse(): Unexpected token`
+
+Your code called `JSON.parse()` on a non-JSON response body.
+
+**Fix:** Add a check before parsing:
+
+```javascript
+const body = res.body();
+if (res.status() !== 200) {
+  console.error("Non-200 response:", res.status(), body);
+  throw new Error(`API error ${res.status()}: ${body.slice(0, 200)}`);
+}
+const data = JSON.parse(body);
+```
+
+---
+
+### Timeout (30s exceeded)
+
+The tool took longer than 30 seconds to complete.
+
+**Fix:** Identify the slow step using `console.time()` / `console.timeEnd()`. Common causes:
+- Database query without an index on the filter column
+- External API with high latency — add a timeout to `sdk.http()`
+- Large result set — add `LIMIT` to SQL queries or paginate
+
+---
+
+### Parameter validation error
+
+The AI passed invalid input — wrong type, missing required field, or value outside expected range.
+
+**Fix:** Review your [parameter definitions](/tools/parameters) and strengthen the descriptions so the AI knows exactly what to pass. For optional parameters, set sensible default values.
+
+---
+
+## Setting up alerts
+
+<Note>
+  Error rate alerts via email and webhook are coming soon. Until then, monitor the Error Logs page or use the [Analytics](/observability/analytics) error rate chart.
+</Note>

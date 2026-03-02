@@ -1,0 +1,130 @@
+---
+title: "Claude Desktop"
+description: "Add your MCPCore server to Claude Desktop to give Claude access to your tools."
+---
+
+## Prerequisites
+
+- [Claude Desktop](https://claude.ai/download) installed (macOS or Windows)
+- A MCPCore server with at least one tool
+- The server's **Endpoint URL** (from the server Overview tab)
+
+---
+
+## Step 1 — Copy your endpoint URL
+
+Go to your server's **Overview** tab in the MCPCore dashboard and copy the endpoint URL:
+
+```
+https://mcp.mcpcore.io/s/<your-server-id>
+```
+
+<Frame>
+  <img src="/images/screenshots/connect-endpoint-url.png" alt="Endpoint URL on the Server Overview tab" />
+</Frame>
+
+---
+
+## Step 2 — Edit the Claude Desktop config
+
+Open the Claude Desktop configuration file in a text editor.
+
+**macOS:**
+```
+~/Library/Application Support/Claude/claude_desktop_config.json
+```
+
+**Windows:**
+```
+%APPDATA%\Claude\claude_desktop_config.json
+```
+
+If the file doesn't exist, create it.
+
+---
+
+## Step 3 — Add your server
+
+Add a `mcpServers` entry for your MCPCore server.
+
+### Public server (no auth)
+
+```json
+{
+  "mcpServers": {
+    "my-mcpcore-server": {
+      "url": "https://mcp.mcpcore.io/s/<your-server-id>"
+    }
+  }
+}
+```
+
+### API Key protected server
+
+```json
+{
+  "mcpServers": {
+    "my-mcpcore-server": {
+      "url": "https://mcp.mcpcore.io/s/<your-server-id>",
+      "headers": {
+        "X-API-Key": "sk-xxxxxxxxxxxxxxxxxx"
+      }
+    }
+  }
+}
+```
+
+### Multiple servers
+
+```json
+{
+  "mcpServers": {
+    "github-tools": {
+      "url": "https://mcp.mcpcore.io/s/<server-id-1>",
+      "headers": {
+        "X-API-Key": "sk-xxxxxxxxxxxxxxxxxx"
+      }
+    },
+    "database-tools": {
+      "url": "https://mcp.mcpcore.io/s/<server-id-2>",
+      "headers": {
+        "X-API-Key": "sk-yyyyyyyyyyyyyyyyyy"
+      }
+    }
+  }
+}
+```
+
+---
+
+## Step 4 — Restart Claude Desktop
+
+Save the config file, then **fully quit and reopen** Claude Desktop. MCP connections are established at startup.
+
+---
+
+## Step 5 — Verify the connection
+
+In Claude Desktop, look for the **Tools** icon (a hammer or plug icon) in the input bar. Click it to see the list of available tools from your server.
+
+<Frame>
+  <img src="/images/screenshots/claude-desktop-tools-icon.png" alt="Claude Desktop chat interface with Tools icon visible" />
+</Frame>
+
+Start a conversation and ask Claude to use one of your tools — for example:
+> "Use the fetch_repo_stats tool to get the stats for the anthropics/anthropic-sdk-python repository."
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| Tools not visible after restart | Double-check the JSON syntax in the config file — a missing comma or bracket will cause the entire file to fail |
+| `401 Unauthorized` | Verify the API key in the `headers` field matches a key generated in the MCPCore dashboard |
+| `Connection refused` / `ECONNREFUSED` | Ensure Claude Desktop has internet access and the endpoint URL is correct |
+| Tools appear but fail when called | Open [Traffic Logs](/observability/traffic-logs) to see the error detail |
+
+<Note>
+  You can validate your JSON config at [jsonlint.com](https://jsonlint.com) before saving — syntax errors are the most common cause of connection failures.
+</Note>

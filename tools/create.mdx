@@ -1,0 +1,117 @@
+---
+title: "Creating a Tool"
+description: "A tool is a callable JavaScript function exposed over MCP. The AI decides when to call it — you decide what it does."
+---
+
+## What is a tool?
+
+A **tool** is the fundamental unit of work in MCPCore. It has:
+
+- A **name** — how the AI client identifies and calls it (e.g. `fetch_repo_stats`)
+- A **description** — plain-language explanation of what the tool does; the AI uses this to decide when to call it
+- **Parameters** — the typed inputs the AI passes at call time
+- **Code** — the JavaScript that runs when the tool is invoked
+
+When the AI connects to your server, it receives the full list of tools with their schemas. It then decides autonomously which tools to call, in what order, and with what parameters.
+
+---
+
+## Create a tool
+
+<Steps>
+  <Step title="Open the Tools tab">
+    On the server detail page, click the **Tools** tab, then click **New Tool**.
+
+    <Frame>
+      <img src="/images/screenshots/tool-new-button.png" alt="New Tool button on the Tools tab" />
+    </Frame>
+  </Step>
+  <Step title="Name your tool">
+    Choose a clear, descriptive name in **lowercase snake_case**:
+
+    | Good | Avoid |
+    |---|---|
+    | `fetch_user_orders` | `FetchUserOrders` |
+    | `send_slack_message` | `sendSlackMessage` |
+    | `query_inventory_db` | `tool1` |
+
+    The name appears in the MCP schema and in your analytics dashboard. It cannot contain spaces or special characters.
+  </Step>
+  <Step title="Write a description">
+    The description is critically important — it's what the AI reads to decide when to call your tool. Be specific.
+
+    **Good description:**
+    > Fetches the number of stars, forks, and primary language for a GitHub repository. Use when the user asks about repository statistics or open-source project metrics.
+
+    **Weak description:**
+    > Gets GitHub data.
+  </Step>
+  <Step title="Add parameters">
+    Define the inputs your code will receive via `params.*`. See [Parameters](/tools/parameters) for the full schema reference.
+  </Step>
+  <Step title="Write the code">
+    Write JavaScript in the editor. The sandbox gives you access to `sdk`, `params`, `env`, and `console`. See [Sandbox](/tools/sandbox) for the complete API.
+
+    <Frame>
+      <img src="/images/screenshots/tool-editor.png" alt="Tool code editor with a sample function" />
+    </Frame>
+  </Step>
+  <Step title="Save">
+    Click **Save**. The tool is live immediately on your server's endpoint.
+  </Step>
+</Steps>
+
+---
+
+## A minimal tool
+
+```javascript
+// params.repo is a string like "anthropics/anthropic-sdk-python"
+const res = await sdk.http({
+  method: "GET",
+  url: `https://api.github.com/repos/${params.repo}`,
+  headers: {
+    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+  },
+});
+
+const data = JSON.parse(res.body());
+
+return {
+  stars:    data.stargazers_count,
+  forks:    data.forks_count,
+  language: data.language,
+};
+```
+
+`sdk.http()` makes an HTTP request. `env.GITHUB_TOKEN` is a secret stored in the dashboard. `params.repo` is the value the AI passed at call time. The object you `return` is what the AI receives as the tool result.
+
+---
+
+## Tool limits
+
+| Limit | Value |
+|---|---|
+| Code size | 512 KB |
+| Execution timeout | 30 seconds |
+| Response payload | 4 MB |
+| Parameters per tool | 50 |
+
+---
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Sandbox API" icon="code" href="/tools/sandbox">
+    Full reference for `sdk.http()`, `sdk.db()`, `env`, `params`, and `console`.
+  </Card>
+  <Card title="Parameters" icon="list" href="/tools/parameters">
+    Define typed, validated inputs for your tools.
+  </Card>
+  <Card title="Secrets" icon="lock" href="/tools/secrets">
+    Store and reference API keys and credentials securely.
+  </Card>
+  <Card title="Testing" icon="play" href="/tools/testing">
+    Run tools with real parameters from the dashboard's Run panel.
+  </Card>
+</CardGroup>

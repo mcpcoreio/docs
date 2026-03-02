@@ -1,0 +1,163 @@
+---
+title: "Parameters"
+description: "Define the typed, validated inputs that the AI passes to your tool at call time."
+---
+
+## What are parameters?
+
+Parameters are the inputs your tool receives from the AI. When the AI decides to call your tool, it constructs a JSON payload matching your parameter schema. MCPCore validates this payload before your code runs.
+
+Your code accesses parameters through the `params` object:
+
+```javascript
+// If you defined a parameter named "userId":
+const id = params.userId;
+```
+
+---
+
+## Adding parameters
+
+In the tool editor, click **Add parameter** for each input your code needs.
+
+<Frame>
+  <img src="/images/screenshots/tool-parameters-panel.png" alt="Parameters panel with Add parameter button" />
+</Frame>
+
+---
+
+## Parameter fields
+
+| Field | Required | Description |
+|---|---|---|
+| **Name** | Yes | The key used to access the value in `params.*`. Use camelCase. |
+| **Type** | Yes | The expected data type (see types below). |
+| **Description** | Yes | What the parameter represents. The AI uses this to know what value to pass. |
+| **Required** | — | If checked, the AI must always provide this parameter. |
+| **Default value** | — | Used when the parameter is not required and the AI doesn't provide it. |
+
+---
+
+## Supported types
+
+### `string`
+
+A plain text value.
+
+```javascript
+// Parameter: "repo", type: string
+const repoName = params.repo;      // "anthropics/anthropic-sdk-python"
+```
+
+### `number`
+
+An integer or floating-point number.
+
+```javascript
+// Parameter: "limit", type: number, default: 10
+const limit = params.limit;        // 25
+```
+
+### `boolean`
+
+`true` or `false`.
+
+```javascript
+// Parameter: "includeArchived", type: boolean, default: false
+const includeArchived = params.includeArchived;   // false
+```
+
+### `array`
+
+A JSON array. Use the **Items type** field to specify the type of each element.
+
+```javascript
+// Parameter: "userIds", type: array of strings
+const ids = params.userIds;    // ["user_1", "user_2", "user_3"]
+```
+
+### `object`
+
+A JSON object with sub-properties. Define each sub-property with its own type and description.
+
+```javascript
+// Parameter: "filter" of type object with sub-fields: status (string), since (string)
+const { status, since } = params.filter;
+```
+
+---
+
+## Best practices for parameter descriptions
+
+The AI reads the parameter description to understand what value to pass. Good descriptions reduce tool call errors.
+
+| Parameter | Weak description | Strong description |
+|---|---|---|
+| `repo` | "The repo" | "GitHub repository in `owner/repo` format, e.g. `torvalds/linux`" |
+| `since` | "Start date" | "ISO 8601 date string. Filters results to records created after this date, e.g. `2024-01-01`" |
+| `limit` | "How many" | "Maximum number of results to return. Min 1, max 100. Defaults to 20." |
+
+---
+
+## Parameter validation
+
+MCPCore validates every tool call against your parameter schema before running the code. If validation fails:
+
+- Missing required parameters → `400` error returned to the AI
+- Wrong type → `400` error with a clear message
+- Your code is never executed
+
+This means you do not need to validate required parameters in your code — they are guaranteed to be present and of the correct type when your code runs.
+
+---
+
+## Optional parameters
+
+For optional parameters, always provide a sensible default value or handle the `undefined` case in code:
+
+```javascript
+// Parameter "status" is optional, no default defined
+const status = params.status ?? "active";   // default to "active" in code
+
+const rows = await db.select("orders", {
+  user_id: params.userId,
+  status,
+});
+```
+
+---
+
+## Working with objects
+
+Object parameters are ideal for grouping related inputs:
+
+```javascript
+// Parameter "pagination" of type object:
+//   - page (number, required)
+//   - pageSize (number, default: 20)
+const { page, pageSize = 20 } = params.pagination;
+
+const offset = (page - 1) * pageSize;
+const rows = await db.query(
+  "SELECT * FROM products ORDER BY created_at DESC LIMIT $1 OFFSET $2",
+  [pageSize, offset]
+);
+
+return { page, pageSize, total: rows.rowCount, results: rows.rows };
+```
+
+---
+
+## Working with arrays
+
+```javascript
+// Parameter "tags" of type array of strings
+const tags = params.tags;   // ["javascript", "react", "nextjs"]
+
+const results = await db.query(
+  "SELECT * FROM posts WHERE tags && $1",
+  [tags]
+);
+
+return { posts: results.rows };
+```

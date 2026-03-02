@@ -1,97 +1,59 @@
 ---
 title: "Introduction"
-description: "Welcome to the new home for your documentation"
+description: "MCPCore is the fastest way to build, deploy, and manage MCP servers — no infrastructure required."
 ---
 
-## Setting up
+## What is MCPCore?
 
-Get your documentation site up and running in minutes.
+**MCPCore** is a managed platform for the [Model Context Protocol (MCP)](https://modelcontextprotocol.io). It lets you write tool logic in JavaScript and get a live, MCP-compliant endpoint in under 30 seconds — no Docker, no servers, no `node_modules`.
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+You write the code that matters. MCPCore handles everything else:
 
-## Make it yours
+- **MCP server hosting** — your tools run in an isolated, always-on sandbox
+- **Authentication** — choose from 4 security modes (Public, API Key, OAuth 2.0, Bearer Token)
+- **Encrypted secrets** — store API keys and credentials securely; reference them as `env.MY_KEY`
+- **Observability** — real-time traffic logs, error traces, and analytics dashboards
 
-Design a docs site that looks great and empowers your users.
+## How it fits together
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+```
+AI Client (Claude, Cursor, Windsurf…)
+         │
+         │  MCP protocol (JSON-RPC over HTTP/SSE)
+         ▼
+MCPCore — your MCP server
+         │  tools: fetch_repo, query_db, send_notification…
+         │
+         ▼
+External services (REST APIs, databases, third-party SaaS)
+```
+
+The AI model never touches your database or external APIs directly. It calls your MCPCore tool, which runs your sandboxed code and returns a structured result. This separation keeps your infrastructure secure and your integrations composable.
+
+## Core concepts
+
+<CardGroup cols={2}>
+  <Card title="MCP Servers" icon="server" href="/servers/create">
+    A server groups related tools under a single endpoint URL. Create as many servers as you need — one per project, one per team, or one per environment.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Tools" icon="wrench" href="/tools/create">
+    A tool is a callable JavaScript function. The AI decides when to call it and what parameters to pass. You decide what it does.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Security Modes" icon="shield" href="/servers/security-overview">
+    Every server has an independent security mode — Public, API Key, OAuth 2.0, or Bearer Token. Switching modes never requires changing your tool code.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Observability" icon="chart-line" href="/observability/traffic-logs">
+    Every request is logged. Inspect call history, error traces, latency trends, and geographic distribution from the dashboard.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Ready to build?
 
-Everything you need to create world-class documentation.
-
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
+<CardGroup cols={2}>
+  <Card title="Quickstart — 5 minutes" icon="rocket" href="/quickstart">
+    Create a server, write a tool, and test it live.
   </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
+  <Card title="Connect an AI client" icon="plug" href="/connect/overview">
+    Add your endpoint to Claude Desktop, Cursor, or Windsurf.
   </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
-
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+</CardGroup>

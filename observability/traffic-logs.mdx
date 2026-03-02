@@ -1,0 +1,131 @@
+---
+title: "Traffic Logs"
+description: "A complete record of every request your MCP server has received — who called what, when, and how fast."
+---
+
+## What are Traffic Logs?
+
+Traffic Logs give you a real-time, per-request view of your server's activity. Every MCP tool call is recorded with its full context: who called it, what parameters were passed, what was returned, how long it took, and what log output your code produced.
+
+You can access Traffic Logs from the dashboard sidebar under **Observability → Traffic Logs**, or from the **Logs** tab on any server detail page.
+
+<Frame>
+  <img src="/images/screenshots/traffic-logs-list.png" alt="Traffic Logs list showing recent requests with status indicators" />
+</Frame>
+
+---
+
+## The log list
+
+Each row in the log list shows:
+
+| Column | Description |
+|---|---|
+| **Status** | Green for success, red for error |
+| **Tool** | The tool name that was called |
+| **Server** | Which server received the request |
+| **Source** | `ai-client` or `dashboard-run` |
+| **Duration** | Execution time in milliseconds |
+| **Time** | Timestamp of the request |
+
+You can filter by server, tool, status (success/error), date range, and source.
+
+---
+
+## Request detail
+
+Click any log row to open the full request detail:
+
+<Frame>
+  <img src="/images/screenshots/traffic-log-detail.png" alt="Traffic log detail modal showing input params, output, duration, and console logs" />
+</Frame>
+
+### Input parameters
+
+The exact JSON payload the AI client sent — the parameters your code received via `params`.
+
+```json
+{
+  "repo": "anthropics/anthropic-sdk-python"
+}
+```
+
+### Output
+
+The return value your tool code produced — exactly what the AI received as the tool result.
+
+```json
+{
+  "stars": 3421,
+  "forks": 312,
+  "language": "Python"
+}
+```
+
+### Console logs
+
+Any output from `console.log()`, `console.info()`, `console.warn()`, `console.error()`, or `console.debug()` in your tool code, in order:
+
+```
+[INFO]  Fetching repo: anthropics/anthropic-sdk-python
+[INFO]  GitHub API responded in 143ms
+[INFO]  Stars: 3421, Forks: 312
+```
+
+### Execution metadata
+
+- **Start time** and **end time**
+- **Duration** (milliseconds)
+- **Client IP** (geo-resolved to country)
+- **MCP session ID**
+
+---
+
+## What's logged and what's not
+
+| Logged | Not logged |
+|---|---|
+| Input `params.*` values | Secret values (`env.*`) — always redacted |
+| Return value | Internal MCPCore infrastructure details |
+| Console output | Raw HTTP responses unless you log them |
+| Error messages and stack traces | Encrypted credentials in request headers |
+| Execution duration | |
+
+<Note>
+  Secret values are automatically redacted from all log output. You will never see a raw API key, password, or OAuth token in the logs — even if you accidentally call `console.log(env.MY_SECRET)`.
+</Note>
+
+---
+
+## Filtering and searching
+
+Use the filter bar to narrow down logs:
+
+- **Server** — filter to a specific server
+- **Tool** — filter to a specific tool name
+- **Status** — All / Success / Error
+- **Source** — All / AI client / Dashboard run
+- **Date range** — Last hour, last 24h, last 7 days, custom
+
+<Frame>
+  <img src="/images/screenshots/traffic-logs-filters.png" alt="Traffic Logs filter bar" />
+</Frame>
+
+---
+
+## Retention
+
+Traffic logs are retained for **30 days** on the Free plan and **90 days** on paid plans. Older logs are permanently deleted.
+
+---
+
+## Common use cases
+
+**Debugging why a tool returned unexpected output:**
+Open the log entry, check the input params (did the AI pass the right values?), check the console output (did the code execute the expected path?), and check the return value.
+
+**Verifying a new tool works before connecting an AI client:**
+Use the [Run panel](/tools/testing) to fire test calls. These appear in Traffic Logs with source `dashboard-run` so you can compare the actual output against your expectations.
+
+**Understanding which tools the AI calls most:**
+Use the [Analytics](/observability/analytics) dashboard for aggregate call counts, or browse Traffic Logs sorted by tool name to see the call distribution.

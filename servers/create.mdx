@@ -1,0 +1,98 @@
+---
+title: "Creating a Server"
+description: "An MCP server is the container that groups your tools under a single endpoint URL."
+---
+
+## What is an MCP server?
+
+An MCP server is a named, hosted process that exposes one or more tools to any MCP-compatible AI client. When the AI connects to your server, it discovers all available tools and their input schemas — then decides which ones to call based on the conversation.
+
+Each server gets its own:
+
+- **Endpoint URL** — a unique HTTPS URL your AI clients connect to
+- **Security mode** — independent auth configuration (Public, API Key, OAuth 2.0, or Bearer Token)
+- **Tool collection** — the functions the AI can call
+- **Environment secrets** — encrypted key-value pairs referenced as `env.KEY_NAME`
+
+You can create as many servers as you need. Common patterns:
+
+| Pattern | Example |
+|---|---|
+| One server per project | `github-tools`, `jira-tools`, `slack-bot` |
+| One server per environment | `my-api-dev`, `my-api-prod` |
+| One server per team | `data-team-tools`, `infra-tools` |
+| One server per customer | `acme-corp-tools`, `example-inc-tools` |
+
+---
+
+## Create a server
+
+<Steps>
+  <Step title="Navigate to My Servers">
+    From the dashboard sidebar, click **My Servers**, then click the **New Server** button.
+
+    <Frame>
+      <img src="/images/screenshots/server-create-button.png" alt="New Server button in the My Servers list" />
+    </Frame>
+  </Step>
+  <Step title="Fill in the details">
+    | Field | Description |
+    |---|---|
+    | **Name** | A short identifier. Used in the dashboard and visible to AI clients. |
+    | **Description** | Optional. Shown in the dashboard to help you identify the server's purpose. |
+    | **Security mode** | How incoming requests are authenticated. [Learn more](/servers/security-overview). |
+
+    <Frame>
+      <img src="/images/screenshots/server-create-form.png" alt="Create server form" />
+    </Frame>
+  </Step>
+  <Step title="Click Create server">
+    You'll be redirected to the server detail page. The server is live immediately — there are no deploy steps.
+  </Step>
+</Steps>
+
+---
+
+## The server detail page
+
+Once created, the server detail page is your central hub:
+
+<Frame>
+  <img src="/images/screenshots/server-detail-page.png" alt="Server detail page with tabs: Overview, Tools, Secrets, Settings" />
+</Frame>
+
+| Tab | What's here |
+|---|---|
+| **Overview** | Endpoint URL, security mode, live request counter |
+| **Tools** | Create and manage the tools this server exposes |
+| **Secrets** | Encrypted environment variables for your tool code |
+| **Settings** | Rename, change security mode, or delete the server |
+
+---
+
+## The endpoint URL
+
+Every server gets a permanent HTTPS endpoint URL:
+
+```
+https://mcp.mcpcore.io/s/<your-server-id>
+```
+
+This is what you paste into Claude Desktop, Cursor, Windsurf, or any other MCP client. The URL never changes — even if you rename your server or change its security mode.
+
+<Note>
+  Copy the endpoint URL from the **Overview** tab of the server detail page.
+</Note>
+
+---
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Configure security" icon="shield" href="/servers/security-overview">
+    Choose and configure the right security mode for your use case.
+  </Card>
+  <Card title="Add tools" icon="wrench" href="/tools/create">
+    Write the JavaScript tool functions this server will expose.
+  </Card>
+</CardGroup>

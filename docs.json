@@ -1,68 +1,84 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "MCPCore",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#7c3aed",
+    "light": "#a78bfa",
+    "dark": "#6d28d9"
+  },
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
   },
   "favicon": "/favicon.svg",
+  "navbar": {
+    "links": [
+      {
+        "label": "mcpcore.io",
+        "href": "https://mcpcore.io"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get started free",
+      "href": "https://app.mcpcore.io/register"
+    }
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Getting Started",
             "pages": [
               "index",
-              "quickstart",
-              "development"
+              "quickstart"
             ]
           },
           {
-            "group": "Customization",
+            "group": "MCP Servers",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "servers/create",
+              "servers/settings",
+              "servers/security-overview",
+              {
+                "group": "Security Modes",
+                "pages": [
+                  "servers/security/public",
+                  "servers/security/api-key",
+                  "servers/security/oauth2",
+                  "servers/security/bearer-token"
+                ]
+              }
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Tools",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "tools/create",
+              "tools/sandbox",
+              "tools/parameters",
+              "tools/secrets",
+              "tools/testing"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Observability",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API reference",
-        "groups": [
-          {
-            "group": "API documentation",
-            "pages": [
-              "api-reference/introduction"
+              "observability/traffic-logs",
+              "observability/error-logs",
+              "observability/analytics"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Connect AI Clients",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "connect/overview",
+              "connect/claude-desktop",
+              "connect/cursor",
+              "connect/windsurf"
             ]
           }
         ]
@@ -71,52 +87,30 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "Dashboard",
+          "href": "https://app.mcpcore.io",
+          "icon": "gauge"
         },
         {
           "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
+          "href": "https://mcpcore.io/blog",
           "icon": "newspaper"
         }
       ]
     }
   },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "claude",
+      "cursor"
+    ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "x": "https://x.com/mcpcore_io",
+      "linkedin": "https://linkedin.com/company/mcpcore"
     }
   }
 }

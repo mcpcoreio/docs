@@ -1,0 +1,53 @@
+---
+title: "Server Settings"
+description: "Rename your server, change its security mode, or delete it from the Settings tab."
+---
+
+## Accessing settings
+
+Open the server detail page and click the **Settings** tab.
+
+<Frame>
+  <img src="/images/screenshots/server-settings-tab.png" alt="Server Settings tab" />
+</Frame>
+
+---
+
+## Rename a server
+
+Update the server's **name** and **description** at any time. The name is only used in the dashboard — it does not appear in the MCP endpoint URL, so renaming never breaks existing client configurations.
+
+---
+
+## Change the security mode
+
+You can switch between security modes at any time without modifying any tool code. The endpoint URL stays the same.
+
+<Warning>
+  Changing the security mode takes effect immediately. Existing clients that no longer provide the correct credentials will receive a `401 Unauthorized` response.
+</Warning>
+
+See [Security Overview](/servers/security-overview) for a full description of each mode and when to use it.
+
+---
+
+## Delete a server
+
+Deleting a server is permanent and removes:
+
+- The server and its endpoint URL
+- All tools on the server
+- All secrets stored on the server
+- All traffic logs associated with the server
+
+<Warning>
+  This action cannot be undone. Connected AI clients will immediately lose access to the server's tools.
+</Warning>
+
+To confirm, you'll be asked to type the server name before the delete button becomes active.
+
+---
+
+## Server status
+
+Servers are always on — there is no start/stop mechanism. If you need to temporarily block access without deleting the server, switch the security mode to **API Key** and revoke or change the key. This is simpler than deleting and recreating the server.

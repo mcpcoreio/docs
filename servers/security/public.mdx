@@ -1,0 +1,57 @@
+---
+title: "Public Mode"
+description: "No authentication required — any caller with the endpoint URL can invoke your tools."
+---
+
+## How it works
+
+When a server is set to **Public** mode, MCPCore forwards every incoming MCP request to your tools without checking any credentials. There is no API key to distribute, no token to acquire, and no configuration required on the client side.
+
+---
+
+## When to use it
+
+- **Demos and prototypes** — share a link and let anyone test your tools
+- **Read-only public data** — tools that query open APIs (GitHub public repos, weather APIs, etc.)
+- **Local development** — fastest to set up when iterating on tool logic
+
+<Warning>
+  Do not use Public mode for tools that access private data, perform write operations, or consume paid APIs. Anyone with your endpoint URL can call these tools — including automated scanners.
+</Warning>
+
+---
+
+## Configure
+
+<Steps>
+  <Step title="Open Server Settings">
+    Go to your server's **Settings** tab in the dashboard.
+  </Step>
+  <Step title="Select Public">
+    Under **Security mode**, select **Public** and click **Save**.
+  </Step>
+</Steps>
+
+No additional configuration is needed.
+
+---
+
+## Client configuration
+
+When connecting to a Public server, no auth header is required:
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "url": "https://mcp.mcpcore.io/s/<your-server-id>"
+    }
+  }
+}
+```
+
+---
+
+## Switching away from Public
+
+If you decide to lock down the server later, switch to **API Key** mode from the **Settings** tab. The endpoint URL does not change, and your tool code does not need to be modified.

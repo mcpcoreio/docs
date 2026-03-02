@@ -1,0 +1,103 @@
+---
+title: "API Key Mode"
+description: "Clients authenticate by including a static API key in the X-API-Key request header."
+---
+
+## How it works
+
+In **API Key** mode, MCPCore checks every incoming request for a valid `X-API-Key` header. Requests that omit the header or provide an unrecognised key receive a `401 Unauthorized` response before any tool code runs.
+
+You generate keys from the dashboard. Keys are shown once at creation time — store them securely.
+
+---
+
+## When to use it
+
+- **Internal tooling** — you control all the clients and can distribute the key securely
+- **CI/CD and automation** — fixed credentials that don't expire or require OAuth flows
+- **Team tools** — a single shared key for the whole team (or one key per integration)
+
+---
+
+## Configure
+
+<Steps>
+  <Step title="Open Server Settings">
+    Go to your server's **Settings** tab.
+  </Step>
+  <Step title="Select API Key">
+    Under **Security mode**, select **API Key** and click **Save**.
+
+    <Frame>
+      <img src="/images/screenshots/security-apikey-settings.png" alt="API Key security mode selected" />
+    </Frame>
+  </Step>
+  <Step title="Generate a key">
+    On the **Overview** tab, click **Add API key**. Give it a label (e.g. `cursor-dev`, `ci-pipeline`) and click **Generate**.
+
+    Copy the key immediately — it is shown only once.
+
+    <Frame>
+      <img src="/images/screenshots/security-apikey-generate.png" alt="Generated API key with copy button" />
+    </Frame>
+  </Step>
+</Steps>
+
+---
+
+## Client configuration
+
+Include the API key in the `X-API-Key` header for every MCP request:
+
+<CodeGroup>
+  ```json Claude Desktop
+  {
+    "mcpServers": {
+      "my-server": {
+        "url": "https://mcp.mcpcore.io/s/<your-server-id>",
+        "headers": {
+          "X-API-Key": "sk-xxxxxxxxxxxxxxxxxx"
+        }
+      }
+    }
+  }
+  ```
+
+  ```json Cursor / Windsurf
+  {
+    "mcpServers": {
+      "my-server": {
+        "url": "https://mcp.mcpcore.io/s/<your-server-id>",
+        "headers": {
+          "X-API-Key": "sk-xxxxxxxxxxxxxxxxxx"
+        }
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+---
+
+## Managing keys
+
+From the server **Overview** tab you can:
+
+- **Generate** additional keys (useful for isolating access per integration)
+- **Revoke** individual keys without affecting others
+- **Label** keys to track which integration uses each one
+
+<Note>
+  Revoking a key takes effect immediately. Any client using that key will receive `401` until it is reconfigured with a valid key.
+</Note>
+
+---
+
+## Key rotation
+
+To rotate a key without downtime:
+
+1. Generate a new key
+2. Update the client configuration with the new key
+3. Verify the client is working correctly
+4. Revoke the old key

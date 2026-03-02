@@ -1,0 +1,138 @@
+---
+title: "Analytics"
+description: "Understand how your MCP servers are being used — request volume, latency trends, tool breakdown, cost, and geographic distribution."
+---
+
+## Overview
+
+The Analytics dashboard gives you aggregate insights about your MCP server usage. Unlike Traffic Logs (which show individual requests), Analytics shows trends and summaries over time — useful for capacity planning, performance optimisation, and understanding which tools the AI actually uses.
+
+Access Analytics from **Observability → Analytics** in the sidebar, or from the **Analytics** tab on any server detail page.
+
+<Frame>
+  <img src="/images/screenshots/analytics-dashboard.png" alt="Analytics dashboard with KPI cards and charts" />
+</Frame>
+
+---
+
+## Account-level analytics
+
+The account-level analytics view aggregates across all your servers.
+
+### KPI summary
+
+Four headline metrics at the top of the page:
+
+| Metric | What it measures |
+|---|---|
+| **Total requests** | Cumulative tool calls in the selected period |
+| **Success rate** | Percentage of calls that completed without error |
+| **Avg. latency** | Mean execution time across all tools and servers |
+| **Estimated cost** | Approximate compute cost for the period |
+
+Each metric shows a percentage change vs the previous equivalent period (e.g. last 7 days vs the 7 days before that).
+
+<Frame>
+  <img src="/images/screenshots/analytics-kpi-cards.png" alt="KPI summary cards showing total requests, success rate, avg latency, and cost" />
+</Frame>
+
+### Daily request trend
+
+A bar or line chart showing request volume per day. Hover over a bar to see the exact count for that day.
+
+Use this to:
+- Spot unexpected spikes (sudden increase in AI usage or a misconfigured client making excessive calls)
+- Identify periods of low usage (nights, weekends) vs peak hours
+
+<Frame>
+  <img src="/images/screenshots/analytics-daily-trend.png" alt="Daily request trend chart" />
+</Frame>
+
+### Hourly request pattern
+
+Shows average request counts by hour of day (in your account timezone). Useful for understanding when your tools are most active and planning maintenance windows.
+
+### Latency trend
+
+P50 (median) and P95 execution time over time. P95 tells you the "worst normal case" — if P95 is rising, investigate slow tools even if average latency looks fine.
+
+### Top servers
+
+A ranked list of your servers by request volume in the selected period.
+
+### Top tools
+
+A ranked list of your individual tools by request volume — across all servers. This is the most direct signal of which tools the AI is actually using. You'll typically find that 80% of calls go to 2–3 tools.
+
+### Geographic distribution
+
+A map showing where requests originate by country. Useful for understanding your user base and for diagnosing latency issues in specific regions.
+
+### Daily cost trend
+
+Your estimated daily compute cost over the selected period. Use this to forecast monthly costs and identify unexpectedly expensive days.
+
+---
+
+## Server-level analytics
+
+Click on any server from the **Top servers** list, or navigate to a server's **Analytics** tab, to see analytics scoped to that server.
+
+<Frame>
+  <img src="/images/screenshots/analytics-server-level.png" alt="Server-level analytics with tool breakdown chart" />
+</Frame>
+
+Server-level analytics includes everything from account-level, plus:
+
+### Tool breakdown
+
+A pie or bar chart showing the distribution of calls across the tools on this server. Use this to:
+
+- Identify which tools are unused (candidates for cleanup)
+- Understand the AI's behaviour: if it's calling one tool unexpectedly often, check if the tool description is too broad
+
+<Frame>
+  <img src="/images/screenshots/analytics-tool-breakdown.png" alt="Tool breakdown pie chart for a single server" />
+</Frame>
+
+### Session trend
+
+Shows unique session counts over time. A session is a single AI client connection. Rising session counts indicate growing adoption; flat sessions with rising request counts indicate more intensive use per session.
+
+### Traffic heatmap
+
+A grid of hour-of-day vs day-of-week showing relative request intensity. Darker cells = more requests. Useful for identifying the busiest periods for a specific server.
+
+<Frame>
+  <img src="/images/screenshots/analytics-heatmap.png" alt="Traffic heatmap grid showing day-of-week vs hour patterns" />
+</Frame>
+
+---
+
+## Selecting a time period
+
+Use the date range picker at the top of the analytics page to select:
+
+- Last 24 hours
+- Last 7 days (default)
+- Last 30 days
+- Last 90 days
+- Custom date range
+
+All charts and KPI metrics update to reflect the selected period.
+
+---
+
+## How to use analytics effectively
+
+**Find optimisation opportunities:**
+Look at the latency trend. If P95 is > 5 seconds for any tool, that tool is a candidate for caching, query optimisation, or pagination.
+
+**Identify unused tools:**
+In the tool breakdown chart, tools with 0 calls over 30 days are likely candidates for cleanup or improved descriptions. The AI may not be calling them because the description doesn't match what users ask for.
+
+**Plan for scaling:**
+The daily request trend shows your growth rate. Use it to estimate when you'll hit your plan's request limits.
+
+**Debug sudden errors:**
+A spike in the error rate chart (visible in the KPI trend) combined with Traffic Logs filtered to that time window will usually reveal the cause.

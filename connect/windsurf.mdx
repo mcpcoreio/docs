@@ -1,0 +1,104 @@
+---
+title: "Windsurf"
+description: "Add your MCPCore server to Windsurf (by Codeium) to give the AI access to your tools."
+---
+
+## Prerequisites
+
+- [Windsurf](https://codeium.com/windsurf) installed
+- A MCPCore server with at least one tool
+- The server's **Endpoint URL** (from the server Overview tab)
+
+---
+
+## Step 1 — Copy your endpoint URL
+
+Go to your server's **Overview** tab in the MCPCore dashboard and copy the endpoint URL:
+
+```
+https://mcp.mcpcore.io/s/<your-server-id>
+```
+
+---
+
+## Step 2 — Locate the Windsurf MCP config
+
+Windsurf reads MCP configuration from:
+
+**macOS / Linux:**
+```
+~/.codeium/windsurf/mcp_config.json
+```
+
+**Windows:**
+```
+%USERPROFILE%\.codeium\windsurf\mcp_config.json
+```
+
+If the file doesn't exist, create it.
+
+---
+
+## Step 3 — Add your server
+
+Edit `mcp_config.json` and add a `mcpServers` entry:
+
+### Public server (no auth)
+
+```json
+{
+  "mcpServers": {
+    "my-mcpcore-server": {
+      "serverUrl": "https://mcp.mcpcore.io/s/<your-server-id>"
+    }
+  }
+}
+```
+
+### API Key protected server
+
+```json
+{
+  "mcpServers": {
+    "my-mcpcore-server": {
+      "serverUrl": "https://mcp.mcpcore.io/s/<your-server-id>",
+      "headers": {
+        "X-API-Key": "sk-xxxxxxxxxxxxxxxxxx"
+      }
+    }
+  }
+}
+```
+
+<Note>
+  Windsurf uses the `serverUrl` key (not `url`). Check your version's documentation if the field name has changed.
+</Note>
+
+---
+
+## Step 4 — Reload Windsurf
+
+Save the config file and restart Windsurf (or use **Reload MCP** from the command palette if available).
+
+---
+
+## Step 5 — Verify the connection
+
+Open Windsurf's AI panel (Cascade). Your MCPCore tools should now be listed in the available tools. Start a conversation and reference a tool:
+
+> "Check the current GitHub star count for this repo using fetch_repo_stats."
+
+<Frame>
+  <img src="/images/screenshots/windsurf-tool-call.png" alt="Windsurf Cascade panel showing a tool call to MCPCore" />
+</Frame>
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| Tools not appearing | Ensure the config file is at the correct path and has valid JSON |
+| `401 Unauthorized` | Verify the API key in the headers matches one from the MCPCore dashboard |
+| Tool calls failing silently | Open [Traffic Logs](/observability/traffic-logs) to inspect the error |
+| `serverUrl` vs `url` confusion | Try both; the correct key depends on your Windsurf version |

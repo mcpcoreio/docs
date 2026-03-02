@@ -1,0 +1,63 @@
+---
+title: "Security Overview"
+description: "Every MCPCore server has an independent security mode that controls how incoming requests are authenticated."
+---
+
+## The four security modes
+
+| Mode | How the client authenticates | Best for |
+|---|---|---|
+| **Public** | No credentials needed | Open demos, read-only public data |
+| **API Key** | `X-API-Key: sk-xxxxxxxxxx` | Internal tools where you control the clients |
+| **OAuth 2.0** | `Authorization: Bearer <oauth_token>` | User-facing apps with per-user identity |
+| **Bearer Token** | `Authorization: Bearer <your_jwt>` | Server-to-server with short-lived JWTs |
+
+Security is configured per-server, not per-account. You can run a public demo server and a production OAuth-locked server at the same time.
+
+---
+
+## Choosing the right mode
+
+### Public
+
+Use when the tools expose non-sensitive, read-only information and you want zero setup for callers. Anyone with the endpoint URL can call your tools.
+
+[Configure Public mode →](/servers/security/public)
+
+### API Key
+
+Use for internal tools or when you control all the clients. You generate one or more API keys from the dashboard; clients include the key in the `X-API-Key` header.
+
+This is the simplest authenticated mode — no token exchange, no expiry, no redirect flows.
+
+[Configure API Key mode →](/servers/security/api-key)
+
+### OAuth 2.0
+
+Use when individual users need to authenticate through their own accounts. MCPCore acts as an OAuth 2.0 client — you provide your app's Client ID and Client Secret, and MCPCore handles the token acquisition and refresh.
+
+This is the right choice when the tools need to act on behalf of a specific user (e.g. reading their GitHub repositories, posting to their Slack).
+
+[Configure OAuth 2.0 mode →](/servers/security/oauth2)
+
+### Bearer Token
+
+Use for server-to-server integrations where you issue short-lived JWTs yourself. MCPCore validates the token signature using the public key you configure.
+
+[Configure Bearer Token mode →](/servers/security/bearer-token)
+
+---
+
+## Changing the security mode
+
+You can switch modes at any time from the server's **Settings** tab. The endpoint URL stays the same — only the authentication behaviour changes.
+
+<Warning>
+  Switching modes takes effect immediately. Connected clients that no longer provide valid credentials will receive `401 Unauthorized`.
+</Warning>
+
+---
+
+## Security does not affect tool code
+
+Your tool code always receives the same `params` and `env` objects regardless of the security mode. Authentication is handled entirely at the server layer before your code runs.

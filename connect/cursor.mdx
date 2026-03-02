@@ -1,0 +1,104 @@
+---
+title: "Cursor"
+description: "Add your MCPCore server to Cursor to give the AI access to your tools in the editor."
+---
+
+## Prerequisites
+
+- [Cursor](https://cursor.com) installed
+- A MCPCore server with at least one tool
+- The server's **Endpoint URL** (from the server Overview tab)
+
+---
+
+## Step 1 — Copy your endpoint URL
+
+Go to your server's **Overview** tab in the MCPCore dashboard and copy the endpoint URL:
+
+```
+https://mcp.mcpcore.io/s/<your-server-id>
+```
+
+---
+
+## Step 2 — Open Cursor MCP settings
+
+In Cursor, open **Settings** → **MCP** (or press `Cmd+Shift+J` / `Ctrl+Shift+J` and search for "MCP").
+
+You can add servers through the UI panel or by editing the config file directly.
+
+<Frame>
+  <img src="/images/screenshots/cursor-mcp-settings.png" alt="Cursor MCP settings panel" />
+</Frame>
+
+---
+
+## Step 3 — Add your server
+
+### Via the settings UI
+
+Click **Add MCP Server** in the MCP settings panel and enter:
+
+- **Name:** A label for the server (e.g. `mcpcore-tools`)
+- **URL:** Your MCPCore endpoint URL
+- **Headers:** Add `X-API-Key` if your server uses API Key mode
+
+### Via the config file
+
+Cursor's MCP config is stored at:
+
+**macOS / Linux:**
+```
+~/.cursor/mcp.json
+```
+
+**Windows:**
+```
+%USERPROFILE%\.cursor\mcp.json
+```
+
+Edit the file to add your server:
+
+```json
+{
+  "mcpServers": {
+    "my-mcpcore-server": {
+      "url": "https://mcp.mcpcore.io/s/<your-server-id>",
+      "headers": {
+        "X-API-Key": "sk-xxxxxxxxxxxxxxxxxx"
+      }
+    }
+  }
+}
+```
+
+---
+
+## Step 4 — Reload Cursor
+
+Save the config file. Cursor picks up MCP config changes automatically; you may need to close and reopen the MCP settings panel to see the new server listed.
+
+---
+
+## Step 5 — Use tools in the editor
+
+Your MCPCore tools are now available to Cursor's AI features (Agent mode, Composer, inline chat). You can reference tools explicitly:
+
+> "Use fetch_repo_stats to check the current star count for this project's repository."
+
+Or let the AI call them when relevant to your current task.
+
+<Frame>
+  <img src="/images/screenshots/cursor-tool-call.png" alt="Cursor Agent mode showing a tool call to MCPCore" />
+</Frame>
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| Server shows as offline | Verify the endpoint URL is correct; check internet connectivity |
+| `401 Unauthorized` | Confirm the API key in the headers matches one generated in MCPCore |
+| Tools visible but failing | Check [Traffic Logs](/observability/traffic-logs) for the full error |
+| JSON parse error | Validate `~/.cursor/mcp.json` syntax before saving |
