@@ -14,12 +14,7 @@
   },
   "favicon": "/favicon.svg",
   "navbar": {
-    "links": [
-      {
-        "label": "mcpcore.io",
-        "href": "https://mcpcore.io"
-      }
-    ],
+    "links": [],
     "primary": {
       "type": "button",
       "label": "Get started free",
@@ -112,8 +107,9 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mcpcore_io",
-      "linkedin": "https://linkedin.com/company/mcpcore"
+      "x": "https://x.com/mcpcore",
+      "linkedin": "https://linkedin.com/company/mcpcore",
+      "instagram": "https://instagram.com/mcpcore"
     }
   }
 }
