@@ -3,10 +3,11 @@
   "theme": "mint",
   "name": "MCPCore",
   "colors": {
-    "primary": "#7c3aed",
-    "light": "#a78bfa",
-    "dark": "#6d28d9"
+    "primary": "#d2fa00",
+    "light": "#e4fc66",
+    "dark": "#a8cc00"
   },
+  "css": "/custom.css",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"

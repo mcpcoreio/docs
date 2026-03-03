@@ -1,0 +1,25 @@
+/*
+ * Override text color on primary-colored interactive elements.
+ * The primary brand color (#d2fa00) is very bright — white text is unreadable.
+ * Force dark text so buttons and highlighted links remain legible.
+ */
+
+/* Navbar primary CTA button */
+a[class*="primary"],
+button[class*="primary"],
+[data-primary],
+.bg-primary {
+  color: #0d0d0d !important;
+}
+
+/* Mintlify renders the navbar "Get started" button as an anchor with a solid bg.
+   Target it via the inline style color variable Mintlify injects. */
+:root {
+  --primary-foreground: #0d0d0d;
+}
+
+/* Active/selected sidebar items that get the primary background */
+[aria-current="page"],
+[aria-selected="true"] {
+  color: #0d0d0d !important;
+}
