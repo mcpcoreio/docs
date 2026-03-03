@@ -1,198 +1,295 @@
 ---
 title: "OAuth 2.0 Mode"
-description: "Clients authenticate through an OAuth 2.0 authorization flow, enabling per-user identity and fine-grained scopes."
+description: "Protect your server with your own Authorization Server — Okta, Auth0, Keycloak, or any RFC 8414-compliant provider. MCP clients authenticate automatically."
 ---
 
 ## How it works
 
-In **OAuth 2.0** mode, MCPCore acts as an OAuth 2.0 client on behalf of your MCP server. When a user connects their AI client to your server for the first time, MCPCore initiates an OAuth authorization flow with the external provider (GitHub, Google, your own auth server, etc.).
+In **OAuth 2.0** mode, MCPCore acts as an **OAuth 2.0 resource server**. You bring your own Authorization Server — you do not configure usernames, passwords, or client credentials inside MCPCore.
 
-After the user grants access, MCPCore stores the access token and automatically refreshes it when it expires. Your tool code receives a valid token through `env` — you never handle token management in code.
+You provide MCPCore with a single URL: your Authorization Server's [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) metadata endpoint (the `.well-known` document your auth provider exposes). MCPCore validates that URL, then automatically sets up the discovery infrastructure so that MCP clients can find your auth server and complete the OAuth flow on their own.
 
 ```
-User's AI client
-      │  "connect to MCP server"
+MCP Client (Claude, Cursor, etc.)
+      │  1. connects to your server endpoint
       ▼
-MCPCore
-      │  redirect to OAuth provider
+MCPCore (resource server)
+      │  2. returns 401 + discovery pointer
       ▼
-OAuth Provider (GitHub, Google, etc.)
-      │  user grants access
+MCPCore /.well-known/oauth-protected-resource
+      │  3. client reads → finds your auth server URL
       ▼
-MCPCore receives access_token + refresh_token
-      │  stores encrypted tokens per user
+Your Authorization Server (Okta / Auth0 / Keycloak / self-hosted)
+      │  4. client registers, user logs in, client gets JWT
       ▼
-Tool runs with env.OAUTH_ACCESS_TOKEN available
+MCPCore (validates JWT using jwks_uri)
+      │  5. valid token → request proceeds to tool code
+      ▼
+Tool runs
 ```
+
+Everything in steps 2–5 is automatic once you configure the URL.
 
 ---
 
 ## When to use it
 
-- **User-facing integrations** — tools that act on behalf of the individual user (read their repos, post to their calendar)
-- **Fine-grained permissions** — OAuth scopes let the user (or your app) control exactly what the AI can access
-- **Compliance** — consent is explicit and auditable
+- **User-facing tools** — each user authenticates with their own identity; tools act on their behalf
+- **Enterprise integrations** — your org already has Okta / Azure AD / Auth0 and you want to reuse it
+- **Fine-grained access control** — OAuth scopes let you restrict what each client can do
+- **Compliance** — explicit user consent, auditable access grants, short-lived tokens
 
 ---
 
-## Concepts you need to understand
+## What you need
 
-### Authorization URL
+An RFC 8414-compliant Authorization Server that exposes a `.well-known/oauth-authorization-server` metadata document. Any of the following work out of the box:
 
-The **Authorization URL** is the endpoint on the OAuth provider where users are redirected to approve access. This URL starts the OAuth flow.
+| Provider | Metadata URL format |
+|---|---|
+| **Auth0** | `https://{your-domain}/.well-known/oauth-authorization-server` |
+| **Okta** | `https://{your-domain}/oauth2/default/.well-known/oauth-authorization-server` |
+| **Keycloak** | `https://{host}/realms/{realm}/.well-known/oauth-authorization-server` |
+| **Azure AD** | `https://login.microsoftonline.com/{tenant}/v2.0/.well-known/oauth-authorization-server` |
+| **Google** | `https://accounts.google.com/.well-known/openid-configuration` *(OpenID fallback)* |
+| **Self-hosted** | Any RFC 8414-compliant server at a public HTTPS address |
 
-Examples:
-- GitHub: `https://github.com/login/oauth/authorize`
-- Google: `https://accounts.google.com/o/oauth2/v2/auth`
-- Your own server: `https://auth.yourapp.com/oauth/authorize`
+---
 
-### Token URL
+## What MCPCore validates
 
-The **Token URL** is the endpoint MCPCore calls (server-to-server) to exchange an authorization code for access and refresh tokens.
+When you save the server, MCPCore fetches your metadata URL and checks:
 
-Examples:
-- GitHub: `https://github.com/login/oauth/access_token`
-- Google: `https://oauth2.googleapis.com/token`
-- Your own server: `https://auth.yourapp.com/oauth/token`
+| Field | Why it's required |
+|---|---|
+| `issuer` | Identifies the authorization authority; used to validate token signatures |
+| `authorization_endpoint` | Where MCP clients redirect users to log in |
+| `token_endpoint` | Where MCP clients exchange authorization codes for JWT access tokens |
+| `registration_endpoint` | Enables Dynamic Client Registration (RFC 7591) — MCP clients self-register automatically without pre-configured credentials |
+| `jwks_uri` | MCPCore fetches your server's public keys from here to verify every incoming JWT |
 
-### Client ID and Client Secret
+If any of these fields are missing or the URL is unreachable, the server is not saved.
 
-When you create an OAuth app with the provider, you receive a **Client ID** (public identifier) and a **Client Secret** (private credential). MCPCore uses these to identify itself to the provider during the token exchange.
-
-<Warning>
-  Never put your Client Secret in tool code. Store it as a server secret and reference it as `env.MY_OAUTH_SECRET`.
-</Warning>
-
-### Scopes
-
-**Scopes** are the specific permissions you're requesting. They are defined by the OAuth provider. Always request the minimum scopes needed.
-
-Examples:
-- GitHub: `repo`, `read:user`
-- Google Calendar: `https://www.googleapis.com/auth/calendar.readonly`
-- Custom: `read:orders write:orders`
-
-### Callback URL (Redirect URI)
-
-The **Callback URL** is the URL the OAuth provider redirects back to after the user grants access. MCPCore provides this URL — you do not set it yourself. You must register it with your OAuth provider when creating the OAuth app.
-
-Your MCPCore callback URL is:
-
-```
-https://mcp.mcpcore.io/auth/callback
-```
-
-Register this exact URL in your OAuth provider's app settings.
+<Note>
+  The `registration_endpoint` is what enables zero-config client connections. MCP clients like Claude and Cursor register themselves dynamically the first time they connect — no manual app registration in your provider's dashboard is needed.
+</Note>
 
 ---
 
 ## Configure
 
 <Steps>
-  <Step title="Create an OAuth app with your provider">
-    In your OAuth provider's developer settings, create a new OAuth application and set the **Redirect URI** to:
+  <Step title="Find your Authorization Server metadata URL">
+    Look up your provider's RFC 8414 metadata endpoint. This is a public HTTPS URL your auth server exposes.
 
+    **Auth0:**
     ```
-    https://mcp.mcpcore.io/auth/callback
+    https://{your-auth0-domain}/.well-known/oauth-authorization-server
     ```
 
-    Note the **Client ID** and **Client Secret** that are generated.
+    **Okta:**
+    ```
+    https://{your-okta-domain}/oauth2/default/.well-known/oauth-authorization-server
+    ```
+
+    **Keycloak:**
+    ```
+    https://{keycloak-host}/realms/{realm}/.well-known/oauth-authorization-server
+    ```
+
+    Confirm the URL returns valid JSON before proceeding. Open it in a browser — you should see a JSON object with `issuer`, `authorization_endpoint`, `token_endpoint`, `registration_endpoint`, and `jwks_uri`.
   </Step>
   <Step title="Open Server Settings">
     Go to your server's **Settings** tab in the MCPCore dashboard.
   </Step>
   <Step title="Select OAuth 2.0">
     Under **Security mode**, select **OAuth 2.0**.
-
-    <Frame>
-      <img src="/images/screenshots/security-oauth-settings.png" alt="OAuth 2.0 security mode settings form" />
-    </Frame>
   </Step>
-  <Step title="Fill in the OAuth configuration">
+  <Step title="Enter the metadata URL">
+    Paste your Authorization Server metadata URL into the **OAuth Server URL** field.
+
     | Field | What to enter |
     |---|---|
-    | **Authorization URL** | The provider's authorization endpoint |
-    | **Token URL** | The provider's token exchange endpoint |
-    | **Client ID** | From your OAuth app |
-    | **Client Secret** | From your OAuth app |
-    | **Scopes** | Space-separated list of scopes to request |
+    | **OAuth Server URL** | The full `.well-known` metadata URL from your provider |
 
-    <Frame>
-      <img src="/images/screenshots/security-oauth-form.png" alt="OAuth 2.0 configuration form filled in" />
-    </Frame>
+    MCPCore will fetch and validate this URL when you save. You do not enter client IDs, secrets, scopes, or redirect URIs — those are handled automatically by the MCP client through Dynamic Client Registration.
   </Step>
   <Step title="Save">
-    Click **Save**. MCPCore will now require OAuth authentication for all requests to this server.
+    Click **Save**. MCPCore validates the metadata URL, and if all required fields are present, activates OAuth 2.0 mode for this server.
   </Step>
 </Steps>
 
 ---
 
-## Using the access token in tools
+## What MCPCore sets up automatically
 
-Once a user has completed the OAuth flow, their access token is available in your tool code as a server secret. You can access it using:
+After you save, MCPCore configures your subdomain to serve two discovery endpoints:
 
-```javascript
-// The access token is automatically injected by MCPCore after OAuth completes
-const res = await sdk.http({
-  method: "GET",
-  url: "https://api.github.com/user/repos",
-  headers: {
-    Authorization: `Bearer ${env.OAUTH_ACCESS_TOKEN}`,
-  },
-});
+### Protected Resource Metadata (RFC 9728)
 
-const repos = JSON.parse(res.body());
-return { count: repos.length, repos: repos.map(r => r.full_name) };
+```
+GET https://{your-subdomain}.mcpcore.io/.well-known/oauth-protected-resource
 ```
 
-<Note>
-  MCPCore automatically refreshes the access token before it expires. Your code always receives a valid token.
-</Note>
+This document tells MCP clients which authorization server governs your resource:
+
+```json
+{
+  "resource": "https://{your-subdomain}.mcpcore.io/mcp",
+  "authorization_servers": ["https://your-auth-server.example.com"],
+  "bearer_methods_supported": ["header"]
+}
+```
+
+### 401 response with discovery pointer
+
+When a client connects without a token, MCPCore responds:
+
+```http
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer resource_metadata="https://{your-subdomain}.mcpcore.io/.well-known/oauth-protected-resource"
+```
+
+This tells MCP clients exactly where to start discovery. Everything after this is handled by the client automatically.
 
 ---
 
-## Provider-specific examples
+## The full client flow (automatic)
+
+Once OAuth 2.0 mode is active, here is what happens when an MCP client connects for the first time:
+
+<Steps>
+  <Step title="Client attempts to connect">
+    The MCP client sends a request to `https://{your-subdomain}.mcpcore.io/mcp`. MCPCore returns **401** with a `WWW-Authenticate` header pointing to the resource metadata endpoint.
+  </Step>
+  <Step title="Client discovers your authorization server">
+    The client fetches `/.well-known/oauth-protected-resource` and reads the `authorization_servers` field to find your auth server's issuer URL.
+  </Step>
+  <Step title="Client fetches authorization server metadata">
+    The client fetches your metadata URL (the one you configured) to learn the `authorization_endpoint`, `token_endpoint`, `registration_endpoint`, and `jwks_uri`.
+  </Step>
+  <Step title="Client registers itself (Dynamic Client Registration)">
+    The client sends a registration request to your `registration_endpoint`. Your auth server issues a `client_id` (and optionally a `client_secret`). This registration is cached — it only happens once per client.
+  </Step>
+  <Step title="User completes the OAuth authorization flow">
+    The client opens a browser and directs the user to your `authorization_endpoint`. The user authenticates with your provider. After consent, your auth server redirects back to the client with an authorization code.
+
+    The client exchanges the code for a **JWT access token** at your `token_endpoint`, using PKCE (Proof Key for Code Exchange) throughout to prevent code interception.
+  </Step>
+  <Step title="Client presents the access token">
+    The client includes the JWT in all subsequent requests:
+
+    ```http
+    Authorization: Bearer {jwt-access-token}
+    ```
+  </Step>
+  <Step title="MCPCore validates the token">
+    MCPCore fetches your server's public keys from the `jwks_uri` in your metadata, verifies the JWT signature, checks expiry, and validates the issuer. If the token is valid, the request proceeds to your tool code.
+  </Step>
+</Steps>
+
+On reconnection, the client presents its stored token (or refreshes it) — the user does not have to log in again unless the session has expired.
+
+---
+
+## Provider-specific setup
 
 <AccordionGroup>
-  <Accordion title="GitHub">
-    | Field | Value |
-    |---|---|
-    | Authorization URL | `https://github.com/login/oauth/authorize` |
-    | Token URL | `https://github.com/login/oauth/access_token` |
-    | Common scopes | `repo read:user user:email` |
-    | Register callback at | github.com → Settings → Developer settings → OAuth Apps |
+  <Accordion title="Auth0">
+    1. Log in to [manage.auth0.com](https://manage.auth0.com) and open your tenant.
+    2. Go to **Applications → APIs** and create a new API representing your MCPCore server.
+    3. Enable **Allow Offline Access** if you want refresh tokens.
+    4. Confirm Dynamic Client Registration is enabled (it is on by default for Auth0 management API).
+    5. Your metadata URL:
+
+    ```
+    https://{your-auth0-domain}/.well-known/oauth-authorization-server
+    ```
+
+    Verify it returns a JSON document with all five required fields before pasting it into MCPCore.
   </Accordion>
 
-  <Accordion title="Google">
-    | Field | Value |
-    |---|---|
-    | Authorization URL | `https://accounts.google.com/o/oauth2/v2/auth` |
-    | Token URL | `https://oauth2.googleapis.com/token` |
-    | Common scopes | `https://www.googleapis.com/auth/calendar.readonly openid email` |
-    | Register callback at | console.cloud.google.com → APIs & Services → Credentials |
+  <Accordion title="Okta">
+    1. Log in to your Okta admin console.
+    2. Go to **Security → API → Authorization Servers**.
+    3. Use the `default` server or create a custom one.
+    4. Under **Settings**, confirm **Dynamic Client Registration** is enabled.
+    5. Your metadata URL:
+
+    ```
+    https://{your-okta-domain}/oauth2/{authServerId}/.well-known/oauth-authorization-server
+    ```
+
+    Replace `{authServerId}` with `default` or your custom server ID.
+  </Accordion>
+
+  <Accordion title="Keycloak">
+    1. Open your Keycloak admin console.
+    2. Select your realm and go to **Realm settings → General**.
+    3. Confirm **Client registration → Open** is enabled (allows Dynamic Client Registration without an initial access token).
+    4. Your metadata URL:
+
+    ```
+    https://{keycloak-host}/realms/{realm}/.well-known/oauth-authorization-server
+    ```
+  </Accordion>
+
+  <Accordion title="Azure AD (Entra ID)">
+    1. Register an application in the [Azure portal](https://portal.azure.com) for your tenant.
+    2. Enable the **authorization_code** flow and Dynamic Client Registration via your tenant's policies.
+    3. Your metadata URL:
+
+    ```
+    https://login.microsoftonline.com/{tenant-id}/v2.0/.well-known/openid-configuration
+    ```
+
+    Azure exposes OpenID Connect discovery (the RFC 8414 fallback). MCPCore accepts this format.
 
     <Note>
-      Google requires `access_type=offline` for refresh tokens. MCPCore adds this automatically.
+      Azure does not enable open Dynamic Client Registration by default. You may need to pre-register the MCP client or configure a registration policy in your tenant.
     </Note>
   </Accordion>
 
-  <Accordion title="Custom / self-hosted auth server">
-    If you run your own OAuth 2.0-compliant authorization server, enter your server's endpoints in the Authorization URL and Token URL fields. Any RFC 6749-compliant server will work.
+  <Accordion title="Self-hosted / custom authorization server">
+    Any RFC 8414-compliant server works as long as it exposes a public HTTPS metadata endpoint containing all five required fields. Libraries like [node-oidc-provider](https://github.com/panva/node-oidc-provider), [Spring Authorization Server](https://spring.io/projects/spring-authorization-server), and [Ory Hydra](https://www.ory.sh/hydra/) support this out of the box.
+
+    Your server must:
+    - Be reachable over public HTTPS
+    - Include `registration_endpoint` in its metadata (Dynamic Client Registration)
+    - Include `jwks_uri` pointing to your public key set
+    - Issue short-lived JWTs signed with an RS256 or ES256 key
   </Accordion>
 </AccordionGroup>
 
 ---
 
-## User connection flow
+## Client compatibility
 
-When a user connects an AI client to your OAuth-protected server for the first time:
+MCP clients that implement the MCP Authorization specification handle the OAuth flow automatically — no manual configuration is required.
 
-1. The AI client attempts to connect to your server endpoint
-2. MCPCore responds with a redirect to the OAuth Authorization URL
-3. The user approves access in the provider's UI
-4. The provider redirects to `https://mcp.mcpcore.io/auth/callback`
-5. MCPCore exchanges the authorization code for tokens
-6. The AI client is now connected; tools are available
+| Client | Native MCP OAuth support |
+|---|---|
+| Claude (claude.ai) | Yes — automatic |
+| Cursor | Yes — automatic |
+| VS Code (Copilot) | Partial — check latest version |
+| Claude Desktop | Via `mcp-remote` proxy |
+| Windsurf | Via `mcp-remote` proxy |
+| Cline | Via `mcp-remote` proxy |
 
-Subsequent connections use the stored (and auto-refreshed) token — no re-authorization needed.
+For clients using `mcp-remote` as a proxy, the proxy handles the OAuth flow locally and forwards a session token to MCPCore. The user is prompted once in their browser; subsequent connections are silent.
+
+<Warning>
+  When connecting via `mcp-remote`, the proxy caches tokens in local storage. If you revoke a user's session at your authorization server, the token in the proxy cache remains valid until it expires naturally. Use short token lifetimes (15–60 minutes) to limit this window.
+</Warning>
+
+---
+
+## Token lifetime recommendations
+
+| Setting | Recommended value |
+|---|---|
+| Access token lifetime | 15–60 minutes |
+| Refresh token lifetime | 7–30 days (sliding) |
+| Refresh token rotation | Enabled |
+
+Short-lived access tokens limit exposure if a token is leaked. Refresh token rotation ensures a stolen refresh token is invalidated after a single use.

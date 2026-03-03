@@ -62,9 +62,9 @@ Use for internal tools and server-to-server integrations where you control the c
 
 ### OAuth
 
-Clients authenticate through a standard OAuth 2.0 authorization flow. You supply your app's OAuth metadata URL; MCPCore handles token acquisition, storage, and refresh automatically.
+Clients authenticate through a standard OAuth 2.0 authorization flow. You supply your Authorization Server's RFC 8414 metadata URL (the `.well-known` endpoint from Okta, Auth0, Keycloak, or your own server). MCPCore validates the metadata, sets up discovery endpoints for your subdomain, and verifies incoming JWTs using your server's public keys. MCP clients register themselves and complete the OAuth flow automatically.
 
-Use for user-facing applications where tools act on behalf of individual users.
+Use for user-facing applications where tools act on behalf of individual users, or wherever you want to reuse an existing identity provider.
 
 [Configure OAuth mode →](/servers/security/oauth2)
 
