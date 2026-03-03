@@ -5,12 +5,13 @@
   "colors": {
     "primary": "#d2fa00",
     "light": "#e4fc66",
-    "dark": "#a8cc00"
+    "dark": "#a9c40d"
   },
   "css": "/custom.css",
   "logo": {
+    "light": "/logo/light.svg",
     "dark": "/logo/dark.svg",
-    "light": "/logo/light.svg"
+    "href": "https://mcpcore.io"
   },
   "favicon": "/favicon.svg",
   "navbar": {
@@ -111,5 +112,18 @@
       "linkedin": "https://linkedin.com/company/mcpcore",
       "instagram": "https://instagram.com/mcpcore"
     }
+  },
+  "background": {
+    "decoration": "grid",
+    "color": {
+      "light": "#FFFFFF",
+      "dark": "#000000"
+    }
+  },
+  "fonts": {
+    "family": "Inter"
+  },
+  "appearance": {
+    "default": "system"
   }
 }
