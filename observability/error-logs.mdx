@@ -12,20 +12,20 @@ A request is classified as an error when your tool code throws an uncaught excep
 Access Error Logs from **Observability → Error Logs** in the sidebar.
 
 <Frame>
-  <img src="/images/screenshots/error-logs-list.png" alt="Error Logs list showing failed requests with error type labels" />
+  ![Screenshot 20](/images/screenshots/error-logs-list.png)
 </Frame>
 
 ---
 
 ## Error types
 
-| Type | Cause |
-|---|---|
-| **Tool error** | Your code threw an uncaught exception |
-| **Timeout** | Tool execution exceeded 30 seconds |
-| **Parameter validation error** | The AI passed invalid or missing required parameters |
-| **Authentication error** | The request failed the server's security check (wrong API key, expired token, etc.) |
-| **Sandbox error** | An internal error in the MCPCore execution environment |
+| Type                           | Cause                                                                               |
+| ------------------------------ | ----------------------------------------------------------------------------------- |
+| **Tool error**                 | Your code threw an uncaught exception                                               |
+| **Timeout**                    | Tool execution exceeded 30 seconds                                                  |
+| **Parameter validation error** | The AI passed invalid or missing required parameters                                |
+| **Authentication error**       | The request failed the server's security check (wrong API key, expired token, etc.) |
+| **Sandbox error**              | An internal error in the MCPCore execution environment                              |
 
 ---
 
@@ -34,7 +34,7 @@ Access Error Logs from **Observability → Error Logs** in the sidebar.
 Click any error row to open the full detail view:
 
 <Frame>
-  <img src="/images/screenshots/error-log-detail.png" alt="Error log detail showing error message, stack trace, input params, and console logs" />
+  ![Screenshot 21](/images/screenshots/error-log-detail.png)
 </Frame>
 
 ### Error message
@@ -118,6 +118,7 @@ const data = JSON.parse(body);
 The tool took longer than 30 seconds to complete.
 
 **Fix:** Identify the slow step using `console.time()` / `console.timeEnd()`. Common causes:
+
 - Database query without an index on the filter column
 - External API with high latency — add a timeout to `sdk.http()`
 - Large result set — add `LIMIT` to SQL queries or paginate

@@ -13,7 +13,7 @@ Every tool has a built-in **Run panel** that lets you execute the tool with cust
 - Test edge cases with specific inputs
 
 <Frame>
-  <img src="/images/screenshots/tool-run-panel.png" alt="Run panel with parameter inputs and response section" />
+  ![Screenshot 16](/images/screenshots/tool-run-panel.png)
 </Frame>
 
 ---
@@ -30,7 +30,7 @@ Every tool has a built-in **Run panel** that lets you execute the tool with cust
     Enter real values — the code runs with exactly what you provide.
 
     <Frame>
-      <img src="/images/screenshots/tool-run-params.png" alt="Run panel parameter form with filled-in values" />
+      ![Screenshot 17](/images/screenshots/tool-run-params.png)
     </Frame>
   </Step>
   <Step title="Click Run tool">
@@ -38,13 +38,14 @@ Every tool has a built-in **Run panel** that lets you execute the tool with cust
   </Step>
   <Step title="Inspect the result">
     The response section shows:
+
     - **Return value** — the JSON the AI would receive
     - **Console output** — any `console.log()` / `console.error()` calls your code made
     - **Execution time** — how long the tool took to run
     - **Error** — if the tool threw an exception, the full stack trace
 
     <Frame>
-      <img src="/images/screenshots/tool-run-result.png" alt="Run panel showing successful result with JSON output and console logs" />
+      ![Screenshot 18](/images/screenshots/tool-run-result.png)
     </Frame>
   </Step>
 </Steps>
@@ -82,13 +83,13 @@ When a tool throws an error, the Run panel shows:
 
 Common failure patterns:
 
-| Symptom | Likely cause |
-|---|---|
-| `env.MY_KEY is undefined` | Secret not added to this server, or key name typo |
-| `res.status()` is `401` / `403` | Wrong or expired credentials in secret |
-| `JSON.parse()` throws | Upstream API returned non-JSON (check `res.body()` in a log) |
-| `db.select()` throws | Wrong DB host/port/credentials, or table doesn't exist |
-| Execution timeout | Tool taking > 30s — inspect what step is slow with `console.time()` |
+| Symptom                         | Likely cause                                                         |
+| ------------------------------- | -------------------------------------------------------------------- |
+| `env.MY_KEY is undefined`       | Secret not added to this server, or key name typo                    |
+| `res.status()` is `401` / `403` | Wrong or expired credentials in secret                               |
+| `JSON.parse()` throws           | Upstream API returned non-JSON (check `res.body()` in a log)         |
+| `db.select()` throws            | Wrong DB host/port/credentials, or table doesn't exist               |
+| Execution timeout               | Tool taking \> 30s — inspect what step is slow with `console.time()` |
 
 ---
 

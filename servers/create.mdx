@@ -16,12 +16,12 @@ Each server gets its own:
 
 You can create as many servers as you need. Common patterns:
 
-| Pattern | Example subdomain |
-|---|---|
-| One server per project | `github-tools`, `jira-tools`, `slack-bot` |
-| One server per environment | `my-api-dev`, `my-api-prod` |
-| One server per team | `data-team`, `infra-tools` |
-| One server per customer | `acme-corp`, `example-inc` |
+| Pattern                    | Example subdomain                         |
+| -------------------------- | ----------------------------------------- |
+| One server per project     | `github-tools`, `jira-tools`, `slack-bot` |
+| One server per environment | `my-api-dev`, `my-api-prod`               |
+| One server per team        | `data-team`, `infra-tools`                |
+| One server per customer    | `acme-corp`, `example-inc`                |
 
 ---
 
@@ -32,43 +32,48 @@ You can create as many servers as you need. Common patterns:
     From the dashboard sidebar, click **My Servers**, then click the **New Server** button.
 
     <Frame>
-      <img src="/images/screenshots/server-create-button.png" alt="New Server button in the My Servers list" />
+      ![Image 1](/images/screenshots/server-create-button.png)
     </Frame>
   </Step>
   <Step title="Fill in the server details">
     The creation form has the following fields:
 
     ### Code
+
     A unique machine identifier for your server (5–100 characters). Used internally and in integration configs. Must be in `snake_case` or `camelCase` format.
 
     > Example: `github_tools`, `slackBot`, `inventory_api`
 
     ### Title
+
     A human-readable name displayed in the dashboard (5–255 characters).
 
     > Example: `GitHub Tools`, `Slack Bot`, `Inventory API`
 
-    ### Description *(optional)*
+    ### Description _(optional)_
+
     A short description of what this server does (max 255 characters).
 
     ### Category
+
     Select the category that best describes your server's purpose:
 
-    | Category | Use for |
-    |---|---|
-    | Data & Database | Database connections, SQL, NoSQL, data warehouses |
-    | Files & Documents | File systems, cloud storage, document management |
-    | Web & Search | Web scraping, search engines, external APIs |
-    | DevTools & Repositories | Git, version control, CI/CD, code hosting |
-    | Messaging & Collaboration | Slack, Teams, email, communication platforms |
-    | Business & Productivity | CRM, ERP, project management, analytics |
-    | AI & ML Services | Machine learning APIs, AI models, NLP services |
-    | Automation & Workflows | Zapier, workflow engines, task automation |
-    | Security & Auth | Authentication, authorization, security tools |
-    | Custom & Internal | Internal tools, custom integrations |
-    | Other | Uncategorized or specialized services |
+    | Category                  | Use for                                           |
+    | ------------------------- | ------------------------------------------------- |
+    | Data & Database           | Database connections, SQL, NoSQL, data warehouses |
+    | Files & Documents         | File systems, cloud storage, document management  |
+    | Web & Search              | Web scraping, search engines, external APIs       |
+    | DevTools & Repositories   | Git, version control, CI/CD, code hosting         |
+    | Messaging & Collaboration | Slack, Teams, email, communication platforms      |
+    | Business & Productivity   | CRM, ERP, project management, analytics           |
+    | AI & ML Services          | Machine learning APIs, AI models, NLP services    |
+    | Automation & Workflows    | Zapier, workflow engines, task automation         |
+    | Security & Auth           | Authentication, authorization, security tools     |
+    | Custom & Internal         | Internal tools, custom integrations               |
+    | Other                     | Uncategorized or specialized services             |
 
     ### Subdomain
+
     The subdomain for your server's endpoint (1–63 characters). Must contain only lowercase letters, numbers, and hyphens; cannot start or end with a hyphen.
 
     Your server will be reachable at `https://your-subdomain.mcpcore.io/mcp`. Choose something short and memorable.
@@ -78,25 +83,28 @@ You can create as many servers as you need. Common patterns:
     <Warning>
       Subdomains must be globally unique across all MCPCore accounts. If your preferred subdomain is taken, try adding a suffix (e.g. `my-github-tools`).
     </Warning>
+    ### Instructions _(optional)_
 
-    ### Instructions *(optional)*
     Custom system-level instructions sent to the AI when it connects to this server. Use this to give the AI context about your tools' intended scope, tone, or constraints.
 
     > Example: `Only use these tools for read-only operations. Never modify data unless explicitly asked.`
 
     ### Transport Type
+
     Currently only **Streamable** is available — the default real-time streaming transport for MCP.
 
     ### Rate Limit Per Minute
+
     Maximum number of tool calls per minute (0 = unlimited, max 5000). Use this to protect backend services from excessive AI-driven calls.
 
     > Default: 60 requests/minute
 
     ### Security Mode
+
     How incoming requests are authenticated. See [Security Overview](/servers/security-overview) for a full comparison.
 
     <Frame>
-      <img src="/images/screenshots/server-create-form.png" alt="Create server form with all fields" />
+      ![Screenshot 7](/images/screenshots/server-create-form.png)
     </Frame>
   </Step>
   <Step title="Click Create server">
@@ -111,15 +119,15 @@ You can create as many servers as you need. Common patterns:
 Once created, the server detail page is your central hub:
 
 <Frame>
-  <img src="/images/screenshots/server-detail-page.png" alt="Server detail page showing Overview, Analytics, and Integration tabs" />
+  ![Screenshot 8](/images/screenshots/server-detail-page.png)
 </Frame>
 
 The page is organised into three tabs:
 
-| Tab | What's here |
-|---|---|
-| **Overview** | Subdomain URL, security info, tools list, environment secrets, recent logs and traffic |
-| **Analytics** | Request volume, error rate, latency, tool breakdown, session and hourly trends |
+| Tab             | What's here                                                                             |
+| --------------- | --------------------------------------------------------------------------------------- |
+| **Overview**    | Subdomain URL, security info, tools list, environment secrets, recent logs and traffic  |
+| **Analytics**   | Request volume, error rate, latency, tool breakdown, session and hourly trends          |
 | **Integration** | Ready-to-paste config snippets for Claude Desktop, Cursor, VS Code, Windsurf, and Cline |
 
 ---
@@ -145,10 +153,10 @@ Copy the endpoint URL from the **Overview** section of the server detail page. T
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Configure security" icon="shield" href="/servers/security-overview">
+  <Card icon="shield" href="/servers/security-overview" title="Configure security">
     Choose and configure the right security mode for your use case.
   </Card>
-  <Card title="Add tools" icon="wrench" href="/tools/create">
+  <Card icon="wrench" href="/tools/create" title="Add tools">
     Write the JavaScript tool functions this server will expose.
   </Card>
 </CardGroup>

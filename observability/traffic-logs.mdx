@@ -10,7 +10,7 @@ Traffic Logs give you a real-time, per-request view of your server's activity. E
 You can access Traffic Logs from the dashboard sidebar under **Observability → Traffic Logs**, or from the **Logs** tab on any server detail page.
 
 <Frame>
-  <img src="/images/screenshots/traffic-logs-list.png" alt="Traffic Logs list showing recent requests with status indicators" />
+  ![Traffic Logs list showing recent requests with status indicators](/images/screenshots/traffic-logs-list.png)
 </Frame>
 
 ---
@@ -19,14 +19,14 @@ You can access Traffic Logs from the dashboard sidebar under **Observability →
 
 Each row in the log list shows:
 
-| Column | Description |
-|---|---|
-| **Status** | Green for success, red for error |
-| **Tool** | The tool name that was called |
-| **Server** | Which server received the request |
-| **Source** | `ai-client` or `dashboard-run` |
-| **Duration** | Execution time in milliseconds |
-| **Time** | Timestamp of the request |
+| Column       | Description                       |
+| ------------ | --------------------------------- |
+| **Status**   | Green for success, red for error  |
+| **Tool**     | The tool name that was called     |
+| **Server**   | Which server received the request |
+| **Source**   | `ai-client` or `dashboard-run`    |
+| **Duration** | Execution time in milliseconds    |
+| **Time**     | Timestamp of the request          |
 
 You can filter by server, tool, status (success/error), date range, and source.
 
@@ -37,7 +37,7 @@ You can filter by server, tool, status (success/error), date range, and source.
 Click any log row to open the full request detail:
 
 <Frame>
-  <img src="/images/screenshots/traffic-log-detail.png" alt="Traffic log detail modal showing input params, output, duration, and console logs" />
+  ![Traffic log detail modal showing input params, output, duration, and console logs](/images/screenshots/traffic-log-detail.png)
 </Frame>
 
 ### Input parameters
@@ -83,13 +83,13 @@ Any output from `console.log()`, `console.info()`, `console.warn()`, `console.er
 
 ## What's logged and what's not
 
-| Logged | Not logged |
-|---|---|
-| Input `params.*` values | Secret values (`env.*`) — always redacted |
-| Return value | Internal MCPCore infrastructure details |
-| Console output | Raw HTTP responses unless you log them |
-| Error messages and stack traces | Encrypted credentials in request headers |
-| Execution duration | |
+| Logged                          | Not logged                                |
+| ------------------------------- | ----------------------------------------- |
+| Input `params.*` values         | Secret values (`env.*`) — always redacted |
+| Return value                    | Internal MCPCore infrastructure details   |
+| Console output                  | Raw HTTP responses unless you log them    |
+| Error messages and stack traces | Encrypted credentials in request headers  |
+| Execution duration              |                                           |
 
 <Note>
   Secret values are automatically redacted from all log output. You will never see a raw API key, password, or OAuth token in the logs — even if you accidentally call `console.log(env.MY_SECRET)`.
@@ -108,7 +108,7 @@ Use the filter bar to narrow down logs:
 - **Date range** — Last hour, last 24h, last 7 days, custom
 
 <Frame>
-  <img src="/images/screenshots/traffic-logs-filters.png" alt="Traffic Logs filter bar" />
+  ![Screenshot 19](/images/screenshots/traffic-logs-filters.png)
 </Frame>
 
 ---
@@ -121,11 +121,8 @@ Traffic logs are retained for **30 days** on the Free plan and **90 days** on pa
 
 ## Common use cases
 
-**Debugging why a tool returned unexpected output:**
-Open the log entry, check the input params (did the AI pass the right values?), check the console output (did the code execute the expected path?), and check the return value.
+**Debugging why a tool returned unexpected output:** Open the log entry, check the input params (did the AI pass the right values?), check the console output (did the code execute the expected path?), and check the return value.
 
-**Verifying a new tool works before connecting an AI client:**
-Use the [Run panel](/tools/testing) to fire test calls. These appear in Traffic Logs with source `dashboard-run` so you can compare the actual output against your expectations.
+**Verifying a new tool works before connecting an AI client:** Use the [Run panel](/tools/testing) to fire test calls. These appear in Traffic Logs with source `dashboard-run` so you can compare the actual output against your expectations.
 
-**Understanding which tools the AI calls most:**
-Use the [Analytics](/observability/analytics) dashboard for aggregate call counts, or browse Traffic Logs sorted by tool name to see the call distribution.
+**Understanding which tools the AI calls most:** Use the [Analytics](/observability/analytics) dashboard for aggregate call counts, or browse Traffic Logs sorted by tool name to see the call distribution.

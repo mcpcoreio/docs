@@ -21,20 +21,20 @@ const id = params.userId;
 In the tool editor, click **Add parameter** for each input your code needs.
 
 <Frame>
-  <img src="/images/screenshots/tool-parameters-panel.png" alt="Parameters panel with Add parameter button" />
+  ![Screenshot 13](/images/screenshots/tool-parameters-panel.png)
 </Frame>
 
 ---
 
 ## Parameter fields
 
-| Field | Required | Description |
-|---|---|---|
-| **Name** | Yes | The key used to access the value in `params.*`. Use camelCase. |
-| **Type** | Yes | The expected data type (see types below). |
-| **Description** | Yes | What the parameter represents. The AI uses this to know what value to pass. |
-| **Required** | — | If checked, the AI must always provide this parameter. |
-| **Default value** | — | Used when the parameter is not required and the AI doesn't provide it. |
+| Field             | Required | Description                                                                 |
+| ----------------- | -------- | --------------------------------------------------------------------------- |
+| **Name**          | Yes      | The key used to access the value in `params.*`. Use camelCase.              |
+| **Type**          | Yes      | The expected data type (see types below).                                   |
+| **Description**   | Yes      | What the parameter represents. The AI uses this to know what value to pass. |
+| **Required**      | —        | If checked, the AI must always provide this parameter.                      |
+| **Default value** | —        | Used when the parameter is not required and the AI doesn't provide it.      |
 
 ---
 
@@ -91,11 +91,11 @@ const { status, since } = params.filter;
 
 The AI reads the parameter description to understand what value to pass. Good descriptions reduce tool call errors.
 
-| Parameter | Weak description | Strong description |
-|---|---|---|
-| `repo` | "The repo" | "GitHub repository in `owner/repo` format, e.g. `torvalds/linux`" |
-| `since` | "Start date" | "ISO 8601 date string. Filters results to records created after this date, e.g. `2024-01-01`" |
-| `limit` | "How many" | "Maximum number of results to return. Min 1, max 100. Defaults to 20." |
+| Parameter | Weak description | Strong description                                                                            |
+| --------- | ---------------- | --------------------------------------------------------------------------------------------- |
+| `repo`    | "The repo"       | "GitHub repository in `owner/repo` format, e.g. `torvalds/linux`"                             |
+| `since`   | "Start date"     | "ISO 8601 date string. Filters results to records created after this date, e.g. `2024-01-01`" |
+| `limit`   | "How many"       | "Maximum number of results to return. Min 1, max 100. Defaults to 20."                        |
 
 ---
 

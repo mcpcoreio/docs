@@ -23,17 +23,17 @@ When the AI connects to your server, it receives the full list of tools with the
     On the server detail page, click the **Tools** tab, then click **New Tool**.
 
     <Frame>
-      <img src="/images/screenshots/tool-new-button.png" alt="New Tool button on the Tools tab" />
+      ![New Tool button on the Tools tab](/images/screenshots/tool-new-button.png)
     </Frame>
   </Step>
   <Step title="Name your tool">
     Choose a clear, descriptive name in **lowercase snake_case**:
 
-    | Good | Avoid |
-    |---|---|
-    | `fetch_user_orders` | `FetchUserOrders` |
+    | Good                 | Avoid              |
+    | -------------------- | ------------------ |
+    | `fetch_user_orders`  | `FetchUserOrders`  |
     | `send_slack_message` | `sendSlackMessage` |
-    | `query_inventory_db` | `tool1` |
+    | `query_inventory_db` | `tool1`            |
 
     The name appears in the MCP schema and in your analytics dashboard. It cannot contain spaces or special characters.
   </Step>
@@ -41,9 +41,11 @@ When the AI connects to your server, it receives the full list of tools with the
     The description is critically important — it's what the AI reads to decide when to call your tool. Be specific.
 
     **Good description:**
+
     > Fetches the number of stars, forks, and primary language for a GitHub repository. Use when the user asks about repository statistics or open-source project metrics.
 
     **Weak description:**
+
     > Gets GitHub data.
   </Step>
   <Step title="Add parameters">
@@ -53,7 +55,7 @@ When the AI connects to your server, it receives the full list of tools with the
     Write JavaScript in the editor. The sandbox gives you access to `sdk`, `params`, `env`, and `console`. See [Sandbox](/tools/sandbox) for the complete API.
 
     <Frame>
-      <img src="/images/screenshots/tool-editor.png" alt="Tool code editor with a sample function" />
+      ![Screenshot 12](/images/Screenshot_12.png)
     </Frame>
   </Step>
   <Step title="Save">
@@ -90,28 +92,28 @@ return {
 
 ## Tool limits
 
-| Limit | Value |
-|---|---|
-| Code size | 512 KB |
-| Execution timeout | 30 seconds |
-| Response payload | 4 MB |
-| Parameters per tool | 50 |
+| Limit               | Value      |
+| ------------------- | ---------- |
+| Code size           | 512 KB     |
+| Execution timeout   | 30 seconds |
+| Response payload    | 4 MB       |
+| Parameters per tool | 50         |
 
 ---
 
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Sandbox API" icon="code" href="/tools/sandbox">
+  <Card icon="code" href="/tools/sandbox" title="Sandbox API">
     Full reference for `sdk.http()`, `sdk.db()`, `env`, `params`, and `console`.
   </Card>
-  <Card title="Parameters" icon="list" href="/tools/parameters">
+  <Card icon="list" href="/tools/parameters" title="Parameters">
     Define typed, validated inputs for your tools.
   </Card>
-  <Card title="Secrets" icon="lock" href="/tools/secrets">
+  <Card icon="lock" href="/tools/secrets" title="Secrets">
     Store and reference API keys and credentials securely.
   </Card>
-  <Card title="Testing" icon="play" href="/tools/testing">
+  <Card icon="play" href="/tools/testing" title="Testing">
     Run tools with real parameters from the dashboard's Run panel.
   </Card>
 </CardGroup>

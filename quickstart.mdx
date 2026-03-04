@@ -19,19 +19,20 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
     Go to [app.mcpcore.io](https://app.mcpcore.io) and navigate to **My Servers**.
 
     <Frame>
-      <img src="/images/screenshots/quickstart-my-servers.png" alt="My Servers list page" />
+      ![Image](/images/screenshots/quickstart-my-servers.png)
     </Frame>
   </Step>
   <Step title="Click New Server">
     Click the **New Server** button in the top-right corner.
 
     Fill in:
+
     - **Name** — a short, descriptive name (e.g. `github-tools`)
     - **Description** — optional, but helpful for teams
     - **Security mode** — start with **Public** for now; you can change it later
 
     <Frame>
-      <img src="/images/screenshots/quickstart-create-server.png" alt="Create server form" />
+      ![Image 1](/images/screenshots/quickstart-create-server.png)
     </Frame>
   </Step>
   <Step title="Save">
@@ -52,6 +53,7 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
   </Step>
   <Step title="Add a parameter">
     Click **Add parameter** and add:
+
     - Name: `repo`
     - Type: `string`
     - Description: `GitHub repository in owner/repo format`
@@ -65,9 +67,9 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
       method: "GET",
       url: `https://api.github.com/repos/${params.repo}`,
     });
-
+    
     const data = JSON.parse(res.body());
-
+    
     return {
       stars:    data.stargazers_count,
       forks:    data.forks_count,
@@ -77,7 +79,7 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
     ```
 
     <Frame>
-      <img src="/images/screenshots/quickstart-tool-editor.png" alt="Tool code editor" />
+      ![Screenshot 5](/images/screenshots/quickstart-tool-editor.png)
     </Frame>
   </Step>
   <Step title="Save the tool">
@@ -94,13 +96,13 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
     With the tool selected, click the **Run** tab (or the play button in the editor toolbar).
   </Step>
   <Step title="Enter a parameter value">
-    In the **repo** field, enter a real repository name — e.g. `anthropics/anthropic-sdk-python`.
+    In the **repo** field, enter a real repository name — e.g. `mcpcoreio/docs`.
   </Step>
   <Step title="Click Run">
     Click **Run tool**. The response panel shows the JSON output within a second or two.
 
     <Frame>
-      <img src="/images/screenshots/quickstart-run-panel.png" alt="Run panel showing tool output" />
+      ![Screenshot 6](/images/screenshots/quickstart-run-panel.png)
     </Frame>
   </Step>
 </Steps>
@@ -112,16 +114,16 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
 Copy the **Endpoint URL** from the server detail page and add it to your AI client:
 
 <CardGroup cols={2}>
-  <Card title="Claude Desktop" icon="robot" href="/connect/claude-desktop">
+  <Card icon="robot" href="/connect/claude-desktop" title="Claude Desktop">
     Add MCPCore to your `claude_desktop_config.json`.
   </Card>
-  <Card title="Cursor" icon="code" href="/connect/cursor">
+  <Card icon="code" href="/connect/cursor" title="Cursor">
     Add MCPCore via Cursor's MCP settings panel.
   </Card>
-  <Card title="Windsurf" icon="wind" href="/connect/windsurf">
+  <Card icon="wind" href="/connect/windsurf" title="Windsurf">
     Configure MCPCore in Windsurf's MCP config file.
   </Card>
-  <Card title="Any MCP client" icon="plug" href="/connect/overview">
+  <Card icon="plug" href="/connect/overview" title="Any MCP client">
     Any client that supports the MCP spec works out of the box.
   </Card>
 </CardGroup>
@@ -131,16 +133,16 @@ Copy the **Endpoint URL** from the server detail page and add it to your AI clie
 ## What's next?
 
 <CardGroup cols={2}>
-  <Card title="Add secrets" icon="lock" href="/tools/secrets">
+  <Card icon="lock" href="/tools/secrets" title="Add secrets">
     Store API keys and reference them as `env.MY_KEY` — never hardcode credentials.
   </Card>
-  <Card title="Change security mode" icon="shield" href="/servers/security-overview">
+  <Card icon="shield" href="/servers/security-overview" title="Change security mode">
     Lock your server behind API Key or OAuth 2.0 before going to production.
   </Card>
-  <Card title="Query a database" icon="database" href="/tools/sandbox">
+  <Card icon="database" href="/tools/sandbox" title="Query a database">
     Use `sdk.db()` to connect to PostgreSQL, MySQL, or SQL Server.
   </Card>
-  <Card title="Monitor traffic" icon="chart-bar" href="/observability/traffic-logs">
+  <Card icon="chart-bar" href="/observability/traffic-logs" title="Monitor traffic">
     See every request your server receives and how fast it responded.
   </Card>
 </CardGroup>

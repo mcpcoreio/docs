@@ -34,7 +34,7 @@ You can create multiple keys — one per integration, team member, or client —
     MCPCore automatically generates an API key and displays it in the form.
 
     <Frame>
-      <img src="/images/screenshots/security-apikey-settings.png" alt="API Key security mode selected with generated key" />
+      ![Screenshot 11](/images/screenshots/security-apikey-settings.png)
     </Frame>
   </Step>
   <Step title="Copy the key">
@@ -52,47 +52,51 @@ You can create multiple keys — one per integration, team member, or client —
 Include the key in the `Authorization: Bearer` header:
 
 <CodeGroup>
-  ```json Claude Desktop / Windsurf / Cline
-  {
-    "mcpServers": {
-      "my-server": {
-        "command": "npx",
-        "args": [
-          "-y", "mcp-remote@latest",
-          "https://your-subdomain.mcpcore.io/mcp",
-          "--header", "Authorization: Bearer <your-api-key>"
-        ]
-      }
-    }
-  }
-  ```
 
-  ```json Cursor
-  {
-    "mcpServers": {
-      "my-server": {
-        "url": "https://your-subdomain.mcpcore.io/mcp",
-        "headers": {
-          "Authorization": "Bearer <your-api-key>"
-        }
-      }
+```json Claude Desktop              Cline
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "npx",
+      "args": [
+        "-y", "mcp-remote@latest",
+        "https://your-subdomain.mcpcore.io/mcp",
+        "--header", "Authorization: Bearer <your-api-key>"
+      ]
     }
   }
-  ```
+}
+```
 
-  ```json VS Code
-  {
-    "servers": {
-      "my-server": {
-        "type": "http",
-        "url": "https://your-subdomain.mcpcore.io/mcp",
-        "headers": {
-          "Authorization": "Bearer <your-api-key>"
-        }
+
+```json Cursor
+{
+  "mcpServers": {
+    "my-server": {
+      "url": "https://your-subdomain.mcpcore.io/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-api-key>"
       }
     }
   }
-  ```
+}
+```
+
+
+```json VS Code
+{
+  "servers": {
+    "my-server": {
+      "type": "http",
+      "url": "https://your-subdomain.mcpcore.io/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-api-key>"
+      }
+    }
+  }
+}
+```
+
 </CodeGroup>
 
 The **Integration** tab on your server's detail page generates these snippets with your actual key pre-filled.
