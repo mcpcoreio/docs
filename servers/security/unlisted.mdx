@@ -39,10 +39,6 @@ There are no auth headers to configure, no key rotation ceremony, and no client-
     Under **Security Mode**, select **Unlisted**.
 
     MCPCore automatically generates a 48-character secret key and shows a preview of the full endpoint URL.
-
-    <Frame>
-      ![Screenshot 10](/images/screenshots/security-unlisted-settings.png)
-    </Frame>
   </Step>
   <Step title="Save">
     Click **Save**. The full endpoint URL (including the embedded key) is displayed on the Overview tab — copy it from there to use in your AI clients.
@@ -57,7 +53,7 @@ Use the full URL (with the embedded key) — no additional headers needed:
 
 <CodeGroup>
 
-```json Claude Desktop              Cline
+```json Claude Desktop / Cline
 {
   "mcpServers": {
     "my-server": {

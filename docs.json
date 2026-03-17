@@ -55,10 +55,12 @@
             "group": "Tools",
             "pages": [
               "tools/create",
+              "tools/editor",
               "tools/sandbox",
               "tools/parameters",
               "tools/secrets",
-              "tools/testing"
+              "tools/testing",
+              "tools/examples"
             ]
           },
           {

@@ -1,54 +1,88 @@
 ---
 title: "Error Logs"
-description: "Every failed tool call captured with the full error message, stack trace, and input parameters."
+description: "Every failed tool call captured with the full error message, stack trace, input parameters, and AI-assisted debugging."
 ---
 
 ## What are Error Logs?
 
-Error Logs are a filtered view of your Traffic Logs that shows only the requests that resulted in an error. Instead of scanning through all requests, you get a focused list of failures — with everything you need to reproduce and fix the problem.
+Error Logs are a dedicated view for diagnosing tool failures. Each error entry includes the full error message, stack trace, the tool code that was running, the input parameters that triggered the error, and console output before the failure.
 
-A request is classified as an error when your tool code throws an uncaught exception, or when MCPCore rejects the request before your code runs (e.g. invalid parameters, authentication failure).
+A request is classified as an error when your tool code throws an uncaught exception, or when MCPCore rejects the request before your code runs (e.g. invalid parameters, authentication failure, timeout).
 
 Access Error Logs from **Observability → Error Logs** in the sidebar.
 
-<Frame>
-  ![Screenshot 20](/images/screenshots/error-logs-list.png)
-</Frame>
+---
+
+## The log list
+
+Each row in the error list shows:
+
+| Column | Description |
+|---|---|
+| **Type** | Color-coded level indicator (info, warn, error) |
+| **Tool** | The tool name that failed |
+| **Error Message** | Truncated error description extracted from the context |
+| **Subdomain** | Which server the error occurred on |
+| **Time** | When the error happened |
+
+### Log level colours
+
+| Level | Indicator | When it's used |
+|---|---|---|
+| **info** | Blue dot | Informational logs |
+| **warn** | Yellow dot | Warnings — tool completed but with issues |
+| **error** | Red dot | Failures — tool threw or was rejected |
 
 ---
 
-## Error types
+## Filters
 
-| Type                           | Cause                                                                               |
-| ------------------------------ | ----------------------------------------------------------------------------------- |
-| **Tool error**                 | Your code threw an uncaught exception                                               |
-| **Timeout**                    | Tool execution exceeded 30 seconds                                                  |
-| **Parameter validation error** | The AI passed invalid or missing required parameters                                |
-| **Authentication error**       | The request failed the server's security check (wrong API key, expired token, etc.) |
-| **Sandbox error**              | An internal error in the MCPCore execution environment                              |
+Four independent filters plus a date range:
+
+| Filter | Options |
+|---|---|
+| **Server** | Filter by subdomain |
+| **Tool** | Filter by tool name (cascades based on server) |
+| **Type** | `info`, `warn`, or `error` |
+| **Date Range** | Calendar date picker with start and end dates |
 
 ---
 
 ## Error detail
 
-Click any error row to open the full detail view:
+Click any error row to open the full detail modal. The detail view is split into two columns:
 
-<Frame>
-  ![Screenshot 21](/images/screenshots/error-log-detail.png)
-</Frame>
+### Left column — Metadata
 
-### Error message
+| Field | Description |
+|---|---|
+| **Level** | Color-coded type chip (info/warn/error) |
+| **Tool** | The tool that produced the error |
+| **Subdomain** | The server's subdomain |
+| **Created** | Full timestamp of the error |
 
-The exception message thrown by your code, or the MCPCore-generated error for validation/auth failures.
+### Right column — Diagnostic data
+
+Four expandable sections with all the information needed to reproduce and fix the error:
+
+**Error context** — The primary error information. MCPCore extracts the error message intelligently — parsing JSON responses when available, falling back to raw text:
 
 ```
 Error: GitHub API returned 401: Bad credentials
-    at Object.<anonymous> (tool.js:12:9)
 ```
 
-### Stack trace
+**Tool code** — The complete JavaScript source code of the tool that was running when the error occurred. This lets you correlate the stack trace line numbers with your actual code.
 
-The full call stack at the point of failure. Use this to identify the exact line in your tool code that threw the error.
+**Parameters** — The exact `params` payload that caused the error. Copy these values into the [Run panel](/tools/testing) to reproduce the issue:
+
+```json
+{
+  "owner": "example",
+  "repo": "private-repo"
+}
+```
+
+**Stack trace** — The full call stack at the point of failure (when available):
 
 ```
 Error: GitHub API returned 401: Bad credentials
@@ -56,25 +90,39 @@ Error: GitHub API returned 401: Bad credentials
     at async MCPCore.executeTool (runtime.js:84:5)
 ```
 
-### Input parameters
+---
 
-The `params` payload that caused the error — useful for reproducing the issue in the [Run panel](/tools/testing).
+## AI-assisted debugging
 
-```json
-{
-  "owner": "example",
-  "repo":  "private-repo"
-}
-```
+Each error detail modal includes two AI helper buttons that pre-fill an AI assistant with the full error context:
 
-### Console output
+### Ask Claude
 
-Any `console.*` calls your code made before the failure — often the most useful debugging signal.
+Opens Claude with a pre-built prompt that includes:
+- The platform context (MCPCore)
+- Tool name and subdomain
+- Error type and message
+- The complete tool code
+- Input parameters that caused the error
+- Stack trace (if available)
 
-```
-[INFO]  Fetching repo: example/private-repo
-[ERROR] GitHub API returned status 401
-```
+### Ask ChatGPT
+
+Opens ChatGPT with the same pre-built error context.
+
+Both buttons construct a detailed prompt so the AI has everything needed to diagnose the issue — you don't need to copy-paste error details manually.
+
+---
+
+## Error types
+
+| Type | Cause | What to check |
+|---|---|---|
+| **Tool error** | Your code threw an uncaught exception | Check the stack trace and tool code |
+| **Timeout** | Tool execution exceeded 10 seconds | Identify the slow step with `console.time()` |
+| **Parameter validation error** | The AI passed invalid or missing required parameters | Review parameter definitions |
+| **Authentication error** | Wrong API key, expired token, or missing credentials | Verify secret values |
+| **Sandbox error** | An internal error in the MCPCore execution environment | Contact support if persistent |
 
 ---
 
@@ -100,7 +148,7 @@ Your credentials are wrong, expired, or don't have permission for the requested 
 
 Your code called `JSON.parse()` on a non-JSON response body.
 
-**Fix:** Add a check before parsing:
+**Fix:** Add a status check before parsing:
 
 ```javascript
 const body = res.body();
@@ -113,14 +161,14 @@ const data = JSON.parse(body);
 
 ---
 
-### Timeout (30s exceeded)
+### Timeout (10s exceeded)
 
-The tool took longer than 30 seconds to complete.
+The tool took longer than 10 seconds to complete.
 
 **Fix:** Identify the slow step using `console.time()` / `console.timeEnd()`. Common causes:
 
 - Database query without an index on the filter column
-- External API with high latency — add a timeout to `sdk.http()`
+- External API with high latency
 - Large result set — add `LIMIT` to SQL queries or paginate
 
 ---

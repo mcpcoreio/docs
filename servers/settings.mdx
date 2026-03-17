@@ -7,10 +7,6 @@ description: "Manage your server's active state, restart it, change its security
 
 Server controls are available directly on the **Overview** tab of the server detail page. There is also an **Edit** button in the top-right corner that opens the full settings form.
 
-<Frame>
-  ![Screenshot 9](/images/screenshots/server-settings-tab.png)
-</Frame>
-
 ---
 
 ## Activate / Deactivate a server
@@ -53,8 +49,25 @@ Click the **Edit** button to open the full server form where you can update:
 - **Instructions** (AI system prompt)
 - **Rate limit per minute**
 - **Security mode**
+- **Custom domain**
 
 The **Code** and **Subdomain** fields cannot be changed after creation — they are permanent identifiers.
+
+---
+
+## Custom domain
+
+You can map your own domain to your MCPCore server. Enter the domain in the **Custom Domain** field (e.g. `mcp.yourcompany.com`), then create a CNAME DNS record pointing to your MCPCore subdomain.
+
+SSL certificates are provisioned and managed automatically. The dashboard shows the current SSL status:
+
+- **Pending** — certificate is being provisioned
+- **Active** — SSL is active and the custom domain is ready
+- **Failed** — check your DNS configuration
+
+<Note>
+  Custom domains require a paid plan. MCPCore periodically verifies SSL status and DNS configuration.
+</Note>
 
 ---
 

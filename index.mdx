@@ -10,17 +10,26 @@ description: "MCPCore is the fastest way to build, deploy, and manage MCP server
 You write the code that matters. MCPCore handles everything else:
 
 - **MCP server hosting** — your tools run in an isolated, always-on sandbox
-- **Authentication** — choose from 4 security modes (Public, API Key, OAuth 2.0, Bearer Token)
+- **AI Tool Builder** — describe what you want in plain language and let AI generate the tool code, parameters, and naming for you
+- **Professional code editor** — VS Code-style editor with syntax highlighting, AI-powered completions, and integrated terminal
+- **Authentication** — choose from 4 security modes (Public, Unlisted, API Key, OAuth 2.0)
+- **Custom domains** — use your own domain with automatic SSL provisioning
 - **Encrypted secrets** — store API keys and credentials securely; reference them as `env.MY_KEY`
-- **Observability** — real-time traffic logs, error traces, and analytics dashboards
+- **Observability** — real-time traffic logs, error traces with AI-assisted debugging, and analytics dashboards with interactive charts
 
 ## How it fits together
 
-<Frame>
-  <img src="/images/flow-diagram.svg" alt="MCPCore architecture: AI clients connect to MCPCore which calls external services" />
-</Frame>
-
 The AI model never touches your database or external APIs directly. It calls your MCPCore tool, which runs your sandboxed code and returns a structured result. This separation keeps your infrastructure secure and your integrations composable.
+
+```
+AI Client (Claude, Cursor, VS Code, etc.)
+      │  MCP protocol
+      ▼
+MCPCore (hosted MCP server)
+      │  your sandboxed code
+      ▼
+External APIs, Databases, Services
+```
 
 ## Core concepts
 
@@ -31,11 +40,17 @@ The AI model never touches your database or external APIs directly. It calls you
   <Card title="Tools" icon="wrench" href="/tools/create">
     A tool is a callable JavaScript function. The AI decides when to call it and what parameters to pass. You decide what it does.
   </Card>
+  <Card title="Code Editor" icon="code" href="/tools/editor">
+    A professional VS Code-style IDE with AI-powered completions, integrated terminal, and dark theme — right in your browser.
+  </Card>
   <Card title="Security Modes" icon="shield" href="/servers/security-overview">
-    Every server has an independent security mode — Public, API Key, OAuth 2.0, or Bearer Token. Switching modes never requires changing your tool code.
+    Every server has an independent security mode — Public, Unlisted, API Key, or OAuth 2.0. Switching modes never requires changing your tool code.
   </Card>
   <Card title="Observability" icon="chart-line" href="/observability/traffic-logs">
     Every request is logged. Inspect call history, error traces, latency trends, and geographic distribution from the dashboard.
+  </Card>
+  <Card title="Code Examples" icon="book" href="/tools/examples">
+    Ready-to-use examples for HTTP requests, database queries, data transformation, and more.
   </Card>
 </CardGroup>
 
@@ -46,6 +61,6 @@ The AI model never touches your database or external APIs directly. It calls you
     Create a server, write a tool, and test it live.
   </Card>
   <Card title="Connect an AI client" icon="plug" href="/connect/overview">
-    Add your endpoint to Claude Desktop, Cursor, or Windsurf.
+    Add your endpoint to Claude Desktop, Cursor, or VS Code.
   </Card>
 </CardGroup>

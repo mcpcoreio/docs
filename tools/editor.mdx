@@ -1,0 +1,196 @@
+---
+title: "Code Editor"
+description: "A professional VS Code-style code editor built into the MCPCore dashboard — with AI completions, syntax highlighting, and an integrated terminal."
+---
+
+## Overview
+
+MCPCore's code editor is a full-featured IDE built directly into the dashboard. It uses [Monaco Editor](https://microsoft.github.io/monaco-editor/) — the same engine that powers VS Code — so you get a familiar, professional editing experience without leaving your browser.
+
+---
+
+## Editor layout
+
+The tool editor follows a VS Code-inspired layout with four main areas:
+
+| Area | Position | What it contains |
+|---|---|---|
+| **Activity bar** | Far left | Quick access icons for navigation |
+| **Configuration panel** | Left | Tool settings: parameters, active status toggle |
+| **Code editor + Terminal** | Center | The main editing area with an integrated output terminal below |
+| **AI Assistant** | Right | AI Tool Builder prompt panel for code generation |
+
+The center area is resizable — drag the divider between the code editor and the terminal to adjust the split.
+
+---
+
+## Editor features
+
+### Syntax highlighting
+
+Full JavaScript syntax highlighting with support for:
+
+- Keywords, strings, numbers, and operators
+- Template literals (`` `https://api.example.com/${params.id}` ``)
+- Comments (single-line `//` and multi-line `/* */`)
+- Async/await and arrow functions
+
+### Dark theme
+
+The editor uses the **vs-dark** theme by default — a dark background with high-contrast syntax colors optimised for long editing sessions.
+
+### Line numbers
+
+Line numbers are displayed in the left gutter. The current cursor position (line and column) is shown in the status bar at the bottom of the editor.
+
+### Word wrap
+
+Lines wrap automatically to fit the editor width — no horizontal scrolling needed for long lines.
+
+### Tab size
+
+Indentation is set to **2 spaces** per tab stop, matching common JavaScript conventions.
+
+### Auto layout
+
+The editor automatically resizes when the browser window changes size. No manual adjustment needed.
+
+---
+
+## AI-powered completions
+
+The editor provides context-aware autocompletions for all MCPCore SDK functions. Type `.` after any SDK object to see available methods:
+
+### `sdk.*` completions
+
+| Trigger | Suggestions |
+|---|---|
+| `sdk.` | `db`, `http`, `lodash` |
+| `sdk.db().` | `select`, `insert`, `update`, `delete`, `query` |
+| `sdk.lodash.` | `get`, `set`, `map`, `filter`, `find`, `groupBy`, `orderBy`, `sortBy`, `uniq`, `uniqBy`, `flatten`, `flatMap`, `chunk`, `compact`, `difference`, `intersection`, `merge`, `pick`, `omit`, `sumBy`, `meanBy`, `countBy`, `keyBy`, `debounce`, `throttle`, `cloneDeep` |
+
+### `console.*` completions
+
+| Trigger | Suggestions |
+|---|---|
+| `console.` | `log`, `info`, `warn`, `error`, `debug` |
+
+Completions trigger automatically when you type `.` — no keyboard shortcut needed.
+
+---
+
+## Integrated terminal
+
+Below the code editor, an integrated terminal shows execution output when you run your tool from the Run panel:
+
+### Output format
+
+Each log entry includes:
+
+- **Timestamp** — when the log was produced (e.g. `12:03:41`)
+- **Log level** — color-coded badge:
+  - **info** — blue
+  - **warn** — yellow
+  - **error** — red
+- **Message** — the content you logged
+
+### Example output
+
+```
+12:03:41 [info]  Connecting to database...
+12:03:41 [info]  Query: SELECT * FROM users WHERE id = $1 ["usr_a8k2"]
+12:03:42 [info]  Query: SELECT * FROM orders WHERE userId = $1 ["usr_a8k2"]
+12:03:42 [info]  Fetched user: usr_a8k2 john@example.com
+✓ Execution completed (248ms)
+```
+
+The terminal shows the total execution time at the end. Use the **Clear** button to reset the terminal output between runs.
+
+---
+
+## Default code template
+
+When you create a new tool, the editor is pre-filled with a starter template that shows all available globals:
+
+```javascript
+// Available globals: sdk · env · params · console
+//
+// sdk.db(config)   — connect to a database (pg / mysql / mssql)
+// sdk.http(config) — make HTTP requests
+// sdk.lodash       — full lodash utility library
+//
+// env.KEY_NAME     — secret values you defined in project settings
+// params.name      — input parameters passed to this tool
+
+const response = await sdk.http({
+  method: "GET",
+  url: `https://api.example.com/items/${params.id}`,
+  headers: {
+    Authorization: `Bearer ${env.API_KEY}`
+  }
+});
+
+const data = JSON.parse(response.body());
+console.log("Result:", data);
+return data;
+```
+
+This template gives you a working starting point — modify or replace it entirely as needed.
+
+---
+
+## Status bar
+
+The status bar at the bottom of the editor displays:
+
+| Item | Description |
+|---|---|
+| **Active status** | Green indicator when the tool is active |
+| **Tool name** | The current tool's name |
+| **Language** | Always `JavaScript` |
+| **Cursor position** | Current line and column number (e.g. `Ln 12, Col 34`) |
+
+---
+
+## Configuration panel
+
+The left panel provides quick access to tool settings without leaving the editor:
+
+### Parameters
+
+View and manage the tool's input parameters. Each parameter shows its name, type, and whether it's required. You can add, edit, or remove parameters directly from this panel.
+
+### Active toggle
+
+Enable or disable the tool. Inactive tools are not exposed to AI clients.
+
+---
+
+## AI Assistant panel
+
+The right panel houses the [AI Tool Builder](/tools/create#ai-tool-builder):
+
+1. Type a natural-language description of what your tool should do
+2. A character counter (max 2000) helps you stay within limits
+3. Click **Generate** to produce the complete tool
+4. The generated code, parameters, and name are applied to the editor
+
+Three example prompts are provided as quick-start suggestions to help you get started.
+
+---
+
+## Keyboard shortcuts
+
+The editor supports standard Monaco/VS Code keyboard shortcuts:
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl+S` / `Cmd+S` | Save the tool |
+| `Ctrl+Z` / `Cmd+Z` | Undo |
+| `Ctrl+Shift+Z` / `Cmd+Shift+Z` | Redo |
+| `Ctrl+D` / `Cmd+D` | Select next occurrence |
+| `Ctrl+/` / `Cmd+/` | Toggle line comment |
+| `Ctrl+Shift+K` / `Cmd+Shift+K` | Delete line |
+| `Alt+Up` / `Option+Up` | Move line up |
+| `Alt+Down` / `Option+Down` | Move line down |
+| `Ctrl+Space` | Trigger suggestions |

@@ -17,23 +17,16 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
 <Steps>
   <Step title="Open the dashboard">
     Go to [app.mcpcore.io](https://app.mcpcore.io) and navigate to **My Servers**.
-
-    <Frame>
-      ![Image](/images/screenshots/quickstart-my-servers.png)
-    </Frame>
   </Step>
   <Step title="Click New Server">
     Click the **New Server** button in the top-right corner.
 
     Fill in:
 
-    - **Name** — a short, descriptive name (e.g. `github-tools`)
-    - **Description** — optional, but helpful for teams
+    - **Code** — a unique machine identifier (e.g. `github_tools`)
+    - **Title** — a short, descriptive name (e.g. `GitHub Tools`)
+    - **Subdomain** — your server's URL prefix (e.g. `github-tools`)
     - **Security mode** — start with **Public** for now; you can change it later
-
-    <Frame>
-      ![Image 1](/images/screenshots/quickstart-create-server.png)
-    </Frame>
   </Step>
   <Step title="Save">
     Click **Create server**. You'll be taken to the server detail page, where you can see the endpoint URL and start adding tools.
@@ -45,8 +38,8 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
 ## Step 2 — Write a tool
 
 <Steps>
-  <Step title="Scroll down to Tools">
-    On the server detail page, scroll down to the **Tools** section and click **Create New Tool**.
+  <Step title="Go to Tools">
+    On the server detail page, navigate to the **Tools** section and click **Create New Tool**.
   </Step>
   <Step title="Name your tool">
     Give your tool a name. Tool names become part of the MCP schema the AI sees — use lowercase snake_case (e.g. `fetch_repo_stats`).
@@ -67,9 +60,9 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
       method: "GET",
       url: `https://api.github.com/repos/${params.repo}`,
     });
-    
+
     const data = JSON.parse(res.body());
-    
+
     return {
       stars:    data.stargazers_count,
       forks:    data.forks_count,
@@ -77,10 +70,6 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
       topics:   data.topics,
     };
     ```
-
-    <Frame>
-      ![Screenshot 5](/images/screenshots/quickstart-tool-editor.png)
-    </Frame>
   </Step>
   <Step title="Save the tool">
     Click **Save**. The tool is now part of your server.
@@ -100,10 +89,6 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
   </Step>
   <Step title="Click Run">
     Click **Run tool**. The response panel shows the JSON output within a second or two.
-
-    <Frame>
-      ![Screenshot 6](/images/screenshots/quickstart-run-panel.png)
-    </Frame>
   </Step>
 </Steps>
 

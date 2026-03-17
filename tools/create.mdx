@@ -1,6 +1,6 @@
 ---
 title: "Creating a Tool"
-description: "A tool is a callable JavaScript function exposed over MCP. The AI decides when to call it — you decide what it does."
+description: "A tool is a callable JavaScript function exposed over MCP. Write it yourself or let the AI Tool Builder generate it for you."
 ---
 
 ## What is a tool?
@@ -19,12 +19,8 @@ When the AI connects to your server, it receives the full list of tools with the
 ## Create a tool
 
 <Steps>
-  <Step title="Open the Tools tab">
+  <Step title="Open the Tools section">
     On the server detail page, click the **Tools** tab, then click **New Tool**.
-
-    <Frame>
-      ![New Tool button on the Tools tab](/images/screenshots/tool-new-button.png)
-    </Frame>
   </Step>
   <Step title="Name your tool">
     Choose a clear, descriptive name in **lowercase snake_case**:
@@ -52,16 +48,47 @@ When the AI connects to your server, it receives the full list of tools with the
     Define the inputs your code will receive via `params.*`. See [Parameters](/tools/parameters) for the full schema reference.
   </Step>
   <Step title="Write the code">
-    Write JavaScript in the editor. The sandbox gives you access to `sdk`, `params`, `env`, and `console`. See [Sandbox](/tools/sandbox) for the complete API.
+    Write JavaScript in the [code editor](/tools/editor). The sandbox gives you access to `sdk`, `params`, `env`, and `console`. See [Sandbox](/tools/sandbox) for the complete API.
 
-    <Frame>
-      ![Screenshot 12](/images/Screenshot_12.png)
-    </Frame>
+    Or use the **AI Tool Builder** to generate the code automatically — see below.
   </Step>
   <Step title="Save">
     Click **Save**. The tool is live immediately on your server's endpoint.
   </Step>
 </Steps>
+
+---
+
+## AI Tool Builder
+
+The **AI Tool Builder** lets you create tools by describing what you want in plain language. Instead of writing code manually, you describe the tool's purpose and MCPCore's AI generates the complete tool — including the name, parameters, and code.
+
+### How it works
+
+1. Open the tool editor and locate the **AI Assistant** panel on the right side
+2. Type a description of what your tool should do (up to 2000 characters)
+3. Click **Generate**
+4. The AI produces:
+   - A properly formatted `snake_case` tool name
+   - Typed parameters with descriptions
+   - Complete, working JavaScript code using `sdk.http()`, `sdk.db()`, or `sdk.lodash`
+5. Review the generated code, make any adjustments, and save
+
+### Example prompts
+
+Try these to get started:
+
+- `Fetch user profile from a PostgreSQL database using an email parameter`
+- `Call a REST API endpoint and transform the JSON response`
+- `Connect to MySQL, query a table with filters, and return paginated results`
+
+### Generation limits
+
+AI generation is available on supported plans. Each user can generate up to **20 tools per day**.
+
+<Note>
+  The AI Tool Builder uses Claude Sonnet 4 to generate code. Always review the generated code before saving — especially when the tool writes data or interacts with sensitive systems.
+</Note>
 
 ---
 
@@ -92,19 +119,25 @@ return {
 
 ## Tool limits
 
-| Limit               | Value      |
-| ------------------- | ---------- |
-| Code size           | 512 KB     |
-| Execution timeout   | 30 seconds |
-| Response payload    | 4 MB       |
-| Parameters per tool | 50         |
+| Limit               | Value       |
+| ------------------- | ----------- |
+| Code size           | 100 KB      |
+| Execution timeout   | 10 seconds  |
+| Memory per execution| 64 MB       |
+| Parameters per tool | 50          |
 
 ---
 
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card icon="code" href="/tools/sandbox" title="Sandbox API">
+  <Card icon="code" href="/tools/editor" title="Code Editor">
+    Explore the VS Code-style editor with AI completions and integrated terminal.
+  </Card>
+  <Card icon="book" href="/tools/examples" title="Code Examples">
+    Ready-to-use examples for HTTP, databases, Lodash, and more.
+  </Card>
+  <Card icon="terminal" href="/tools/sandbox" title="Sandbox API">
     Full reference for `sdk.http()`, `sdk.db()`, `env`, `params`, and `console`.
   </Card>
   <Card icon="list" href="/tools/parameters" title="Parameters">

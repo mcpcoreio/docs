@@ -1,0 +1,444 @@
+---
+title: "Code Examples"
+description: "Ready-to-use tool code examples for HTTP requests, database queries, data transformation, and common integration patterns."
+---
+
+Every example below is a complete, working tool body. Copy it into the [code editor](/tools/editor), add the listed parameters and secrets, and save.
+
+---
+
+## HTTP — GET with authentication
+
+Fetch data from a REST API using a Bearer token stored as a secret.
+
+**Parameters:** `repo` (string, required)
+**Secrets:** `GITHUB_TOKEN`
+
+```javascript
+const res = await sdk.http({
+  method: "GET",
+  url: `https://api.github.com/repos/${params.repo}`,
+  headers: {
+    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+    "User-Agent": "MCPCore-Tool/1.0",
+  },
+});
+
+if (res.status() !== 200) {
+  throw new Error(`GitHub API error ${res.status()}: ${res.body()}`);
+}
+
+const data = JSON.parse(res.body());
+
+return {
+  name:     data.full_name,
+  stars:    data.stargazers_count,
+  forks:    data.forks_count,
+  language: data.language,
+  topics:   data.topics,
+};
+```
+
+---
+
+## HTTP — POST with JSON body
+
+Send a JSON payload to an external API.
+
+**Parameters:** `to` (string, required), `subject` (string, required), `body` (string, required)
+**Secrets:** `SENDGRID_API_KEY`
+
+```javascript
+const res = await sdk.http({
+  method: "POST",
+  url: "https://api.sendgrid.com/v3/mail/send",
+  headers: {
+    Authorization: `Bearer ${env.SENDGRID_API_KEY}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    personalizations: [{ to: [{ email: params.to }] }],
+    from: { email: "noreply@yourapp.com" },
+    subject: params.subject,
+    content: [{ type: "text/plain", value: params.body }],
+  }),
+});
+
+if (res.status() >= 400) {
+  throw new Error(`SendGrid error ${res.status()}: ${res.body()}`);
+}
+
+return { status: res.status(), message: "Email sent successfully" };
+```
+
+---
+
+## HTTP — Webhook relay
+
+Receive data from the AI and forward it to a webhook endpoint.
+
+**Parameters:** `event` (string, required), `payload` (object, required)
+**Secrets:** `WEBHOOK_URL`, `WEBHOOK_SECRET`
+
+```javascript
+const res = await sdk.http({
+  method: "POST",
+  url: env.WEBHOOK_URL,
+  headers: {
+    "Content-Type": "application/json",
+    "X-Webhook-Secret": env.WEBHOOK_SECRET,
+  },
+  body: JSON.stringify({
+    event: params.event,
+    data: params.payload,
+    timestamp: new Date().toISOString(),
+  }),
+});
+
+return {
+  status: res.status(),
+  accepted: res.status() >= 200 && res.status() < 300,
+};
+```
+
+---
+
+## Database — Select with filters
+
+Query a PostgreSQL table with optional filters and return results.
+
+**Parameters:** `userId` (string, required), `status` (string, optional)
+**Secrets:** `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+
+```javascript
+const db = await sdk.db({
+  type: "pg",
+  connection: {
+    host:     env.DB_HOST,
+    port:     env.DB_PORT,
+    database: env.DB_NAME,
+    user:     env.DB_USER,
+    password: env.DB_PASSWORD,
+  },
+});
+
+const where = { user_id: params.userId };
+if (params.status) {
+  where.status = params.status;
+}
+
+const orders = await db.select("orders", where);
+
+return {
+  count: orders.length,
+  orders,
+};
+```
+
+---
+
+## Database — Insert a record
+
+Insert a new row and return the created record.
+
+**Parameters:** `name` (string, required), `email` (string, required), `role` (string, optional)
+**Secrets:** `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+
+```javascript
+const db = await sdk.db({
+  type: "pg",
+  connection: {
+    host:     env.DB_HOST,
+    port:     env.DB_PORT,
+    database: env.DB_NAME,
+    user:     env.DB_USER,
+    password: env.DB_PASSWORD,
+  },
+});
+
+const record = await db.insert("users", {
+  name:       params.name,
+  email:      params.email,
+  role:       params.role ?? "member",
+  created_at: new Date().toISOString(),
+});
+
+console.log("Created user:", record.id);
+return { id: record.id, message: "User created" };
+```
+
+---
+
+## Database — Raw SQL with pagination
+
+Use a raw parameterised query for complex operations with pagination support.
+
+**Parameters:** `category` (string, required), `page` (number, optional), `pageSize` (number, optional)
+**Secrets:** `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+
+```javascript
+const db = await sdk.db({
+  type: "pg",
+  connection: {
+    host:     env.DB_HOST,
+    port:     env.DB_PORT,
+    database: env.DB_NAME,
+    user:     env.DB_USER,
+    password: env.DB_PASSWORD,
+  },
+});
+
+const page     = params.page ?? 1;
+const pageSize = params.pageSize ?? 20;
+const offset   = (page - 1) * pageSize;
+
+const result = await db.query(
+  `SELECT p.id, p.name, p.price, p.stock,
+          c.name as category_name
+   FROM products p
+   JOIN categories c ON c.id = p.category_id
+   WHERE c.slug = $1
+   ORDER BY p.created_at DESC
+   LIMIT $2 OFFSET $3`,
+  [params.category, pageSize, offset]
+);
+
+const countResult = await db.query(
+  `SELECT COUNT(*) as total
+   FROM products p
+   JOIN categories c ON c.id = p.category_id
+   WHERE c.slug = $1`,
+  [params.category]
+);
+
+return {
+  page,
+  pageSize,
+  total: parseInt(countResult.rows[0].total),
+  products: result.rows,
+};
+```
+
+---
+
+## Database — MySQL example
+
+Connect to a MySQL database and run a query.
+
+**Parameters:** `email` (string, required)
+**Secrets:** `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_DB`, `MYSQL_USER`, `MYSQL_PASSWORD`
+
+```javascript
+const db = await sdk.db({
+  type: "mysql",
+  connection: {
+    host:     env.MYSQL_HOST,
+    port:     env.MYSQL_PORT,
+    database: env.MYSQL_DB,
+    user:     env.MYSQL_USER,
+    password: env.MYSQL_PASSWORD,
+  },
+});
+
+const users = await db.select("users", { email: params.email });
+
+if (users.length === 0) {
+  return { found: false, message: "User not found" };
+}
+
+return { found: true, user: users[0] };
+```
+
+---
+
+## Lodash — Data transformation
+
+Use `sdk.lodash` to group, sort, and summarise data.
+
+**Parameters:** `userId` (string, required)
+**Secrets:** `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+
+```javascript
+const db = await sdk.db({
+  type: "pg",
+  connection: {
+    host:     env.DB_HOST,
+    port:     env.DB_PORT,
+    database: env.DB_NAME,
+    user:     env.DB_USER,
+    password: env.DB_PASSWORD,
+  },
+});
+
+const orders = await db.select("orders", { user_id: params.userId });
+const _ = sdk.lodash;
+
+// Group orders by status
+const grouped = _.groupBy(orders, "status");
+
+// Get the 5 most recent orders
+const recent = _.orderBy(orders, ["created_at"], ["desc"]).slice(0, 5);
+
+// Calculate total spent
+const totalSpent = _.sumBy(orders, "amount");
+
+// Count orders by status
+const statusCounts = _.countBy(orders, "status");
+
+return {
+  totalOrders: orders.length,
+  totalSpent,
+  statusCounts,
+  recentOrders: recent,
+};
+```
+
+---
+
+## Lodash — Deduplication and filtering
+
+Clean and deduplicate data from an external API.
+
+**Parameters:** `query` (string, required)
+**Secrets:** `API_KEY`
+
+```javascript
+const res = await sdk.http({
+  method: "GET",
+  url: `https://api.example.com/search?q=${encodeURIComponent(params.query)}`,
+  headers: { Authorization: `Bearer ${env.API_KEY}` },
+});
+
+const data = JSON.parse(res.body());
+const _ = sdk.lodash;
+
+// Remove duplicates by ID
+const unique = _.uniqBy(data.results, "id");
+
+// Filter out inactive items
+const active = _.filter(unique, item => item.status === "active");
+
+// Pick only the fields we need
+const cleaned = active.map(item => _.pick(item, ["id", "name", "category", "score"]));
+
+// Sort by score descending and take top 10
+const top10 = _.orderBy(cleaned, ["score"], ["desc"]).slice(0, 10);
+
+return { count: top10.length, results: top10 };
+```
+
+---
+
+## Combined — API call + database write
+
+Fetch data from an external API and store it in your database.
+
+**Parameters:** `repo` (string, required)
+**Secrets:** `GITHUB_TOKEN`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+
+```javascript
+// 1. Fetch from GitHub
+const res = await sdk.http({
+  method: "GET",
+  url: `https://api.github.com/repos/${params.repo}`,
+  headers: {
+    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+    "User-Agent": "MCPCore-Tool/1.0",
+  },
+});
+
+if (res.status() !== 200) {
+  throw new Error(`GitHub API error: ${res.status()}`);
+}
+
+const repo = JSON.parse(res.body());
+console.log("Fetched repo:", repo.full_name);
+
+// 2. Store in database
+const db = await sdk.db({
+  type: "pg",
+  connection: {
+    host:     env.DB_HOST,
+    port:     env.DB_PORT,
+    database: env.DB_NAME,
+    user:     env.DB_USER,
+    password: env.DB_PASSWORD,
+  },
+});
+
+const record = await db.insert("repo_snapshots", {
+  repo_name:  repo.full_name,
+  stars:      repo.stargazers_count,
+  forks:      repo.forks_count,
+  language:   repo.language,
+  captured_at: new Date().toISOString(),
+});
+
+console.log("Saved snapshot:", record.id);
+
+return {
+  repo: repo.full_name,
+  stars: repo.stargazers_count,
+  forks: repo.forks_count,
+  snapshotId: record.id,
+};
+```
+
+---
+
+## Error handling pattern
+
+A robust pattern for handling multiple failure points.
+
+**Parameters:** `userId` (string, required)
+**Secrets:** `API_URL`, `API_KEY`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+
+```javascript
+// 1. Fetch user from external API
+const res = await sdk.http({
+  method: "GET",
+  url: `${env.API_URL}/users/${params.userId}`,
+  headers: { Authorization: `Bearer ${env.API_KEY}` },
+});
+
+if (res.status() === 404) {
+  return { found: false, message: "User not found in external system" };
+}
+
+if (res.status() !== 200) {
+  console.error("API error:", res.status(), res.body());
+  throw new Error(`External API returned ${res.status()}`);
+}
+
+const user = JSON.parse(res.body());
+console.log("Found user:", user.name);
+
+// 2. Enrich with database data
+const db = await sdk.db({
+  type: "pg",
+  connection: {
+    host:     env.DB_HOST,
+    port:     env.DB_PORT,
+    database: env.DB_NAME,
+    user:     env.DB_USER,
+    password: env.DB_PASSWORD,
+  },
+});
+
+const orders = await db.select("orders", { user_id: params.userId });
+const _ = sdk.lodash;
+
+return {
+  found: true,
+  user: {
+    id:    user.id,
+    name:  user.name,
+    email: user.email,
+  },
+  stats: {
+    totalOrders: orders.length,
+    totalSpent:  _.sumBy(orders, "amount"),
+    lastOrder:   _.maxBy(orders, "created_at")?.created_at ?? null,
+  },
+};
+```

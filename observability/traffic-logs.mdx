@@ -1,95 +1,135 @@
 ---
 title: "Traffic Logs"
-description: "A complete record of every request your MCP server has received — who called what, when, and how fast."
+description: "A complete record of every HTTP request your MCP server has received — who called what, when, and how fast."
 ---
 
 ## What are Traffic Logs?
 
-Traffic Logs give you a real-time, per-request view of your server's activity. Every MCP tool call is recorded with its full context: who called it, what parameters were passed, what was returned, how long it took, and what log output your code produced.
+Traffic Logs give you a real-time, per-request view of your server's activity. Every MCP tool call is recorded with its full context: the MCP method, input parameters, response body, HTTP status, client IP, geographic origin, session ID, and execution duration.
 
 You can access Traffic Logs from the dashboard sidebar under **Observability → Traffic Logs**, or from the **Logs** tab on any server detail page.
-
-<Frame>
-  ![Traffic Logs list showing recent requests with status indicators](/images/screenshots/traffic-logs-list.png)
-</Frame>
 
 ---
 
 ## The log list
 
-Each row in the log list shows:
+Each row in the log list displays the following columns:
 
-| Column       | Description                       |
-| ------------ | --------------------------------- |
-| **Status**   | Green for success, red for error  |
-| **Tool**     | The tool name that was called     |
-| **Server**   | Which server received the request |
-| **Source**   | `ai-client` or `dashboard-run`    |
-| **Duration** | Execution time in milliseconds    |
-| **Time**     | Timestamp of the request          |
+| Column       | Description                                                    |
+| ------------ | -------------------------------------------------------------- |
+| **Status**   | HTTP status code as a color-coded chip (green for 2xx, red for 4xx/5xx) |
+| **Method**   | The MCP method that was called (see below)                     |
+| **Tool**     | The tool name that was invoked                                 |
+| **Subdomain**| Which server received the request                              |
+| **IP**       | Client IP address with country flag                            |
+| **Time**     | Timestamp of the request                                       |
 
-You can filter by server, tool, status (success/error), date range, and source.
+### MCP methods tracked
+
+Traffic Logs capture all MCP protocol methods, not just tool calls:
+
+| Method | Description |
+|---|---|
+| `initialize` | Client establishing an MCP session |
+| `ping` | Health check / keep-alive |
+| `tools/list` | Client requesting available tools |
+| `tools/call` | Client invoking a specific tool |
+| `resources/list` | Client listing available resources |
+| `resources/read` | Client reading a resource |
+| `resources/templates/list` | Client listing resource templates |
+| `prompts/list` | Client listing available prompts |
+| `prompts/get` | Client requesting a specific prompt |
+
+---
+
+## Filters
+
+The filter bar lets you narrow down logs with five independent filters plus a date range:
+
+| Filter | Options |
+|---|---|
+| **Server** | Filter to a specific server by subdomain |
+| **Tool** | Filter to a specific tool name (cascades based on server selection) |
+| **Method** | Filter by MCP method (`initialize`, `tools/call`, `resources/read`, etc.) |
+| **Status Code** | Filter by HTTP status: `200`, `400`, `401`, `403`, `404`, `500`, `502`, `503` |
+| **Date Range** | Calendar date picker with start and end dates |
+
+All filters can be combined. For example, you can view only `tools/call` requests that returned `500` on a specific server for the last 24 hours.
+
+---
+
+## Auto-refresh
+
+Toggle the **Live** switch to enable automatic log refreshing every **15 seconds**. When active:
+
+- A green animated dot appears next to the toggle
+- The status text shows `refreshing every 15s`
+- All applied filters are preserved during refresh
+- New logs appear at the top of the list
+
+This is useful for monitoring a server in real time — for example, while testing a new tool or debugging an issue in production.
 
 ---
 
 ## Request detail
 
-Click any log row to open the full request detail:
+Click any log row to open the full detail modal. The detail view is split into two columns:
 
-<Frame>
-  ![Traffic log detail modal showing input params, output, duration, and console logs](/images/screenshots/traffic-log-detail.png)
-</Frame>
+### Left column — Metadata
 
-### Input parameters
+| Field | Description |
+|---|---|
+| **Status** | HTTP status code with color-coded chip |
+| **Method** | The MCP method called |
+| **Tool** | Tool name |
+| **Session ID** | The MCP session identifier (truncated for display) |
+| **Country** | Country flag and ISO code from the client's IP |
+| **IP Address** | Full client IP (IPv4 or IPv6) |
+| **Authorization** | First 10 characters of the auth header (masked for security) |
+| **Subdomain** | The server that received the request |
+| **Timestamp** | Full date and time of the request |
 
-The exact JSON payload the AI client sent — the parameters your code received via `params`.
+### Right column — Request & Response
+
+**Request section** — The full JSON body the client sent. For `tools/call` requests, this includes the tool name and parameter values:
 
 ```json
 {
-  "repo": "anthropics/anthropic-sdk-python"
+  "method": "tools/call",
+  "params": {
+    "name": "fetch_repo_stats",
+    "arguments": {
+      "repo": "anthropics/anthropic-sdk-python"
+    }
+  }
 }
 ```
 
-### Output
-
-The return value your tool code produced — exactly what the AI received as the tool result.
+**Response section** — The full JSON response your tool returned:
 
 ```json
 {
-  "stars": 3421,
-  "forks": 312,
-  "language": "Python"
+  "content": [{
+    "type": "text",
+    "text": "{\"stars\": 3421, \"forks\": 312, \"language\": \"Python\"}"
+  }]
 }
 ```
-
-### Console logs
-
-Any output from `console.log()`, `console.info()`, `console.warn()`, `console.error()`, or `console.debug()` in your tool code, in order:
-
-```
-[INFO]  Fetching repo: anthropics/anthropic-sdk-python
-[INFO]  GitHub API responded in 143ms
-[INFO]  Stars: 3421, Forks: 312
-```
-
-### Execution metadata
-
-- **Start time** and **end time**
-- **Duration** (milliseconds)
-- **Client IP** (geo-resolved to country)
-- **MCP session ID**
 
 ---
 
 ## What's logged and what's not
 
-| Logged                          | Not logged                                |
-| ------------------------------- | ----------------------------------------- |
-| Input `params.*` values         | Secret values (`env.*`) — always redacted |
-| Return value                    | Internal MCPCore infrastructure details   |
-| Console output                  | Raw HTTP responses unless you log them    |
-| Error messages and stack traces | Encrypted credentials in request headers  |
-| Execution duration              |                                           |
+| Logged | Not logged |
+|---|---|
+| Full request body and parameters | Secret values (`env.*`) — always redacted |
+| Full response body | Raw HTTP response bodies from external APIs (unless you log them) |
+| All `console.*` output | Internal MCPCore infrastructure details |
+| Error messages and stack traces | Encrypted credentials in request headers |
+| HTTP status code and duration | Full authorization tokens (masked after 10 chars) |
+| Client IP and geographic origin | |
+| MCP session ID | |
+| CDN headers (IP, country) | |
 
 <Note>
   Secret values are automatically redacted from all log output. You will never see a raw API key, password, or OAuth token in the logs — even if you accidentally call `console.log(env.MY_SECRET)`.
@@ -97,19 +137,9 @@ Any output from `console.log()`, `console.info()`, `console.warn()`, `console.er
 
 ---
 
-## Filtering and searching
+## Pagination
 
-Use the filter bar to narrow down logs:
-
-- **Server** — filter to a specific server
-- **Tool** — filter to a specific tool name
-- **Status** — All / Success / Error
-- **Source** — All / AI client / Dashboard run
-- **Date range** — Last hour, last 24h, last 7 days, custom
-
-<Frame>
-  ![Screenshot 19](/images/screenshots/traffic-logs-filters.png)
-</Frame>
+Logs are displayed **10 per page**. Click **Load More** at the bottom to fetch the next batch. Skeleton loaders appear while new data is being fetched.
 
 ---
 
@@ -121,8 +151,10 @@ Traffic logs are retained for **30 days** on the Free plan and **90 days** on pa
 
 ## Common use cases
 
-**Debugging why a tool returned unexpected output:** Open the log entry, check the input params (did the AI pass the right values?), check the console output (did the code execute the expected path?), and check the return value.
+**Debugging why a tool returned unexpected output:** Open the log entry, inspect the full request (did the AI pass the right parameters?), then check the response (what did your code actually return?).
 
-**Verifying a new tool works before connecting an AI client:** Use the [Run panel](/tools/testing) to fire test calls. These appear in Traffic Logs with source `dashboard-run` so you can compare the actual output against your expectations.
+**Monitoring in real time:** Enable auto-refresh while testing a new tool or running a demo. Watch incoming requests appear live.
 
-**Understanding which tools the AI calls most:** Use the [Analytics](/observability/analytics) dashboard for aggregate call counts, or browse Traffic Logs sorted by tool name to see the call distribution.
+**Tracking session behaviour:** Filter by session ID to see the full sequence of MCP calls within a single client session — from `initialize` through `tools/list` to individual `tools/call` invocations.
+
+**Verifying auth configuration:** After switching security modes, check the logs for `401` or `403` responses to confirm non-authenticated clients are being rejected.

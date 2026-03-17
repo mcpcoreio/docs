@@ -10,6 +10,7 @@ An MCP server is a named, hosted process that exposes one or more tools to any M
 Each server gets its own:
 
 - **Subdomain URL** — `https://your-subdomain.mcpcore.io/mcp` (chosen by you at creation time)
+- **Custom domain** — optionally use your own domain with automatic SSL
 - **Security mode** — independent auth configuration (Public, Unlisted, API Key, or OAuth)
 - **Tool collection** — the functions the AI can call
 - **Environment secrets** — encrypted key-value pairs referenced as `env.KEY_NAME`
@@ -30,23 +31,19 @@ You can create as many servers as you need. Common patterns:
 <Steps>
   <Step title="Navigate to My Servers">
     From the dashboard sidebar, click **My Servers**, then click the **New Server** button.
-
-    <Frame>
-      ![Image 1](/images/screenshots/server-create-button.png)
-    </Frame>
   </Step>
   <Step title="Fill in the server details">
     The creation form has the following fields:
 
     ### Code
 
-    A unique machine identifier for your server (5–100 characters). Used internally and in integration configs. Must be in `snake_case` or `camelCase` format.
+    A unique machine identifier for your server (max 20 characters). Used internally and in integration configs. Must be in `snake_case` or `camelCase` format.
 
-    > Example: `github_tools`, `slackBot`, `inventory_api`
+    > Example: `github_tools`, `slackBot`
 
     ### Title
 
-    A human-readable name displayed in the dashboard (5–255 characters).
+    A human-readable name displayed in the dashboard (max 100 characters).
 
     > Example: `GitHub Tools`, `Slack Bot`, `Inventory API`
 
@@ -83,6 +80,15 @@ You can create as many servers as you need. Common patterns:
     <Warning>
       Subdomains must be globally unique across all MCPCore accounts. If your preferred subdomain is taken, try adding a suffix (e.g. `my-github-tools`).
     </Warning>
+
+    ### Custom Domain _(optional)_
+
+    You can use your own domain instead of the default `mcpcore.io` subdomain. Enter your domain (e.g. `mcp.yourcompany.com`) and point a CNAME record to your MCPCore subdomain. SSL is provisioned automatically.
+
+    <Note>
+      Custom domains are available on paid plans. MCPCore monitors SSL certificate status and performs periodic verification.
+    </Note>
+
     ### Instructions _(optional)_
 
     Custom system-level instructions sent to the AI when it connects to this server. Use this to give the AI context about your tools' intended scope, tone, or constraints.
@@ -102,10 +108,6 @@ You can create as many servers as you need. Common patterns:
     ### Security Mode
 
     How incoming requests are authenticated. See [Security Overview](/servers/security-overview) for a full comparison.
-
-    <Frame>
-      ![Screenshot 7](/images/screenshots/server-create-form.png)
-    </Frame>
   </Step>
   <Step title="Click Create server">
     Your server is live immediately. You'll be redirected to the server detail page where you can start adding tools.
@@ -116,13 +118,7 @@ You can create as many servers as you need. Common patterns:
 
 ## The server detail page
 
-Once created, the server detail page is your central hub:
-
-<Frame>
-  ![Screenshot 8](/images/screenshots/server-detail-page.png)
-</Frame>
-
-The page is organised into three tabs:
+Once created, the server detail page is your central hub. The page is organised into tabs:
 
 | Tab             | What's here                                                                             |
 | --------------- | --------------------------------------------------------------------------------------- |
@@ -138,6 +134,12 @@ Your server's MCP endpoint URL is based on the subdomain you chose:
 
 ```
 https://your-subdomain.mcpcore.io/mcp
+```
+
+If you configured a **custom domain**:
+
+```
+https://mcp.yourcompany.com/mcp
 ```
 
 For **Unlisted** mode, the URL includes an embedded secret key:

@@ -5,7 +5,7 @@ description: "Every MCPCore tool runs in an isolated JavaScript runtime with a b
 
 ## Overview
 
-Your tool code runs in an isolated V8 runtime. There is no file system access, no `require()`, no `import`, and no access to the Node.js standard library. Instead, MCPCore injects a curated set of globals:
+Your tool code runs in an isolated V8 runtime with a 64 MB memory limit. There is no file system access, no `require()`, no `import`, and no access to the Node.js standard library. Instead, MCPCore injects a curated set of globals:
 
 | Global | What it is |
 |---|---|
@@ -18,7 +18,7 @@ Your tool code runs in an isolated V8 runtime. There is no file system access, n
 
 ## `sdk.http()` — HTTP requests
 
-Make outbound HTTP requests to any external API or service.
+Make outbound HTTP requests to any external API or service. Each HTTP request has a 10-second timeout and a 10 MB response size limit, with a maximum of 5 redirects.
 
 ```javascript
 const res = await sdk.http({

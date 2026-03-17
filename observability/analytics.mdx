@@ -1,13 +1,15 @@
 ---
 title: "Analytics"
-description: "Track request volume, error rates, latency, tool usage, and geographic distribution across your servers."
+description: "Interactive charts and KPI cards for tracking request volume, error rates, latency percentiles, tool usage, and geographic distribution."
 ---
 
 ## Overview
 
-The Analytics dashboard gives you aggregate insights about your MCP server usage. Unlike Traffic Logs (which show individual requests), Analytics shows trends and summaries over time.
+The Analytics dashboard gives you aggregate insights about your MCP server usage through interactive charts and summary cards. Unlike Traffic Logs (which show individual requests), Analytics shows trends and patterns over time.
 
 Access account-level analytics from **Analytics** in the dashboard sidebar. Per-server analytics are available on the **Analytics** tab of any server detail page.
+
+All charts are built with [Recharts](https://recharts.org) and are fully interactive — hover over any data point to see exact values.
 
 ---
 
@@ -15,92 +17,117 @@ Access account-level analytics from **Analytics** in the dashboard sidebar. Per-
 
 All charts and KPI metrics update to reflect the selected time range:
 
-| Preset | Data shown |
-|---|---|
-| **24H** | Hourly breakdowns for the past 24 hours |
-| **7D** (default) | Daily breakdowns for the past 7 days |
-| **30D** | Daily breakdowns for the past 30 days |
-| **90D** | Daily breakdowns for the past 90 days |
+| Preset | Data shown | Granularity |
+|---|---|---|
+| **24H** | Past 24 hours | Hourly data points |
+| **7D** (default) | Past 7 days | Daily data points |
+| **30D** | Past 30 days | Daily data points |
+| **90D** | Past 90 days | Daily data points |
 
 ---
 
 ## Account-level analytics
 
-The account-level view aggregates across all your servers.
-
-<Frame>
-  <img src="/images/screenshots/analytics-dashboard.png" alt="Account-level analytics dashboard" />
-</Frame>
+The account-level view aggregates data across all your servers.
 
 ### KPI cards
 
-Four headline metrics shown at the top:
+Four headline metric cards are displayed at the top of the dashboard. Each card shows the current value and a percentage change compared to the previous period of equal length:
 
-| Metric | What it measures |
-|---|---|
-| **Total Requests** | Cumulative tool calls in the selected period, with % change vs prior period |
-| **Error Rate** | Percentage of calls that resulted in an error — green below threshold, red above |
-| **Avg Latency** | Mean execution time across all tools and servers, with % change vs prior period |
-| **Active Servers** | Count of servers that received at least one request in the period |
+| Card | What it measures | Colour logic |
+|---|---|---|
+| **Total Requests** | Cumulative tool calls in the selected period | Trend arrow (green for increase, red for decrease) |
+| **Error Rate** | Percentage of calls that resulted in an error | Green when low, yellow when moderate, red when high |
+| **Avg Latency** | Mean execution time across all tools and servers | Green when fast, yellow when moderate, red when slow |
+| **Active Servers** | Count of servers that received at least one request | Static count |
 
-<Frame>
-  <img src="/images/screenshots/analytics-kpi-cards.png" alt="KPI summary cards" />
-</Frame>
+---
 
-### Daily (or Hourly) request trend
+### Request trend chart
 
-An area chart showing total requests and errors over time.
+**Type:** Area chart with dual series
 
-- **24H preset:** hourly data points
-- **All other presets:** daily data points
+An area chart with two overlapping series:
 
-Hovering over the chart shows the exact values for that day or hour. Use this to spot sudden spikes, drops, or error surges.
+| Series | Colour | Description |
+|---|---|---|
+| **Requests** | Blue (`#0485f7`) | Total request count per time bucket |
+| **Errors** | Red (`#ff383c`) | Error count per time bucket |
 
-<Frame>
-  <img src="/images/screenshots/analytics-daily-trend.png" alt="Daily request trend area chart" />
-</Frame>
+- **X-axis:** Time (formatted as date or hour depending on the preset)
+- **Y-axis:** Request count (auto-scaled, large numbers formatted as K/M)
+- **Hover tooltip:** Shows exact values for requests and errors at that point
 
-### Latency trend
+Use this chart to spot sudden spikes, drops, or error surges. A gap between the blue and red areas is healthy — it means most requests are succeeding.
 
-A multi-line chart showing:
+---
 
-- **Avg latency** (blue) — mean execution time
-- **P95 latency** (yellow dashed) — 95th percentile; the worst case for 95% of requests
-- **P99 latency** (red dashed) — 99th percentile; the worst case for 99% of requests
+### Latency trend chart
 
-The Y-axis scales automatically — values under 1000ms are shown in ms; values over 1000ms are shown in seconds.
+**Type:** Multi-line chart with three series
+
+| Series | Colour | Style | Description |
+|---|---|---|---|
+| **Avg latency** | Blue (`#0485f7`) | Solid line | Mean execution time |
+| **P95 latency** | Yellow (`#fbbf24`) | Dashed line | 95th percentile — worst case for 95% of requests |
+| **P99 latency** | Red (`#ff383c`) | Dashed line | 99th percentile — worst case for 99% of requests |
+
+- **X-axis:** Time
+- **Y-axis:** Latency in ms (auto-formatted: ms below 1000, seconds above)
+- **Hover tooltip:** Shows all three values formatted in milliseconds
 
 <Note>
   Watch the P95 line, not just the average. A rising P95 with a flat average means a subset of requests are getting slow — often a database query missing an index or a rate-limited upstream API.
 </Note>
 
-### Top tools
+---
 
-A horizontal bar chart showing your top 8 most-called tools across all servers, ranked by request count.
+### Top tools chart
+
+**Type:** Horizontal bar chart
+
+Shows the **top 8 most-called tools** across all servers, ranked by total request count.
+
+- **X-axis:** Request count
+- **Y-axis:** Tool names
+- **Colour:** Blue (`#0485f7`)
 
 This is the clearest signal of which tools the AI is actually using. In practice you'll usually find that 80% of calls go to 2–3 tools — invest optimisation effort there.
 
-### Top servers
+---
 
-A horizontal bar chart showing your top 8 most-called servers by request count.
+### Top servers chart
 
-### Geographic distribution
+**Type:** Horizontal bar chart
 
-A horizontal bar chart showing the top 10 countries by request origin (ISO 2-letter country codes). Useful for understanding where your users are and for diagnosing region-specific latency issues.
+Shows the **top 8 most-called servers** by request count.
+
+- **X-axis:** Request count
+- **Y-axis:** Server subdomains
+- **Colour:** Green (`#22c55e`)
+
+---
+
+### Geographic distribution chart
+
+**Type:** Horizontal bar chart
+
+Shows the **top 10 countries** by request origin, using ISO 2-letter country codes.
+
+- **X-axis:** Request count
+- **Y-axis:** Country codes (e.g. US, DE, JP)
+
+Useful for understanding where your users are and for diagnosing region-specific latency issues.
 
 ---
 
 ## Server-level analytics
 
-Click any server from the **Top servers** chart, or open a server's **Analytics** tab, to see analytics scoped to that server.
-
-<Frame>
-  <img src="/images/screenshots/analytics-server-level.png" alt="Server-level analytics tab" />
-</Frame>
+Click any server from the **Top servers** chart, or open a server's **Analytics** tab, to see analytics scoped to that specific server.
 
 ### Server KPI cards
 
-| Metric | What it measures |
+| Card | What it measures |
 |---|---|
 | **Total Requests** | Calls received by this server in the period |
 | **Error Rate** | Percentage of calls that failed |
@@ -109,34 +136,53 @@ Click any server from the **Top servers** chart, or open a server's **Analytics*
 
 ### Request trend
 
-Same dual-line area chart (requests + errors) as account level, scoped to this server.
+Same dual-area chart (requests + errors) as account level, scoped to this server.
 
 ### Tool breakdown
 
-A horizontal bar chart showing the distribution of calls across this server's tools — up to the top 10.
+**Type:** Horizontal bar chart
+
+Shows the distribution of calls across this server's tools — up to the **top 10**.
 
 Use this to:
-- Find tools with zero calls (bad description? unused feature?)
-- Understand the AI's behaviour: a tool called unexpectedly often may have a too-broad description
-
-<Frame>
-  <img src="/images/screenshots/analytics-tool-breakdown.png" alt="Tool breakdown chart for a single server" />
-</Frame>
+- **Find tools with zero calls** — bad description? unused feature?
+- **Understand AI behaviour** — a tool called unexpectedly often may have a too-broad description
+- **Prioritise optimisation** — focus on the most-called tools first
 
 ### Session trend
 
-An area chart of unique client sessions over time. A session is a single AI client connection.
+**Type:** Area chart
 
+An area chart of unique client sessions over time. A session is a single AI client connection identified by the `mcp-session-id` header.
+
+Reading the chart:
 - Rising sessions = more clients connecting → growing adoption
 - Flat sessions + rising requests = each session is more active → more intensive use per user
 
 ### Traffic by hour
 
-A bar chart showing average request count by hour of day (0–23, in your local timezone). Use this to understand peak usage hours and plan maintenance windows.
+**Type:** Bar chart
 
-<Frame>
-  <img src="/images/screenshots/analytics-heatmap.png" alt="Traffic by hour bar chart" />
-</Frame>
+A bar chart showing average request count by hour of day (0–23, in your local timezone).
+
+Use this to:
+- Understand peak usage hours
+- Plan maintenance windows during low-traffic periods
+- Identify unusual activity patterns (e.g. unexpected traffic at 3 AM)
+
+---
+
+## Chart interaction
+
+All charts support:
+
+- **Hover tooltips** — hover over any data point to see exact values with proper formatting
+- **Auto-scaling** — Y-axes adjust automatically based on data range
+- **Number formatting** — large numbers shown as K (thousands) or M (millions)
+- **Time formatting** — dates shown as `Mar 15`, hours shown as `14:00`
+- **Latency formatting** — values below 1000 shown in ms, above shown in seconds
+- **Responsive sizing** — charts resize to fit the available width
+- **Loading skeletons** — skeleton placeholders while data is being fetched
 
 ---
 
@@ -149,4 +195,7 @@ Look at P95 latency. If it's over 3–5 seconds for any time period, your tools 
 In the tool breakdown, zero-call tools over 30 days are candidates for cleanup or improved descriptions. The AI may not be calling them because the description doesn't match what users ask for.
 
 **Debug sudden error spikes:**
-Find the time window when errors spiked in the trend chart, then open [Traffic Logs](/observability/traffic-logs) filtered to that window to see what went wrong.
+Find the time window when errors spiked in the request trend chart, then open [Traffic Logs](/observability/traffic-logs) filtered to that window to see the individual failing requests.
+
+**Track adoption:**
+Watch the session trend over time. Combine it with geographic distribution to understand where your users are and how usage is growing.

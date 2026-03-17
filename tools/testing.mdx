@@ -12,10 +12,6 @@ Every tool has a built-in **Run panel** that lets you execute the tool with cust
 - Inspect the exact JSON structure returned to the AI
 - Test edge cases with specific inputs
 
-<Frame>
-  ![Screenshot 16](/images/screenshots/tool-run-panel.png)
-</Frame>
-
 ---
 
 ## Running a tool
@@ -28,10 +24,6 @@ Every tool has a built-in **Run panel** that lets you execute the tool with cust
     The Run panel renders a form field for each parameter you've defined. Required parameters are marked.
 
     Enter real values — the code runs with exactly what you provide.
-
-    <Frame>
-      ![Screenshot 17](/images/screenshots/tool-run-params.png)
-    </Frame>
   </Step>
   <Step title="Click Run tool">
     Click the **Run tool** button. The tool executes in the sandbox with your inputs.
@@ -43,10 +35,6 @@ Every tool has a built-in **Run panel** that lets you execute the tool with cust
     - **Console output** — any `console.log()` / `console.error()` calls your code made
     - **Execution time** — how long the tool took to run
     - **Error** — if the tool threw an exception, the full stack trace
-
-    <Frame>
-      ![Screenshot 18](/images/screenshots/tool-run-result.png)
-    </Frame>
   </Step>
 </Steps>
 
@@ -89,7 +77,7 @@ Common failure patterns:
 | `res.status()` is `401` / `403` | Wrong or expired credentials in secret                               |
 | `JSON.parse()` throws           | Upstream API returned non-JSON (check `res.body()` in a log)         |
 | `db.select()` throws            | Wrong DB host/port/credentials, or table doesn't exist               |
-| Execution timeout               | Tool taking \> 30s — inspect what step is slow with `console.time()` |
+| Execution timeout               | Tool taking > 10s — inspect what step is slow with `console.time()` |
 
 ---
 

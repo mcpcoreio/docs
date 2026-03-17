@@ -1,13 +1,13 @@
 ---
 title: "API Key Mode"
-description: "Clients authenticate by including a long-lived token in the Authorization header."
+description: "Clients authenticate by including a long-lived JWT token in the Authorization header."
 ---
 
 ## How it works
 
 In **API Key** mode, MCPCore checks every incoming request for a valid `Authorization: Bearer` header. Requests that omit the header or provide an unrecognised key receive a `401 Unauthorized` response before any tool code runs.
 
-MCPCore generates the key for you when you select this mode. The key is shown once at creation — store it securely. It remains valid until you explicitly revoke it; there is no automatic expiry.
+MCPCore generates the key for you as a signed JWT when you select this mode. The key is shown once at creation — store it securely. It remains valid until you explicitly revoke it; there is no automatic expiry.
 
 You can create multiple keys — one per integration, team member, or client — and revoke them individually without affecting the others.
 
@@ -32,10 +32,6 @@ You can create multiple keys — one per integration, team member, or client —
     Under **Security Mode**, select **API Key**.
 
     MCPCore automatically generates an API key and displays it in the form.
-
-    <Frame>
-      ![Screenshot 11](/images/screenshots/security-apikey-settings.png)
-    </Frame>
   </Step>
   <Step title="Copy the key">
     Copy the key immediately — it is shown only once. Store it securely (a password manager, vault, or environment variable in your CI system).
@@ -53,7 +49,7 @@ Include the key in the `Authorization: Bearer` header:
 
 <CodeGroup>
 
-```json Claude Desktop              Cline
+```json Claude Desktop / Cline
 {
   "mcpServers": {
     "my-server": {
