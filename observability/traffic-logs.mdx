@@ -122,7 +122,7 @@ Click any log row to open the full detail modal. The detail view is split into t
 
 | Logged | Not logged |
 |---|---|
-| Full request body and parameters | Secret values (`env.*`) — always redacted |
+| Full request body and parameters | Secret values (`env.*`) — not included in MCP protocol layer |
 | Full response body | Raw HTTP response bodies from external APIs (unless you log them) |
 | All `console.*` output | Internal MCPCore infrastructure details |
 | Error messages and stack traces | Encrypted credentials in request headers |
@@ -132,7 +132,7 @@ Click any log row to open the full detail modal. The detail view is split into t
 | CDN headers (IP, country) | |
 
 <Note>
-  Secret values are automatically redacted from all log output. You will never see a raw API key, password, or OAuth token in the logs — even if you accidentally call `console.log(env.MY_SECRET)`.
+  Secret values (`env.*`) are not exposed at the MCP request/response level — they are never sent to the AI client or included in the MCP protocol layer. However, if you call `console.log(env.MY_SECRET)` in your tool code, that value **will** appear in your Traffic Logs. Never log raw secret values intentionally.
 </Note>
 
 ---
