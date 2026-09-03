@@ -1,0 +1,94 @@
+---
+title: "Auth0 Setup"
+description: "Configure Auth0 as the authorization server for an MCPCore OAuth 2.0 server, including resource indicator support."
+---
+
+This guide covers connecting Auth0 to a specific MCPCore server, and enabling resource indicators so Auth0 issues tokens with the correct `aud` claim. Read [OAuth 2.0 Mode](/servers/security/oauth2) first if you have not already, it covers the parts of this flow that are the same for every provider.
+
+## 1. Create an API for your MCPCore server
+
+1. Log in to [manage.auth0.com](https://manage.auth0.com) and open your tenant.
+2. Go to **Applications → APIs → Create API**.
+3. Set:
+   - **Name**: something recognizable, for example `MCPCore - your-subdomain`
+   - **Identifier**: `https://{your-subdomain}.mcpcore.io/mcp`, this must match your MCPCore resource URL exactly, including the `/mcp` path
+   - **Signing Algorithm**: `RS256`
+4. Save the API.
+
+The Identifier is what Auth0 places in the `aud` claim of tokens issued for this API. If you run multiple MCPCore servers behind the same Auth0 tenant, create one API per server, each with its own Identifier matching that server's resource URL.
+
+## 2. Enable resource indicators
+
+Auth0 supports [Resource Indicators for OAuth 2.0](https://auth0.com/docs/get-started/apis/api-settings) so that a single application can request tokens for multiple APIs by sending a `resource` parameter, which is exactly what MCP clients do.
+
+1. In your Auth0 tenant, go to **Settings → Advanced**.
+2. Under **OIDC Conformant**, confirm it is enabled (default for tenants created after 2017).
+3. Auth0 maps an incoming `resource` value to the API whose Identifier matches it. As long as the Identifier from step 1 matches your MCPCore resource URL exactly, no further mapping step is required.
+
+<Note>
+  If your tenant predates OIDC Conformant mode, Auth0 support can migrate it. Non-conformant tenants do not honor the `resource` parameter reliably.
+</Note>
+
+## 3. Confirm Dynamic Client Registration
+
+Auth0's `/.well-known/oauth-authorization-server` metadata for your tenant includes a `registration_endpoint` by default, which is what lets MCP clients like Claude and Cursor register themselves without you creating an Application manually in the Auth0 dashboard.
+
+Verify this by fetching your metadata URL directly:
+
+```
+https://{your-auth0-domain}/.well-known/oauth-authorization-server
+```
+
+Confirm `registration_endpoint` and `jwks_uri` are both present.
+
+## 4. Allow refresh tokens (optional)
+
+If you want MCP clients to stay connected without repeated logins:
+
+1. On your API (step 1), go to the **Settings** tab.
+2. Enable **Allow Offline Access**.
+3. In the Auth0 Application created via Dynamic Client Registration, refresh token rotation is on by default for OIDC-conformant tenants.
+
+## 5. Configure MCPCore
+
+<Steps>
+  <Step title="Open Server Settings">
+    Go to your server's **Settings** tab in the MCPCore dashboard.
+  </Step>
+  <Step title="Select OAuth 2.0">
+    Under **Security mode**, select **OAuth 2.0**.
+  </Step>
+  <Step title="Paste the metadata URL">
+    ```
+    https://{your-auth0-domain}/.well-known/oauth-authorization-server
+    ```
+  </Step>
+  <Step title="Leave Legacy token audience off">
+    Since your API Identifier matches your MCPCore resource URL, tokens will already carry the correct `aud`. You do not need the legacy audience fallback.
+  </Step>
+  <Step title="Save">
+    MCPCore validates the metadata URL and activates OAuth 2.0 mode.
+  </Step>
+</Steps>
+
+## Verifying the token audience
+
+After connecting an MCP client once, you can decode the access token (for example on [jwt.io](https://jwt.io), paste only the token, never a real user's token into a third-party tool for anything beyond local debugging) and confirm:
+
+```json
+{
+  "aud": "https://{your-subdomain}.mcpcore.io/mcp",
+  "iss": "https://{your-auth0-domain}/"
+}
+```
+
+If `aud` is instead an array containing your Auth0 tenant's own domain, or missing entirely, the API Identifier from step 1 does not match your MCPCore resource URL, check for a trailing slash or a missing `/mcp` path.
+
+## Common pitfalls
+
+| Symptom | Likely cause |
+|---|---|
+| MCP client shows a generic authentication error | API Identifier does not exactly match `https://{your-subdomain}.mcpcore.io/mcp` |
+| Client cannot register automatically | Tenant is not OIDC Conformant, or `registration_endpoint` is missing |
+| Token accepted only with Legacy token audience enabled | `resource` parameter is being sent but no API Identifier matches it, Auth0 falls back to the tenant's default audience |
+| Works once, then fails after token refresh | Refresh token rotation invalidated the previous refresh token while the client cached the old one, reconnect the client |

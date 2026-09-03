@@ -1,0 +1,123 @@
+---
+title: "Bearer Token Mode"
+description: "Validate signed JWTs on every request, with fine-grained control over expiry and scopes."
+---
+
+## How it works
+
+In **Bearer Token** mode, MCPCore checks every incoming request for a valid `Authorization: Bearer` header. Requests that omit the header or provide an invalid token receive a `401 Unauthorized` response before any tool code runs.
+
+MCPCore generates the token for you as a signed JWT when you select this mode. The token is shown once at creation, so store it securely. It remains valid until you explicitly revoke it; there is no automatic expiry unless you configure one.
+
+You can create multiple tokens, one per integration, team member, or client, and revoke them individually without affecting the others.
+
+---
+
+## When to use it
+
+- **Fine-grained expiry and scope control**, since each token is a signed JWT you can configure independently
+- **CI/CD and automation pipelines**, a non-expiring credential that does not require an OAuth flow
+- **Team tools**, issue one token per team or integration and revoke per-client when needed
+- **Server-to-server integrations**, where your backend includes the token on every request
+
+---
+
+## Configure
+
+<Steps>
+  <Step title="Create or edit a server">
+    Open the server creation form (New Server) or click **Edit** on an existing server.
+  </Step>
+  <Step title="Select Bearer Token">
+    Under **Security Mode**, select **Bearer Token**.
+
+    MCPCore automatically generates a signed JWT and displays it in the form.
+  </Step>
+  <Step title="Copy the token">
+    Copy the token immediately, it is shown only once. Store it securely (a password manager, vault, or environment variable in your CI system).
+  </Step>
+  <Step title="Save">
+    Click **Save**. The server now requires the `Authorization: Bearer` header for all requests.
+  </Step>
+</Steps>
+
+---
+
+## Client configuration
+
+Include the token in the `Authorization: Bearer` header:
+
+<CodeGroup>
+
+```json Claude Desktop / Cline
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "npx",
+      "args": [
+        "-y", "mcp-remote@latest",
+        "https://your-subdomain.mcpcore.io/mcp",
+        "--header", "Authorization: Bearer <your-jwt>"
+      ]
+    }
+  }
+}
+```
+
+
+```json Cursor
+{
+  "mcpServers": {
+    "my-server": {
+      "url": "https://your-subdomain.mcpcore.io/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-jwt>"
+      }
+    }
+  }
+}
+```
+
+
+```json VS Code
+{
+  "servers": {
+    "my-server": {
+      "type": "http",
+      "url": "https://your-subdomain.mcpcore.io/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-jwt>"
+      }
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+The **Integration** tab on your server's detail page generates these snippets with your actual token pre-filled.
+
+---
+
+## Token management
+
+From the server's **Overview** section you can:
+
+- **Generate** additional tokens (one per integration or environment)
+- **Revoke** individual tokens without affecting others
+- **Label** tokens so you know which integration uses each one
+
+<Note>
+  Revoking a token takes effect immediately. Clients using that token will receive `401` until they are reconfigured with a valid token.
+</Note>
+
+---
+
+## Token rotation
+
+To rotate a token without downtime:
+
+1. Generate a new token from the dashboard
+2. Update your client configurations with the new token
+3. Verify the clients are working
+4. Revoke the old token

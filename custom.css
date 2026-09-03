@@ -1,5 +1,5 @@
 /*
  * Override text color on primary-colored interactive elements.
- * The primary brand color (#d2fa00) is very bright — white text is unreadable.
+ * The primary brand color (#d2fa00) is very bright, white text is unreadable.
  * Force dark text so buttons and highlighted links remain legible.
  */

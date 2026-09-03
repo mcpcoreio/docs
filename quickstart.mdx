@@ -7,12 +7,12 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
 
 ## Prerequisites
 
-- An MCPCore account — [sign up free](https://app.mcpcore.io/register), no credit card required
+- An MCPCore account, [sign up free](https://app.mcpcore.io/register), no credit card required
 - That's it. No local installs needed.
 
 ---
 
-## Step 1 — Create a server
+## Step 1: Create a server
 
 <Steps>
   <Step title="Open the dashboard">
@@ -23,10 +23,10 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
 
     Fill in:
 
-    - **Code** — a unique machine identifier (e.g. `github_tools`)
-    - **Title** — a short, descriptive name (e.g. `GitHub Tools`)
-    - **Subdomain** — your server's URL prefix (e.g. `github-tools`)
-    - **Security mode** — start with **Public** for now; you can change it later
+    - **Code**: a unique machine identifier (e.g. `github_tools`)
+    - **Title**: a short, descriptive name (e.g. `GitHub Tools`)
+    - **Subdomain**: your server's URL prefix (e.g. `github-tools`)
+    - **Security mode**: start with **Public** for now, you can change it later
   </Step>
   <Step title="Save">
     Click **Create server**. You'll be taken to the server detail page, where you can see the endpoint URL and start adding tools.
@@ -35,14 +35,14 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
 
 ---
 
-## Step 2 — Write a tool
+## Step 2: Write a tool
 
 <Steps>
   <Step title="Go to Tools">
     On the server detail page, navigate to the **Tools** section and click **Create New Tool**.
   </Step>
   <Step title="Name your tool">
-    Give your tool a name. Tool names become part of the MCP schema the AI sees — use lowercase snake_case (e.g. `fetch_repo_stats`).
+    Give your tool a name. Tool names become part of the MCP schema the AI sees, so use lowercase snake_case (e.g. `fetch_repo_stats`).
   </Step>
   <Step title="Add a parameter">
     Click **Add parameter** and add:
@@ -78,14 +78,14 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
 
 ---
 
-## Step 3 — Test it
+## Step 3: Test it
 
 <Steps>
   <Step title="Open the Run panel">
     With the tool selected, click the **Run** tab (or the play button in the editor toolbar).
   </Step>
   <Step title="Enter a parameter value">
-    In the **repo** field, enter a real repository name — e.g. `mcpcoreio/docs`.
+    In the **repo** field, enter a real repository name, e.g. `mcpcoreio/docs`.
   </Step>
   <Step title="Click Run">
     Click **Run tool**. The response panel shows the JSON output within a second or two.
@@ -94,7 +94,7 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
 
 ---
 
-## Step 4 — Connect to an AI client
+## Step 4: Connect to an AI client
 
 Copy the **Endpoint URL** from the server detail page and add it to your AI client:
 
@@ -119,7 +119,7 @@ Copy the **Endpoint URL** from the server detail page and add it to your AI clie
 
 <CardGroup cols={2}>
   <Card icon="lock" href="/tools/secrets" title="Add secrets">
-    Store API keys and reference them as `env.MY_KEY` — never hardcode credentials.
+    Store API keys and reference them as `env.MY_KEY`, never hardcode credentials.
   </Card>
   <Card icon="shield" href="/servers/security-overview" title="Change security mode">
     Lock your server behind API Key or OAuth 2.0 before going to production.

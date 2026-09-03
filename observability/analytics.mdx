@@ -7,9 +7,9 @@ description: "Interactive charts and KPI cards for tracking request volume, erro
 
 The Analytics dashboard gives you aggregate insights about your MCP server usage through interactive charts and summary cards. Unlike Traffic Logs (which show individual requests), Analytics shows trends and patterns over time.
 
-Access account-level analytics from **Analytics** in the dashboard sidebar. Per-server analytics are available on the **Analytics** tab of any server detail page.
+Account-level analytics, aggregated across all your servers, are available from the **Analytics** item in the dashboard sidebar. Per-server analytics, scoped to a single server, are available on the **Analytics** tab of that server's detail page.
 
-All charts are built with [Recharts](https://recharts.org) and are fully interactive — hover over any data point to see exact values.
+All charts are built with [Recharts](https://recharts.org) and are fully interactive, hover over any data point to see exact values.
 
 ---
 
@@ -58,7 +58,7 @@ An area chart with two overlapping series:
 - **Y-axis:** Request count (auto-scaled, large numbers formatted as K/M)
 - **Hover tooltip:** Shows exact values for requests and errors at that point
 
-Use this chart to spot sudden spikes, drops, or error surges. A gap between the blue and red areas is healthy — it means most requests are succeeding.
+Use this chart to spot sudden spikes, drops, or error surges. A gap between the blue and red areas is healthy, it means most requests are succeeding.
 
 ---
 
@@ -69,15 +69,15 @@ Use this chart to spot sudden spikes, drops, or error surges. A gap between the 
 | Series | Colour | Style | Description |
 |---|---|---|---|
 | **Avg latency** | Blue (`#0485f7`) | Solid line | Mean execution time |
-| **P95 latency** | Yellow (`#fbbf24`) | Dashed line | 95th percentile — worst case for 95% of requests |
-| **P99 latency** | Red (`#ff383c`) | Dashed line | 99th percentile — worst case for 99% of requests |
+| **P95 latency** | Yellow (`#fbbf24`) | Dashed line | 95th percentile, worst case for 95% of requests |
+| **P99 latency** | Red (`#ff383c`) | Dashed line | 99th percentile, worst case for 99% of requests |
 
 - **X-axis:** Time
 - **Y-axis:** Latency in ms (auto-formatted: ms below 1000, seconds above)
 - **Hover tooltip:** Shows all three values formatted in milliseconds
 
 <Note>
-  Watch the P95 line, not just the average. A rising P95 with a flat average means a subset of requests are getting slow — often a database query missing an index or a rate-limited upstream API.
+  Watch the P95 line, not just the average. A rising P95 with a flat average means a subset of requests are getting slow, often a database query missing an index or a rate-limited upstream API.
 </Note>
 
 ---
@@ -92,7 +92,7 @@ Shows the **top 8 most-called tools** across all servers, ranked by total reques
 - **Y-axis:** Tool names
 - **Colour:** Blue (`#0485f7`)
 
-This is the clearest signal of which tools the AI is actually using. In practice you'll usually find that 80% of calls go to 2–3 tools — invest optimisation effort there.
+This is the clearest signal of which tools the AI is actually using. In practice you'll usually find that 80% of calls go to 2 or 3 tools, so invest optimisation effort there.
 
 ---
 
@@ -142,12 +142,12 @@ Same dual-area chart (requests + errors) as account level, scoped to this server
 
 **Type:** Horizontal bar chart
 
-Shows the distribution of calls across this server's tools — up to the **top 10**.
+Shows the distribution of calls across this server's tools, up to the **top 10**.
 
 Use this to:
-- **Find tools with zero calls** — bad description? unused feature?
-- **Understand AI behaviour** — a tool called unexpectedly often may have a too-broad description
-- **Prioritise optimisation** — focus on the most-called tools first
+- **Find tools with zero calls**: bad description, or an unused feature?
+- **Understand AI behaviour**: a tool called unexpectedly often may have a too-broad description
+- **Prioritise optimisation**: focus on the most-called tools first
 
 ### Session trend
 
@@ -176,13 +176,13 @@ Use this to:
 
 All charts support:
 
-- **Hover tooltips** — hover over any data point to see exact values with proper formatting
-- **Auto-scaling** — Y-axes adjust automatically based on data range
-- **Number formatting** — large numbers shown as K (thousands) or M (millions)
-- **Time formatting** — dates shown as `Mar 15`, hours shown as `14:00`
-- **Latency formatting** — values below 1000 shown in ms, above shown in seconds
-- **Responsive sizing** — charts resize to fit the available width
-- **Loading skeletons** — skeleton placeholders while data is being fetched
+- **Hover tooltips**: hover over any data point to see exact values with proper formatting
+- **Auto-scaling**: Y-axes adjust automatically based on data range
+- **Number formatting**: large numbers shown as K (thousands) or M (millions)
+- **Time formatting**: dates shown as `Mar 15`, hours shown as `14:00`
+- **Latency formatting**: values below 1000 shown in ms, above shown in seconds
+- **Responsive sizing**: charts resize to fit the available width
+- **Loading skeletons**: skeleton placeholders while data is being fetched
 
 ---
 

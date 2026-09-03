@@ -30,8 +30,8 @@ Each row in the error list shows:
 | Level | Indicator | When it's used |
 |---|---|---|
 | **info** | Blue dot | Informational logs |
-| **warn** | Yellow dot | Warnings — tool completed but with issues |
-| **error** | Red dot | Failures — tool threw or was rejected |
+| **warn** | Yellow dot | Warnings, tool completed but with issues |
+| **error** | Red dot | Failures, tool threw or was rejected |
 
 ---
 
@@ -52,7 +52,7 @@ Four independent filters plus a date range:
 
 Click any error row to open the full detail modal. The detail view is split into two columns:
 
-### Left column — Metadata
+### Left column: Metadata
 
 | Field | Description |
 |---|---|
@@ -61,19 +61,19 @@ Click any error row to open the full detail modal. The detail view is split into
 | **Subdomain** | The server's subdomain |
 | **Created** | Full timestamp of the error |
 
-### Right column — Diagnostic data
+### Right column: Diagnostic data
 
 Four expandable sections with all the information needed to reproduce and fix the error:
 
-**Error context** — The primary error information. MCPCore extracts the error message intelligently — parsing JSON responses when available, falling back to raw text:
+**Error context**: The primary error information. MCPCore extracts the error message intelligently, parsing JSON responses when available and falling back to raw text:
 
 ```
 Error: GitHub API returned 401: Bad credentials
 ```
 
-**Tool code** — The complete JavaScript source code of the tool that was running when the error occurred. This lets you correlate the stack trace line numbers with your actual code.
+**Tool code**: The complete JavaScript source code of the tool that was running when the error occurred. This lets you correlate the stack trace line numbers with your actual code.
 
-**Parameters** — The exact `params` payload that caused the error. Copy these values into the [Run panel](/tools/testing) to reproduce the issue:
+**Parameters**: The exact `params` payload that caused the error. Copy these values into the [Run panel](/tools/testing) to reproduce the issue:
 
 ```json
 {
@@ -82,7 +82,7 @@ Error: GitHub API returned 401: Bad credentials
 }
 ```
 
-**Stack trace** — The full call stack at the point of failure (when available):
+**Stack trace**: The full call stack at the point of failure (when available):
 
 ```
 Error: GitHub API returned 401: Bad credentials
@@ -110,7 +110,7 @@ Opens Claude with a pre-built prompt that includes:
 
 Opens ChatGPT with the same pre-built error context.
 
-Both buttons construct a detailed prompt so the AI has everything needed to diagnose the issue — you don't need to copy-paste error details manually.
+Both buttons construct a detailed prompt so the AI has everything needed to diagnose the issue, you don't need to copy-paste error details manually.
 
 ---
 
@@ -169,13 +169,13 @@ The tool took longer than 10 seconds to complete.
 
 - Database query without an index on the filter column
 - External API with high latency
-- Large result set — add `LIMIT` to SQL queries or paginate
+- Large result set, add `LIMIT` to SQL queries or paginate
 
 ---
 
 ### Parameter validation error
 
-The AI passed invalid input — wrong type, missing required field, or value outside expected range.
+The AI passed invalid input: wrong type, missing required field, or value outside expected range.
 
 **Fix:** Review your [parameter definitions](/tools/parameters) and strengthen the descriptions so the AI knows exactly what to pass. For optional parameters, set sensible default values.
 

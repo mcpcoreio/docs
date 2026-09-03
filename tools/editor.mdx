@@ -1,11 +1,11 @@
 ---
 title: "Code Editor"
-description: "A professional VS Code-style code editor built into the MCPCore dashboard — with AI completions, syntax highlighting, and an integrated terminal."
+description: "A professional VS Code-style code editor built into the MCPCore dashboard, with AI completions, syntax highlighting, and an integrated terminal."
 ---
 
 ## Overview
 
-MCPCore's code editor is a full-featured IDE built directly into the dashboard. It uses [Monaco Editor](https://microsoft.github.io/monaco-editor/) — the same engine that powers VS Code — so you get a familiar, professional editing experience without leaving your browser.
+MCPCore's code editor is a full-featured IDE built directly into the dashboard. It uses [Monaco Editor](https://microsoft.github.io/monaco-editor/), the same engine that powers VS Code, so you get a familiar, professional editing experience without leaving your browser.
 
 ---
 
@@ -20,7 +20,7 @@ The tool editor follows a VS Code-inspired layout with four main areas:
 | **Code editor + Terminal** | Center | The main editing area with an integrated output terminal below |
 | **AI Assistant** | Right | AI Tool Builder prompt panel for code generation |
 
-The center area is resizable — drag the divider between the code editor and the terminal to adjust the split.
+The center area is resizable. Drag the divider between the code editor and the terminal to adjust the split.
 
 ---
 
@@ -37,7 +37,7 @@ Full JavaScript syntax highlighting with support for:
 
 ### Dark theme
 
-The editor uses the **vs-dark** theme by default — a dark background with high-contrast syntax colors optimised for long editing sessions.
+The editor uses the **vs-dark** theme by default, a dark background with high-contrast syntax colors optimised for long editing sessions.
 
 ### Line numbers
 
@@ -45,7 +45,7 @@ Line numbers are displayed in the left gutter. The current cursor position (line
 
 ### Word wrap
 
-Lines wrap automatically to fit the editor width — no horizontal scrolling needed for long lines.
+Lines wrap automatically to fit the editor width, no horizontal scrolling needed for long lines.
 
 ### Tab size
 
@@ -75,7 +75,7 @@ The editor provides context-aware autocompletions for all MCPCore SDK functions.
 |---|---|
 | `console.` | `log`, `info`, `warn`, `error`, `debug` |
 
-Completions trigger automatically when you type `.` — no keyboard shortcut needed.
+Completions trigger automatically when you type `.`, no keyboard shortcut needed.
 
 ---
 
@@ -87,12 +87,12 @@ Below the code editor, an integrated terminal shows execution output when you ru
 
 Each log entry includes:
 
-- **Timestamp** — when the log was produced (e.g. `12:03:41`)
-- **Log level** — color-coded badge:
-  - **info** — blue
-  - **warn** — yellow
-  - **error** — red
-- **Message** — the content you logged
+- **Timestamp**: when the log was produced (e.g. `12:03:41`)
+- **Log level**: a color-coded badge:
+  - **info**: blue
+  - **warn**: yellow
+  - **error**: red
+- **Message**: the content you logged
 
 ### Example output
 
@@ -115,12 +115,12 @@ When you create a new tool, the editor is pre-filled with a starter template tha
 ```javascript
 // Available globals: sdk · env · params · console
 //
-// sdk.db(config)   — connect to a database (pg / mysql / mssql)
-// sdk.http(config) — make HTTP requests
-// sdk.lodash       — full lodash utility library
+// sdk.db(config)   : connect to a database (pg / mysql / mssql)
+// sdk.http(config) : make HTTP requests
+// sdk.lodash       : full lodash utility library
 //
-// env.KEY_NAME     — secret values you defined in project settings
-// params.name      — input parameters passed to this tool
+// env.KEY_NAME     : secret values you defined in project settings
+// params.name      : input parameters passed to this tool
 
 const response = await sdk.http({
   method: "GET",
@@ -135,7 +135,7 @@ console.log("Result:", data);
 return data;
 ```
 
-This template gives you a working starting point — modify or replace it entirely as needed.
+This template gives you a working starting point. Modify or replace it entirely as needed.
 
 ---
 

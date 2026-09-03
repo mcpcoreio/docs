@@ -1,0 +1,84 @@
+---
+title: "Keycloak Setup"
+description: "Configure Keycloak as the authorization server for an MCPCore OAuth 2.0 server, including resource indicator support."
+---
+
+This guide covers connecting Keycloak to a specific MCPCore server, and adding an audience mapper so Keycloak issues tokens with the correct `aud` claim. Read [OAuth 2.0 Mode](/servers/security/oauth2) first if you have not already, it covers the parts of this flow that are the same for every provider.
+
+## 1. Confirm your realm's metadata
+
+Keycloak exposes RFC 8414 metadata per realm at:
+
+```
+https://{keycloak-host}/realms/{realm}/.well-known/oauth-authorization-server
+```
+
+Fetch it directly and confirm `registration_endpoint` and `jwks_uri` are present.
+
+## 2. Enable open client registration
+
+1. Open your Keycloak admin console and select your realm.
+2. Go to **Realm settings → General**.
+3. Confirm **Client registration → Open** is enabled. This allows Dynamic Client Registration without an initial access token, which is what lets MCP clients like Claude and Cursor register themselves automatically.
+
+<Note>
+  If your organization requires registration to stay locked down, you can instead configure an Initial Access Token and pre-register the specific MCP client you use, but this removes the zero-configuration behavior MCPCore otherwise gives you.
+</Note>
+
+## 3. Add an audience mapper
+
+Keycloak does not automatically set `aud` to the `resource` parameter a client sends. Instead, you add a **protocol mapper** that stamps a fixed audience value onto every token issued through a given client or client scope.
+
+1. Go to **Client scopes**, and either edit an existing scope applied to all clients (such as the default `profile` scope) or create a new dedicated scope, for example `mcpcore-audience`.
+2. Open the **Mappers** tab, click **Add mapper → By configuration → Audience**.
+3. Set:
+   - **Name**: `mcpcore-audience`
+   - **Included Custom Audience**: `https://{your-subdomain}.mcpcore.io/mcp`, this must match your MCPCore resource URL exactly, including the `/mcp` path
+   - **Add to access token**: on
+4. If you created a dedicated client scope, go to **Realm settings → Client policies**, or your realm's default client scopes, and make sure it is assigned as a **Default** client scope so every dynamically registered client picks it up automatically.
+
+<Note>
+  If you run multiple MCPCore servers from the same Keycloak realm, each one needs its own client scope with its own audience mapper, since a single scope only stamps one fixed audience value.
+</Note>
+
+## 4. Configure MCPCore
+
+<Steps>
+  <Step title="Open Server Settings">
+    Go to your server's **Settings** tab in the MCPCore dashboard.
+  </Step>
+  <Step title="Select OAuth 2.0">
+    Under **Security mode**, select **OAuth 2.0**.
+  </Step>
+  <Step title="Paste the metadata URL">
+    ```
+    https://{keycloak-host}/realms/{realm}/.well-known/oauth-authorization-server
+    ```
+  </Step>
+  <Step title="Leave Legacy token audience off">
+    Since the audience mapper stamps your MCPCore resource URL onto every token, no fallback is needed.
+  </Step>
+  <Step title="Save">
+    MCPCore validates the metadata URL and activates OAuth 2.0 mode.
+  </Step>
+</Steps>
+
+## Verifying the token audience
+
+After connecting an MCP client once, decode the access token (for example on [jwt.io](https://jwt.io) for local debugging only) and confirm:
+
+```json
+{
+  "aud": "https://{your-subdomain}.mcpcore.io/mcp",
+  "iss": "https://{keycloak-host}/realms/{realm}"
+}
+```
+
+## Common pitfalls
+
+| Symptom | Likely cause |
+|---|---|
+| Client cannot register automatically | **Client registration → Open** is disabled at the realm level |
+| Token issued but MCPCore rejects it | Audience mapper's **Included Custom Audience** does not exactly match `https://{your-subdomain}.mcpcore.io/mcp` |
+| Audience missing from token entirely | Mapper's client scope is not assigned as a **Default** scope, so dynamically registered clients never pick it up |
+| One realm, multiple MCPCore servers, wrong audience on tokens | Reusing a single audience mapper across servers instead of one client scope per resource |

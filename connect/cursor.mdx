@@ -11,11 +11,11 @@ description: "Connect your MCPCore server to Cursor using its native HTTP MCP tr
 
 ---
 
-## Step 1 — Get your config snippet
+## Step 1: Get your config snippet
 
 Open your server's detail page, click the **Integration** tab, and select **Cursor**. Copy the generated snippet.
 
-Cursor supports native HTTP transport — no `npx` bridge needed:
+Cursor supports native HTTP transport, no `npx` bridge needed:
 
 ```json
 {
@@ -35,7 +35,22 @@ For API Key mode:
     "your-server-code": {
       "url": "https://your-subdomain.mcpcore.io/mcp",
       "headers": {
-        "Authorization": "Bearer <your-api-key>"
+        "X-API-Key": "<your-api-key>"
+      }
+    }
+  }
+}
+```
+
+For Bearer Token mode:
+
+```json
+{
+  "mcpServers": {
+    "your-server-code": {
+      "url": "https://your-subdomain.mcpcore.io/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-jwt>"
       }
     }
   }
@@ -44,7 +59,7 @@ For API Key mode:
 
 ---
 
-## Step 2 — Open the MCP config file
+## Step 2: Open the MCP config file
 
 Cursor's MCP config is at:
 
@@ -62,7 +77,7 @@ Create the file if it doesn't exist.
 
 ---
 
-## Step 3 — Merge the snippet
+## Step 3: Merge the snippet
 
 Add your server entry to the `mcpServers` object. If the file is new:
 
@@ -72,7 +87,7 @@ Add your server entry to the `mcpServers` object. If the file is new:
     "your-server-code": {
       "url": "https://your-subdomain.mcpcore.io/mcp",
       "headers": {
-        "Authorization": "Bearer <your-api-key>"
+        "X-API-Key": "<your-api-key>"
       }
     }
   }
@@ -81,13 +96,13 @@ Add your server entry to the `mcpServers` object. If the file is new:
 
 ---
 
-## Step 4 — Reload MCP in Cursor
+## Step 4: Reload MCP in Cursor
 
 Save the file. You can reload without restarting Cursor: open the Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`) and search for **MCP: Reload**.
 
 ---
 
-## Step 5 — Verify
+## Step 5: Verify
 
 Open Cursor's Agent mode or a chat and ask it to use one of your tools. Your MCPCore tools are available in any AI feature.
 
@@ -98,5 +113,5 @@ Open Cursor's Agent mode or a chat and ask it to use one of your tools. Your MCP
 | Problem | Solution |
 |---|---|
 | Server shows as offline | Confirm the URL is correct and internet access is available |
-| `401 Unauthorized` | Verify the `Authorization` header value |
+| `401 Unauthorized` | Verify the header name and value match your server's security mode |
 | Tools fail silently | Check [Traffic Logs](/observability/traffic-logs) |

@@ -7,7 +7,7 @@ Every example below is a complete, working tool body. Copy it into the [code edi
 
 ---
 
-## HTTP — GET with authentication
+## HTTP: GET with authentication
 
 Fetch data from a REST API using a Bearer token stored as a secret.
 
@@ -41,7 +41,7 @@ return {
 
 ---
 
-## HTTP — POST with JSON body
+## HTTP: POST with JSON body
 
 Send a JSON payload to an external API.
 
@@ -73,7 +73,7 @@ return { status: res.status(), message: "Email sent successfully" };
 
 ---
 
-## HTTP — Webhook relay
+## HTTP: Webhook relay
 
 Receive data from the AI and forward it to a webhook endpoint.
 
@@ -103,7 +103,7 @@ return {
 
 ---
 
-## Database — Select with filters
+## Database: Select with filters
 
 Query a PostgreSQL table with optional filters and return results.
 
@@ -137,7 +137,7 @@ return {
 
 ---
 
-## Database — Insert a record
+## Database: Insert a record
 
 Insert a new row and return the created record.
 
@@ -169,7 +169,7 @@ return { id: record.id, message: "User created" };
 
 ---
 
-## Database — Raw SQL with pagination
+## Database: Raw SQL with pagination
 
 Use a raw parameterised query for complex operations with pagination support.
 
@@ -221,7 +221,7 @@ return {
 
 ---
 
-## Database — MySQL example
+## Database: MySQL example
 
 Connect to a MySQL database and run a query.
 
@@ -251,7 +251,7 @@ return { found: true, user: users[0] };
 
 ---
 
-## Lodash — Data transformation
+## Lodash: Data transformation
 
 Use `sdk.lodash` to group, sort, and summarise data.
 
@@ -295,7 +295,7 @@ return {
 
 ---
 
-## Lodash — Deduplication and filtering
+## Lodash: Deduplication and filtering
 
 Clean and deduplicate data from an external API.
 
@@ -329,7 +329,7 @@ return { count: top10.length, results: top10 };
 
 ---
 
-## Combined — API call + database write
+## Combined: API call + database write
 
 Fetch data from an external API and store it in your database.
 

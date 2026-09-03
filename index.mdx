@@ -1,21 +1,23 @@
 ---
 title: "Introduction"
-description: "MCPCore is the fastest way to build, deploy, and manage MCP servers — no infrastructure required."
+description: "MCPCore is the fastest way to build, deploy, and manage MCP servers, with no infrastructure required."
 ---
 
 ## What is MCPCore?
 
-**MCPCore** is a managed platform for the [Model Context Protocol (MCP)](https://modelcontextprotocol.io). It lets you write tool logic in JavaScript and get a live, MCP-compliant endpoint in under 30 seconds — no Docker, no servers, no `node_modules`.
+**MCPCore** is a managed platform for the [Model Context Protocol (MCP)](https://modelcontextprotocol.io). It lets you write tool logic in JavaScript and get a live, MCP-compliant endpoint in under 30 seconds, with no Docker, no servers, and no `node_modules`.
+
+MCPCore currently implements MCP specification version **2026-07-28**, the current stable release of the protocol.
 
 You write the code that matters. MCPCore handles everything else:
 
-- **MCP server hosting** — your tools run in an isolated, always-on sandbox
-- **AI Tool Builder** — describe what you want in plain language and let AI generate the tool code, parameters, and naming for you
-- **Professional code editor** — VS Code-style editor with syntax highlighting, AI-powered completions, and integrated terminal
-- **Authentication** — choose from 4 security modes (Public, Unlisted, API Key, OAuth 2.0)
-- **Custom domains** — use your own domain with automatic SSL provisioning
-- **Encrypted secrets** — store API keys and credentials securely; reference them as `env.MY_KEY`
-- **Observability** — real-time traffic logs, error traces with AI-assisted debugging, and analytics dashboards with interactive charts
+- **MCP server hosting**, your tools run in an isolated, always-on sandbox
+- **AI Tool Builder**, describe what you want in plain language and let AI generate the tool code, parameters, and naming for you
+- **Professional code editor**, a VS Code-style editor with syntax highlighting, AI-powered completions, and an integrated terminal
+- **Authentication**, choose from 4 security modes (Public, API Key, OAuth 2.0, Bearer Token)
+- **Custom domains**, use your own domain with automatic SSL provisioning
+- **Encrypted secrets**, store API keys and credentials securely, referenced in code as `env.MY_KEY`
+- **Observability**, real-time traffic logs, error traces with AI-assisted debugging, and analytics dashboards with interactive charts
 
 ## How it fits together
 
@@ -35,16 +37,16 @@ External APIs, Databases, Services
 
 <CardGroup cols={2}>
   <Card title="MCP Servers" icon="server" href="/servers/create">
-    A server groups related tools under a single endpoint URL. Create as many servers as you need — one per project, one per team, or one per environment.
+    A server groups related tools under a single endpoint URL. Create as many servers as you need, one per project, one per team, or one per environment.
   </Card>
   <Card title="Tools" icon="wrench" href="/tools/create">
     A tool is a callable JavaScript function. The AI decides when to call it and what parameters to pass. You decide what it does.
   </Card>
   <Card title="Code Editor" icon="code" href="/tools/editor">
-    A professional VS Code-style IDE with AI-powered completions, integrated terminal, and dark theme — right in your browser.
+    A professional VS Code-style IDE with AI-powered completions, integrated terminal, and dark theme, right in your browser.
   </Card>
   <Card title="Security Modes" icon="shield" href="/servers/security-overview">
-    Every server has an independent security mode — Public, Unlisted, API Key, or OAuth 2.0. Switching modes never requires changing your tool code.
+    Every server has an independent security mode: Public, API Key, OAuth 2.0, or Bearer Token. Switching modes never requires changing your tool code.
   </Card>
   <Card title="Observability" icon="chart-line" href="/observability/traffic-logs">
     Every request is logged. Inspect call history, error traces, latency trends, and geographic distribution from the dashboard.
@@ -57,7 +59,7 @@ External APIs, Databases, Services
 ## Ready to build?
 
 <CardGroup cols={2}>
-  <Card title="Quickstart — 5 minutes" icon="rocket" href="/quickstart">
+  <Card title="Quickstart: 5 minutes" icon="rocket" href="/quickstart">
     Create a server, write a tool, and test it live.
   </Card>
   <Card title="Connect an AI client" icon="plug" href="/connect/overview">

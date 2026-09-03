@@ -7,10 +7,10 @@ description: "A tool is a callable JavaScript function exposed over MCP. Write i
 
 A **tool** is the fundamental unit of work in MCPCore. It has:
 
-- A **name** — how the AI client identifies and calls it (e.g. `fetch_repo_stats`)
-- A **description** — plain-language explanation of what the tool does; the AI uses this to decide when to call it
-- **Parameters** — the typed inputs the AI passes at call time
-- **Code** — the JavaScript that runs when the tool is invoked
+- A **name**: how the AI client identifies and calls it (e.g. `fetch_repo_stats`)
+- A **description**: a plain-language explanation of what the tool does; the AI uses this to decide when to call it
+- **Parameters**: the typed inputs the AI passes at call time
+- **Code**: the JavaScript that runs when the tool is invoked
 
 When the AI connects to your server, it receives the full list of tools with their schemas. It then decides autonomously which tools to call, in what order, and with what parameters.
 
@@ -34,7 +34,7 @@ When the AI connects to your server, it receives the full list of tools with the
     The name appears in the MCP schema and in your analytics dashboard. It cannot contain spaces or special characters.
   </Step>
   <Step title="Write a description">
-    The description is critically important — it's what the AI reads to decide when to call your tool. Be specific.
+    The description is critically important: it's what the AI reads to decide when to call your tool. Be specific.
 
     **Good description:**
 
@@ -50,7 +50,7 @@ When the AI connects to your server, it receives the full list of tools with the
   <Step title="Write the code">
     Write JavaScript in the [code editor](/tools/editor). The sandbox gives you access to `sdk`, `params`, `env`, and `console`. See [Sandbox](/tools/sandbox) for the complete API.
 
-    Or use the **AI Tool Builder** to generate the code automatically — see below.
+    Or use the **AI Tool Builder** to generate the code automatically, see below.
   </Step>
   <Step title="Save">
     Click **Save**. The tool is live immediately on your server's endpoint.
@@ -61,7 +61,7 @@ When the AI connects to your server, it receives the full list of tools with the
 
 ## AI Tool Builder
 
-The **AI Tool Builder** lets you create tools by describing what you want in plain language. Instead of writing code manually, you describe the tool's purpose and MCPCore's AI generates the complete tool — including the name, parameters, and code.
+The **AI Tool Builder** lets you create tools by describing what you want in plain language. Instead of writing code manually, you describe the tool's purpose and MCPCore's AI generates the complete tool, including the name, parameters, and code.
 
 ### How it works
 
@@ -87,7 +87,7 @@ Try these to get started:
 AI generation is available on supported plans. Each user can generate up to **20 tools per day**.
 
 <Note>
-  The AI Tool Builder uses Claude Sonnet 4 to generate code. Always review the generated code before saving — especially when the tool writes data or interacts with sensitive systems.
+  The AI Tool Builder uses Claude Sonnet 4 to generate code. Always review the generated code before saving, especially when the tool writes data or interacts with sensitive systems.
 </Note>
 
 ---

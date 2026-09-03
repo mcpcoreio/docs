@@ -1,0 +1,84 @@
+---
+title: "Okta Setup"
+description: "Configure Okta as the authorization server for an MCPCore OAuth 2.0 server, including resource indicator support."
+---
+
+This guide covers connecting Okta to a specific MCPCore server, and setting the audience so Okta issues tokens with the correct `aud` claim. Read [OAuth 2.0 Mode](/servers/security/oauth2) first if you have not already, it covers the parts of this flow that are the same for every provider.
+
+## 1. Create a Custom Authorization Server per MCPCore server
+
+Okta's Custom Authorization Servers each have a single **Audience** value, which becomes the `aud` claim of every token they issue. This means one authorization server maps to one MCPCore resource.
+
+1. Log in to your Okta admin console.
+2. Go to **Security → API → Authorization Servers**.
+3. Click **Add Authorization Server**.
+4. Set:
+   - **Name**: something recognizable, for example `mcpcore-your-subdomain`
+   - **Audience**: `https://{your-subdomain}.mcpcore.io/mcp`, this must match your MCPCore resource URL exactly, including the `/mcp` path
+
+<Note>
+  If you run multiple MCPCore servers from the same Okta org, each one needs its own Custom Authorization Server, since Audience is a single fixed value per server, not something Okta derives from an incoming `resource` parameter.
+</Note>
+
+## 2. Add an access policy
+
+A fresh Custom Authorization Server has no access policies, so it issues no tokens until you add one.
+
+1. On your new authorization server, go to the **Access Policies** tab.
+2. Click **Add New Access Policy**, assign it to **All clients**.
+3. Add a rule with the grant type **Authorization Code**, and reasonable token lifetimes (see [Token lifetime recommendations](/servers/security/oauth2#token-lifetime-recommendations)).
+
+## 3. Enable Dynamic Client Registration
+
+1. On your authorization server, go to **Settings**.
+2. Confirm **Dynamic Client Registration** is enabled for the org (Okta orgs created after mid-2022 have this on by default under **Security → API → Dynamic Client Registration**).
+
+This lets MCP clients like Claude and Cursor register themselves the first time they connect, without you creating an app integration manually.
+
+## 4. Your metadata URL
+
+```
+https://{your-okta-domain}/oauth2/{authServerId}/.well-known/oauth-authorization-server
+```
+
+`{authServerId}` is the ID Okta assigned your Custom Authorization Server, visible in its settings page URL. Fetch this URL directly and confirm it returns `issuer`, `authorization_endpoint`, `token_endpoint`, `registration_endpoint`, and `jwks_uri`.
+
+## 5. Configure MCPCore
+
+<Steps>
+  <Step title="Open Server Settings">
+    Go to your server's **Settings** tab in the MCPCore dashboard.
+  </Step>
+  <Step title="Select OAuth 2.0">
+    Under **Security mode**, select **OAuth 2.0**.
+  </Step>
+  <Step title="Paste the metadata URL">
+    The authorization server metadata URL from step 4.
+  </Step>
+  <Step title="Leave Legacy token audience off">
+    Since the Custom Authorization Server's Audience matches your MCPCore resource URL, tokens will already carry the correct `aud`.
+  </Step>
+  <Step title="Save">
+    MCPCore validates the metadata URL and activates OAuth 2.0 mode.
+  </Step>
+</Steps>
+
+## Verifying the token audience
+
+After connecting an MCP client once, decode the access token (for example on [jwt.io](https://jwt.io) for local debugging only) and confirm:
+
+```json
+{
+  "aud": "https://{your-subdomain}.mcpcore.io/mcp",
+  "iss": "https://{your-okta-domain}/oauth2/{authServerId}"
+}
+```
+
+## Common pitfalls
+
+| Symptom | Likely cause |
+|---|---|
+| `invalid_client` during Dynamic Client Registration | Dynamic Client Registration is disabled at the org level |
+| No tokens issued, generic error at login | No access policy exists on the Custom Authorization Server |
+| MCP client shows a generic authentication error | Audience on the Custom Authorization Server does not exactly match `https://{your-subdomain}.mcpcore.io/mcp` |
+| One Okta org, multiple MCPCore servers, tokens work on the wrong server | Reusing a single Custom Authorization Server across servers instead of one per resource |

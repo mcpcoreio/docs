@@ -1,11 +1,11 @@
 ---
 title: "OAuth 2.0 Mode"
-description: "Protect your server with your own Authorization Server — Okta, Auth0, Keycloak, or any RFC 8414-compliant provider. MCP clients authenticate automatically."
+description: "Protect your server with your own Authorization Server: Okta, Auth0, Keycloak, or any RFC 8414-compliant provider. MCP clients authenticate automatically."
 ---
 
 ## How it works
 
-In **OAuth 2.0** mode, MCPCore acts as an **OAuth 2.0 resource server**. You bring your own Authorization Server — you do not configure usernames, passwords, or client credentials inside MCPCore.
+In **OAuth 2.0** mode, MCPCore acts as an **OAuth 2.0 resource server**. You bring your own Authorization Server, so you do not configure usernames, passwords, or client credentials inside MCPCore.
 
 You provide MCPCore with a single URL: your Authorization Server's [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) metadata endpoint (the `.well-known` document your auth provider exposes). MCPCore validates that URL, then automatically sets up the discovery infrastructure so that MCP clients can find your auth server and complete the OAuth flow on their own.
 
@@ -34,10 +34,10 @@ Everything in steps 2–5 is automatic once you configure the URL.
 
 ## When to use it
 
-- **User-facing tools** — each user authenticates with their own identity; tools act on their behalf
-- **Enterprise integrations** — your org already has Okta / Azure AD / Auth0 and you want to reuse it
-- **Fine-grained access control** — OAuth scopes let you restrict what each client can do
-- **Compliance** — explicit user consent, auditable access grants, short-lived tokens
+- **User-facing tools**: each user authenticates with their own identity, and tools act on their behalf
+- **Enterprise integrations**: your org already has Okta, Azure AD, or Auth0 and you want to reuse it
+- **Fine-grained access control**: OAuth scopes let you restrict what each client can do
+- **Compliance**: explicit user consent, auditable access grants, short-lived tokens
 
 ---
 
@@ -65,13 +65,13 @@ When you save the server, MCPCore fetches your metadata URL and checks:
 | `issuer` | Identifies the authorization authority; used to validate token signatures |
 | `authorization_endpoint` | Where MCP clients redirect users to log in |
 | `token_endpoint` | Where MCP clients exchange authorization codes for JWT access tokens |
-| `registration_endpoint` | Enables Dynamic Client Registration (RFC 7591) — MCP clients self-register automatically without pre-configured credentials |
+| `registration_endpoint` | Enables Dynamic Client Registration (RFC 7591), so MCP clients self-register automatically without pre-configured credentials |
 | `jwks_uri` | MCPCore fetches your server's public keys from here to verify every incoming JWT |
 
 If any of these fields are missing or the URL is unreachable, the server is not saved.
 
 <Note>
-  The `registration_endpoint` is what enables zero-config client connections. MCP clients like Claude and Cursor register themselves dynamically the first time they connect — no manual app registration in your provider's dashboard is needed.
+  The `registration_endpoint` is what enables zero-config client connections. MCP clients like Claude and Cursor register themselves dynamically the first time they connect, so no manual app registration in your provider's dashboard is needed.
 </Note>
 
 ---
@@ -97,7 +97,7 @@ If any of these fields are missing or the URL is unreachable, the server is not 
     https://{keycloak-host}/realms/{realm}/.well-known/oauth-authorization-server
     ```
 
-    Confirm the URL returns valid JSON before proceeding. Open it in a browser — you should see a JSON object with `issuer`, `authorization_endpoint`, `token_endpoint`, `registration_endpoint`, and `jwks_uri`.
+    Confirm the URL returns valid JSON before proceeding. Open it in a browser, you should see a JSON object with `issuer`, `authorization_endpoint`, `token_endpoint`, `registration_endpoint`, and `jwks_uri`.
   </Step>
   <Step title="Open Server Settings">
     Go to your server's **Settings** tab in the MCPCore dashboard.
@@ -112,7 +112,7 @@ If any of these fields are missing or the URL is unreachable, the server is not 
     |---|---|
     | **OAuth Server URL** | The full `.well-known` metadata URL from your provider |
 
-    MCPCore will fetch and validate this URL when you save. You do not enter client IDs, secrets, scopes, or redirect URIs — those are handled automatically by the MCP client through Dynamic Client Registration.
+    MCPCore will fetch and validate this URL when you save. You do not enter client IDs, secrets, scopes, or redirect URIs, those are handled automatically by the MCP client through Dynamic Client Registration.
   </Step>
   <Step title="Save">
     Click **Save**. MCPCore validates the metadata URL, and if all required fields are present, activates OAuth 2.0 mode for this server.
@@ -169,12 +169,12 @@ Once OAuth 2.0 mode is active, here is what happens when an MCP client connects 
     The client fetches your metadata URL (the one you configured) to learn the `authorization_endpoint`, `token_endpoint`, `registration_endpoint`, and `jwks_uri`.
   </Step>
   <Step title="Client registers itself (Dynamic Client Registration)">
-    The client sends a registration request to your `registration_endpoint`. Your auth server issues a `client_id` (and optionally a `client_secret`). This registration is cached — it only happens once per client.
+    The client sends a registration request to your `registration_endpoint`. Your auth server issues a `client_id` (and optionally a `client_secret`). This registration is cached, so it only happens once per client.
   </Step>
   <Step title="User completes the OAuth authorization flow">
-    The client opens a browser and directs the user to your `authorization_endpoint`. The user authenticates with your provider. After consent, your auth server redirects back to the client with an authorization code.
+    The client opens a browser and directs the user to your `authorization_endpoint`, adding a `resource` parameter set to your MCPCore endpoint (`https://{your-subdomain}.mcpcore.io/mcp`), per [RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707). The user authenticates with your provider. After consent, your auth server redirects back to the client with an authorization code.
 
-    The client exchanges the code for a **JWT access token** at your `token_endpoint`, using PKCE (Proof Key for Code Exchange) throughout to prevent code interception.
+    The client exchanges the code for a **JWT access token** at your `token_endpoint`, sending the same `resource` value again, and using PKCE (Proof Key for Code Exchange) throughout to prevent code interception.
   </Step>
   <Step title="Client presents the access token">
     The client includes the JWT in all subsequent requests:
@@ -184,20 +184,156 @@ Once OAuth 2.0 mode is active, here is what happens when an MCP client connects 
     ```
   </Step>
   <Step title="MCPCore validates the token">
-    MCPCore fetches your server's public keys from the `jwks_uri` in your metadata, verifies the JWT signature, checks expiry, and validates the issuer. If the token is valid, the request proceeds to your tool code.
+    MCPCore fetches your server's public keys from the `jwks_uri` in your metadata, verifies the JWT signature, checks expiry, checks that the `aud` claim matches your MCPCore resource URL exactly, and validates the issuer. If the token is valid, the request proceeds to your tool code.
   </Step>
 </Steps>
 
-On reconnection, the client presents its stored token (or refreshes it) — the user does not have to log in again unless the session has expired.
+On reconnection, the client presents its stored token (or refreshes it), and the user does not have to log in again unless the session has expired.
+
+---
+
+## Resource indicators and token audience (current standard)
+
+This is the part of the setup that causes the most connection failures, so read it closely if you are configuring your own authorization server (or an enterprise SSO provider) for the first time.
+
+MCP clients follow [RFC 8707 (Resource Indicators for OAuth 2.0)](https://datatracker.ietf.org/doc/html/rfc8707). When a client starts the authorization flow against your auth server, it sends a `resource` parameter identifying exactly which MCPCore endpoint it wants to call:
+
+```
+resource=https://{your-subdomain}.mcpcore.io/mcp
+```
+
+This value is sent on both the authorization request and the token request. Your authorization server is expected to copy it into the **`aud` (audience) claim** of the JWT it issues. That is the whole contract:
+
+```json
+{
+  "iss": "https://your-auth-server.example.com",
+  "aud": "https://{your-subdomain}.mcpcore.io/mcp",
+  "sub": "user-123",
+  "exp": 1750000000
+}
+```
+
+MCPCore validates every incoming token by checking that `aud` matches its own resource URL for your server. If it does not match, the request is rejected with `401 Unauthorized`, and MCP Inspector (or any other client) usually surfaces this as a generic authentication error rather than the specific audience mismatch, since the failure happens before your tool code runs.
+
+<Note>
+  A resource identifier is scoped to one MCPCore server. If you run five MCPCore servers behind the same authorization server, each one has its own resource URL, and your auth server must issue a distinct `aud` for each, matching whatever `resource` value the client sent for that connection.
+</Note>
+
+### Quick reference by provider
+
+| Provider | Primitive that controls `aud` | Full guide |
+|---|---|---|
+| **Auth0** | Resource Indicators / API Identifier | [Auth0 setup](/servers/security/sso/auth0) |
+| **Okta** | Custom Authorization Server Audience | [Okta setup](/servers/security/sso/okta) |
+| **Keycloak** | Audience protocol mapper | [Keycloak setup](/servers/security/sso/keycloak) |
+| **Azure AD / Entra ID** | Application ID URI | [Azure AD / Entra ID setup](/servers/security/sso/azure-entra) |
+| **Self-hosted** | Whatever your token endpoint sets `aud` to | See below |
+
+### Legacy audience mode (deprecated)
+
+Older authorization servers, and some minimal or hand-rolled OAuth implementations, ignore the `resource` parameter entirely and always issue tokens with `aud` set to the issuer itself, instead of the resource being accessed. MCPCore has a compatibility fallback for this, exposed as **Legacy token audience** in your server's OAuth settings.
+
+<Warning>
+  Enabling legacy token audience makes MCPCore accept a token whose `aud` equals the issuer, in addition to the resource URL. Because the issuer is shared across every MCPCore server that points at the same authorization server, a token minted for one tenant becomes technically valid for any other tenant using that same authorization server. Every request accepted this way is written to your error logs as a `legacy_token_audience` warning so you can track how often it happens.
+
+  Treat this as a temporary bridge while you fix resource indicator support on your authorization server, not as a permanent setting.
+</Warning>
+
+Once your authorization server correctly echoes `resource` into `aud`, turn **Legacy token audience** back off. Audience validation will then match exactly, with no fallback and no cross-tenant exposure.
+
+---
+
+## Running your own authorization server
+
+If you are not using Okta, Auth0, Keycloak, or Azure AD, and instead run a small custom OAuth server (for internal tools, a proof of concept, or a self-hosted identity provider), it must expose the following to work with MCPCore correctly, including resource indicator support.
+
+### 1. Authorization server metadata
+
+```
+GET https://your-auth-server.example.com/.well-known/oauth-authorization-server
+```
+
+```json
+{
+  "issuer": "https://your-auth-server.example.com",
+  "authorization_endpoint": "https://your-auth-server.example.com/oauth/authorize",
+  "token_endpoint": "https://your-auth-server.example.com/oauth/token",
+  "registration_endpoint": "https://your-auth-server.example.com/oauth/register",
+  "jwks_uri": "https://your-auth-server.example.com/.well-known/jwks.json",
+  "response_types_supported": ["code"],
+  "grant_types_supported": ["authorization_code"],
+  "code_challenge_methods_supported": ["S256"],
+  "token_endpoint_auth_methods_supported": ["none", "client_secret_basic"],
+  "resource_indicators_supported": true
+}
+```
+
+`resource_indicators_supported: true` is not required for MCPCore to accept the document, but it tells MCP clients you honor RFC 8707, so include it once you have implemented the behavior below.
+
+### 2. JWKS endpoint
+
+```
+GET https://your-auth-server.example.com/.well-known/jwks.json
+```
+
+A standard JWK Set containing the public half of the RS256 (or ES256) key you sign tokens with. MCPCore refetches this on a short cache TTL, so key rotation does not require redeploying MCPCore.
+
+### 3. Authorization endpoint must carry `resource` through
+
+Your `/oauth/authorize` handler receives a `resource` query parameter alongside the usual `client_id`, `redirect_uri`, `code_challenge`, and `scope`. It must survive the login step and be stored with the authorization code, the same way `redirect_uri` and `code_challenge` already are:
+
+```javascript
+app.get('/oauth/authorize', (req, res) => {
+    const { client_id, redirect_uri, state, code_challenge, code_challenge_method, scope, resource } = req.query;
+
+    // validate client_id and redirect_uri as usual, then render your login
+    // form with `resource` carried through as a hidden field so it reaches
+    // the code that creates the authorization code
+});
+```
+
+### 4. Token endpoint must set `aud` to the stored `resource`
+
+```javascript
+app.post('/oauth/token', (req, res) => {
+    // ... validate grant_type, code, redirect_uri, and PKCE as usual
+
+    const accessToken = jwt.sign(
+        {
+            sub: authCode.username,
+            iss: BASE_URL,
+            aud: authCode.resource || BASE_URL,
+            iat: now,
+            exp: now + 3600,
+            scope: authCode.scope || 'openid'
+        },
+        privateKey,
+        { algorithm: 'RS256', keyid: KEY_ID }
+    );
+
+    res.json({
+        access_token: accessToken,
+        token_type: 'Bearer',
+        expires_in: 3600,
+        scope: authCode.scope || 'openid'
+    });
+});
+```
+
+The `aud: authCode.resource || BASE_URL` line is the entire fix. Falling back to `BASE_URL` (your issuer) when no `resource` was sent keeps older clients working, but only MCPCore's legacy audience mode will accept that fallback value, so treat the fallback as best-effort compatibility, not the target state.
+
+With this in place, leave **Legacy token audience** off in MCPCore. The token's `aud` will already equal the resource MCPCore expects, with no compatibility fallback needed.
 
 ---
 
 ## Provider-specific setup
 
+These are the minimum steps to get connected. Each provider also needs its audience/resource identifier configured to match your MCPCore resource URL exactly, covered in depth on the dedicated page linked from each entry.
+
 <AccordionGroup>
   <Accordion title="Auth0">
     1. Log in to [manage.auth0.com](https://manage.auth0.com) and open your tenant.
-    2. Go to **Applications → APIs** and create a new API representing your MCPCore server.
+    2. Go to **Applications → APIs** and create a new API representing your MCPCore server, with **Identifier** set to `https://{your-subdomain}.mcpcore.io/mcp`.
     3. Enable **Allow Offline Access** if you want refresh tokens.
     4. Confirm Dynamic Client Registration is enabled (it is on by default for Auth0 management API).
     5. Your metadata URL:
@@ -206,13 +342,13 @@ On reconnection, the client presents its stored token (or refreshes it) — the 
     https://{your-auth0-domain}/.well-known/oauth-authorization-server
     ```
 
-    Verify it returns a JSON document with all five required fields before pasting it into MCPCore.
+    Verify it returns a JSON document with all five required fields before pasting it into MCPCore, then see the [full Auth0 guide](/servers/security/sso/auth0) to enable resource indicators so issued tokens carry the correct `aud`.
   </Accordion>
 
   <Accordion title="Okta">
     1. Log in to your Okta admin console.
     2. Go to **Security → API → Authorization Servers**.
-    3. Use the `default` server or create a custom one.
+    3. Create a custom authorization server (or reuse one) with **Audience** set to `https://{your-subdomain}.mcpcore.io/mcp`.
     4. Under **Settings**, confirm **Dynamic Client Registration** is enabled.
     5. Your metadata URL:
 
@@ -220,30 +356,34 @@ On reconnection, the client presents its stored token (or refreshes it) — the 
     https://{your-okta-domain}/oauth2/{authServerId}/.well-known/oauth-authorization-server
     ```
 
-    Replace `{authServerId}` with `default` or your custom server ID.
+    Replace `{authServerId}` with `default` or your custom server ID, then see the [full Okta guide](/servers/security/sso/okta) for the audience and one-server-per-resource details.
   </Accordion>
 
   <Accordion title="Keycloak">
     1. Open your Keycloak admin console.
     2. Select your realm and go to **Realm settings → General**.
     3. Confirm **Client registration → Open** is enabled (allows Dynamic Client Registration without an initial access token).
-    4. Your metadata URL:
+    4. Add an **Audience** protocol mapper so issued tokens carry `https://{your-subdomain}.mcpcore.io/mcp` as an audience.
+    5. Your metadata URL:
 
     ```
     https://{keycloak-host}/realms/{realm}/.well-known/oauth-authorization-server
     ```
+
+    See the [full Keycloak guide](/servers/security/sso/keycloak) for the protocol mapper walkthrough.
   </Accordion>
 
   <Accordion title="Azure AD (Entra ID)">
     1. Register an application in the [Azure portal](https://portal.azure.com) for your tenant.
-    2. Enable the **authorization_code** flow and Dynamic Client Registration via your tenant's policies.
-    3. Your metadata URL:
+    2. Set the **Application ID URI** (Expose an API) to `https://{your-subdomain}.mcpcore.io/mcp` so tokens are minted with that value as `aud`.
+    3. Enable the **authorization_code** flow. Azure does not enable open Dynamic Client Registration by default, see the note below.
+    4. Your metadata URL:
 
     ```
     https://login.microsoftonline.com/{tenant-id}/v2.0/.well-known/openid-configuration
     ```
 
-    Azure exposes OpenID Connect discovery (the RFC 8414 fallback). MCPCore accepts this format.
+    Azure exposes OpenID Connect discovery (the RFC 8414 fallback). MCPCore accepts this format. See the [full Azure AD / Entra ID guide](/servers/security/sso/azure-entra) for the Application ID URI and client registration policy details.
 
     <Note>
       Azure does not enable open Dynamic Client Registration by default. You may need to pre-register the MCP client or configure a registration policy in your tenant.
@@ -258,6 +398,7 @@ On reconnection, the client presents its stored token (or refreshes it) — the 
     - Include `registration_endpoint` in its metadata (Dynamic Client Registration)
     - Include `jwks_uri` pointing to your public key set
     - Issue short-lived JWTs signed with an RS256 or ES256 key
+    - Read the `resource` parameter and echo it into the `aud` claim, see [Running your own authorization server](#running-your-own-authorization-server) above
   </Accordion>
 </AccordionGroup>
 
@@ -265,13 +406,13 @@ On reconnection, the client presents its stored token (or refreshes it) — the 
 
 ## Client compatibility
 
-MCP clients that implement the MCP Authorization specification handle the OAuth flow automatically — no manual configuration is required.
+MCP clients that implement the MCP Authorization specification handle the OAuth flow automatically, so no manual configuration is required.
 
 | Client | Native MCP OAuth support |
 |---|---|
-| Claude (claude.ai) | Yes — automatic |
-| Cursor | Yes — automatic |
-| VS Code (Copilot) | Partial — check latest version |
+| Claude (claude.ai) | Yes, automatic |
+| Cursor | Yes, automatic |
+| VS Code (Copilot) | Native HTTP transport with OAuth support; see the [VS Code connection guide](/connect/vscode) for the minimum required version |
 | Claude Desktop | Via `mcp-remote` proxy |
 | Windsurf | Via `mcp-remote` proxy |
 | Cline | Via `mcp-remote` proxy |

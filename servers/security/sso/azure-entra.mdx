@@ -1,0 +1,91 @@
+---
+title: "Azure AD / Entra ID Setup"
+description: "Configure Microsoft Entra ID (Azure AD) as the authorization server for an MCPCore OAuth 2.0 server, including resource indicator support."
+---
+
+This guide covers connecting Microsoft Entra ID (formerly Azure AD) to a specific MCPCore server, and setting the Application ID URI so Entra ID issues tokens with the correct `aud` claim. Read [OAuth 2.0 Mode](/servers/security/oauth2) first if you have not already, it covers the parts of this flow that are the same for every provider. Entra ID needs more manual setup than Auth0, Okta, or Keycloak, mainly because open Dynamic Client Registration is not enabled by default.
+
+## 1. Register an application
+
+1. Log in to the [Azure portal](https://portal.azure.com) and open **Microsoft Entra ID**.
+2. Go to **App registrations → New registration**.
+3. Set:
+   - **Name**: something recognizable, for example `MCPCore - your-subdomain`
+   - **Supported account types**: single tenant, unless you specifically need multi-tenant access
+4. Register the application.
+
+## 2. Expose an API with the correct Application ID URI
+
+This is the step that controls the `aud` claim.
+
+1. On your app registration, go to **Expose an API**.
+2. Click **Set** next to Application ID URI.
+3. Replace the default `api://{app-id}` value with `https://{your-subdomain}.mcpcore.io/mcp`, this must match your MCPCore resource URL exactly, including the `/mcp` path.
+4. Add a scope, for example `access`, with **Who can consent**: Admins and users.
+
+Tokens issued for this scope carry `aud` equal to the Application ID URI you just set, which is why it needs to match your MCPCore resource exactly.
+
+<Note>
+  If you run multiple MCPCore servers from the same Entra ID tenant, each one needs its own app registration, since the Application ID URI is a single fixed value per registration.
+</Note>
+
+## 3. Enable the authorization code flow
+
+1. On your app registration, go to **Authentication**.
+2. Under **Platform configurations**, add a **Web** platform (MCP clients complete the redirect through a local loopback or the client's own redirect handler, check your specific client's documentation for the exact redirect URI it registers).
+3. Under **Implicit grant and hybrid flows**, leave both checkboxes off, MCP clients use the standard authorization code flow with PKCE.
+
+## 4. Dynamic Client Registration
+
+Entra ID does not support open Dynamic Client Registration the way Auth0, Okta, and Keycloak do. You have two options:
+
+- **Pre-register the MCP client's redirect URI** on the app registration from step 1, and share the resulting `client_id` out of band with whoever is connecting an MCP client. This works well for a small, known set of internal users.
+- **Configure an app registration policy** that allows self-service application registration for your tenant, if you need MCP clients to register themselves the way they do with the other providers. This requires Global Administrator access and affects tenant-wide registration policy, evaluate the security implications for your organization before enabling it.
+
+## 5. Your metadata URL
+
+```
+https://login.microsoftonline.com/{tenant-id}/v2.0/.well-known/openid-configuration
+```
+
+Entra ID exposes OpenID Connect discovery rather than the raw RFC 8414 path, MCPCore accepts this format as a fallback. Fetch it directly and confirm `jwks_uri` and `token_endpoint` are present.
+
+## 6. Configure MCPCore
+
+<Steps>
+  <Step title="Open Server Settings">
+    Go to your server's **Settings** tab in the MCPCore dashboard.
+  </Step>
+  <Step title="Select OAuth 2.0">
+    Under **Security mode**, select **OAuth 2.0**.
+  </Step>
+  <Step title="Paste the metadata URL">
+    The OpenID Connect discovery URL from step 5.
+  </Step>
+  <Step title="Leave Legacy token audience off">
+    Since the Application ID URI matches your MCPCore resource URL, tokens will already carry the correct `aud`.
+  </Step>
+  <Step title="Save">
+    MCPCore validates the metadata URL and activates OAuth 2.0 mode.
+  </Step>
+</Steps>
+
+## Verifying the token audience
+
+After connecting an MCP client once, decode the access token (for example on [jwt.io](https://jwt.io) for local debugging only) and confirm:
+
+```json
+{
+  "aud": "https://{your-subdomain}.mcpcore.io/mcp",
+  "iss": "https://login.microsoftonline.com/{tenant-id}/v2.0"
+}
+```
+
+## Common pitfalls
+
+| Symptom | Likely cause |
+|---|---|
+| Client cannot register automatically | Open Dynamic Client Registration is disabled, the default for Entra ID, see step 4 |
+| Token audience is `api://{app-id}` instead of your resource URL | Application ID URI in **Expose an API** was not changed from the default |
+| `AADSTS500011` resource not found error | The client is requesting a scope for an Application ID URI that does not match what you configured, double check both values are identical |
+| Works for admins, fails for regular users | The scope's **Who can consent** is set to Admins only, and no admin has granted consent yet |

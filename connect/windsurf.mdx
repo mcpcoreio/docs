@@ -11,7 +11,7 @@ description: "Connect your MCPCore server to Windsurf (by Codeium) using the mcp
 
 ---
 
-## Step 1 — Get your config snippet
+## Step 1: Get your config snippet
 
 Open your server's detail page, click the **Integration** tab, and select **Windsurf**. Copy the generated snippet.
 
@@ -36,7 +36,24 @@ For API Key mode:
       "args": [
         "-y", "mcp-remote@latest",
         "https://your-subdomain.mcpcore.io/mcp",
-        "--header", "Authorization: Bearer <your-api-key>"
+        "--header", "X-API-Key: <your-api-key>"
+      ]
+    }
+  }
+}
+```
+
+For Bearer Token mode:
+
+```json
+{
+  "mcpServers": {
+    "your-server-code": {
+      "command": "npx",
+      "args": [
+        "-y", "mcp-remote@latest",
+        "https://your-subdomain.mcpcore.io/mcp",
+        "--header", "Authorization: Bearer <your-jwt>"
       ]
     }
   }
@@ -45,7 +62,7 @@ For API Key mode:
 
 ---
 
-## Step 2 — Open the config file
+## Step 2: Open the config file
 
 **macOS / Linux:**
 ```
@@ -61,19 +78,19 @@ Create the file if it doesn't exist.
 
 ---
 
-## Step 3 — Merge the snippet
+## Step 3: Merge the snippet
 
 Paste your server entry into the `mcpServers` object.
 
 ---
 
-## Step 4 — Restart Windsurf
+## Step 4: Restart Windsurf
 
 Save the config and restart Windsurf (or use **Reload MCP** from the Command Palette if available).
 
 ---
 
-## Step 5 — Verify
+## Step 5: Verify
 
 Open Windsurf's **Cascade** AI panel and ask it to use one of your tools.
 

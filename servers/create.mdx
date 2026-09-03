@@ -5,15 +5,15 @@ description: "An MCP server is the container that groups your tools under a sing
 
 ## What is an MCP server?
 
-An MCP server is a named, hosted process that exposes one or more tools to any MCP-compatible AI client. When the AI connects to your server, it discovers all available tools and their input schemas — then decides which ones to call based on the conversation.
+An MCP server is a named, hosted process that exposes one or more tools to any MCP-compatible AI client. When the AI connects to your server, it discovers all available tools and their input schemas, then decides which ones to call based on the conversation.
 
 Each server gets its own:
 
-- **Subdomain URL** — `https://your-subdomain.mcpcore.io/mcp` (chosen by you at creation time)
-- **Custom domain** — optionally use your own domain with automatic SSL
-- **Security mode** — independent auth configuration (Public, Unlisted, API Key, or OAuth)
-- **Tool collection** — the functions the AI can call
-- **Environment secrets** — encrypted key-value pairs referenced as `env.KEY_NAME`
+- **Subdomain URL**: `https://your-subdomain.mcpcore.io/mcp` (chosen by you at creation time)
+- **Custom domain**: optionally use your own domain with automatic SSL
+- **Security mode**: independent auth configuration (Public, API Key, OAuth 2.0, or Bearer Token)
+- **Tool collection**: the functions the AI can call
+- **Environment secrets**: encrypted key-value pairs referenced as `env.KEY_NAME`
 
 You can create as many servers as you need. Common patterns:
 
@@ -97,7 +97,7 @@ You can create as many servers as you need. Common patterns:
 
     ### Transport Type
 
-    Currently only **Streamable** is available — the default real-time streaming transport for MCP.
+    Currently only **Streamable** is available, the default real-time streaming transport for MCP.
 
     ### Rate Limit Per Minute
 
@@ -142,13 +142,7 @@ If you configured a **custom domain**:
 https://mcp.yourcompany.com/mcp
 ```
 
-For **Unlisted** mode, the URL includes an embedded secret key:
-
-```
-https://your-subdomain.mcpcore.io/mcp/{secretKey}
-```
-
-Copy the endpoint URL from the **Overview** section of the server detail page. This URL is permanent — it never changes if you rename the server or update its settings.
+Copy the endpoint URL from the **Overview** section of the server detail page. This URL is permanent, it never changes if you rename the server or update its settings.
 
 ---
 

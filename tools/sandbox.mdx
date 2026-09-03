@@ -16,7 +16,7 @@ Your tool code runs in an isolated V8 runtime with a 64 MB memory limit. There i
 
 ---
 
-## `sdk.http()` — HTTP requests
+## `sdk.http()`: HTTP requests
 
 Make outbound HTTP requests to any external API or service. Each HTTP request has a 10-second timeout and a 10 MB response size limit, with a maximum of 5 redirects.
 
@@ -33,11 +33,11 @@ const res = await sdk.http({
 
 ```javascript
 res.status()          // HTTP status code (number)  e.g. 200
-res.body()            // Response body as a string — parse with JSON.parse()
+res.body()            // Response body as a string, parse with JSON.parse()
 res.headers()         // Response headers as an object
 ```
 
-### Example — GET with auth
+### Example: GET with auth
 
 ```javascript
 const res = await sdk.http({
@@ -56,7 +56,7 @@ if (res.status() !== 200) {
 return JSON.parse(res.body());
 ```
 
-### Example — POST with JSON body
+### Example: POST with JSON body
 
 ```javascript
 const res = await sdk.http({
@@ -79,9 +79,9 @@ return { status: res.status() };
 
 ---
 
-## `sdk.db()` — Database queries
+## `sdk.db()`: Database queries
 
-Connect to a relational database and run queries. `sdk.db()` is powered by **[Knex.js](https://knexjs.org)** under the hood — a battle-tested SQL query builder for Node.js. If you're familiar with Knex, the API will feel natural. MCPCore wraps it with a simplified interface for the most common operations.
+Connect to a relational database and run queries. `sdk.db()` is powered by **[Knex.js](https://knexjs.org)** under the hood, a battle-tested SQL query builder for Node.js. If you're familiar with Knex, the API will feel natural. MCPCore wraps it with a simplified interface for the most common operations.
 
 ```javascript
 const db = await sdk.db({
@@ -168,12 +168,12 @@ return { topProducts: result.rows };
 ```
 
 <Warning>
-  Always use parameterised queries (`$1`, `$2`, …) when embedding user input in SQL. Never concatenate `params.*` values directly into a SQL string.
+  Always use parameterised queries (`$1`, `$2`, and so on) when embedding user input in SQL. Never concatenate `params.*` values directly into a SQL string.
 </Warning>
 
 ---
 
-## `sdk.lodash` — Utility functions
+## `sdk.lodash`: Utility functions
 
 A subset of [Lodash](https://lodash.com) is available for data manipulation.
 
@@ -189,7 +189,7 @@ const flat    = _.flatMap(groups, group => group.items);
 
 ---
 
-## `params` — Tool inputs
+## `params`: Tool inputs
 
 `params` is a plain object containing the values the AI passed when calling the tool. The keys are the parameter names you defined in the tool schema.
 
@@ -208,7 +208,7 @@ Parameters are validated against the schema you defined before the code runs. If
 
 ---
 
-## `env` — Secrets
+## `env`: Secrets
 
 `env` contains the encrypted secrets you stored in the server's **Secrets** tab. Reference them by their key name:
 
@@ -222,7 +222,7 @@ const apiKey   = env.OPENAI_API_KEY;
 
 ---
 
-## `console` — Structured logging
+## `console`: Structured logging
 
 Log messages from your tool code. All output is captured and visible in the [Traffic Logs](/observability/traffic-logs) dashboard.
 

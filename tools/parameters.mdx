@@ -29,8 +29,8 @@ In the tool editor, click **Add parameter** for each input your code needs.
 | **Name**          | Yes      | The key used to access the value in `params.*`. Use camelCase.              |
 | **Type**          | Yes      | The expected data type (see types below).                                   |
 | **Description**   | Yes      | What the parameter represents. The AI uses this to know what value to pass. |
-| **Required**      | —        | If checked, the AI must always provide this parameter.                      |
-| **Default value** | —        | Used when the parameter is not required and the AI doesn't provide it.      |
+| **Required**      | N/A      | If checked, the AI must always provide this parameter.                      |
+| **Default value** | N/A      | Used when the parameter is not required and the AI doesn't provide it.      |
 
 ---
 
@@ -103,7 +103,7 @@ MCPCore validates every tool call against your parameter schema before running t
 - Wrong type → `400` error with a clear message
 - Your code is never executed
 
-This means you do not need to validate required parameters in your code — they are guaranteed to be present and of the correct type when your code runs.
+This means you do not need to validate required parameters in your code, they are guaranteed to be present and of the correct type when your code runs.
 
 ---
 

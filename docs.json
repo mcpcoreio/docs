@@ -44,9 +44,18 @@
                 "group": "Security Modes",
                 "pages": [
                   "servers/security/public",
-                  "servers/security/unlisted",
                   "servers/security/api-key",
-                  "servers/security/oauth2"
+                  "servers/security/oauth2",
+                  "servers/security/bearer-token"
+                ]
+              },
+              {
+                "group": "Enterprise SSO",
+                "pages": [
+                  "servers/security/sso/auth0",
+                  "servers/security/sso/okta",
+                  "servers/security/sso/keycloak",
+                  "servers/security/sso/azure-entra"
                 ]
               }
             ]

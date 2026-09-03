@@ -16,7 +16,7 @@ Every server has an **Active** toggle switch visible at the top of the Overview 
 - **Active (on):** The server accepts incoming MCP requests normally.
 - **Inactive (off):** The server rejects all incoming requests with a `503 Service Unavailable` response. Your tools, secrets, and configuration are preserved.
 
-Use this to temporarily disable a server without deleting it — for maintenance, billing concerns, or while debugging a production issue. Toggle it back on when you're ready.
+Use this to temporarily disable a server without deleting it, for maintenance, billing concerns, or while debugging a production issue. Toggle it back on when you're ready.
 
 <Note>
   Deactivating a server takes effect immediately. Connected AI clients will lose access until the server is re-activated.
@@ -30,7 +30,7 @@ The **Restart** button (visible in the server header) stops all active connectio
 
 **When to restart:**
 
-- After updating secrets — to ensure the new values are loaded immediately
+- After updating secrets, to ensure the new values are loaded immediately
 - If the server appears unresponsive without a clear error in the logs
 - After making significant changes to multiple tools at once
 
@@ -51,7 +51,7 @@ Click the **Edit** button to open the full server form where you can update:
 - **Security mode**
 - **Custom domain**
 
-The **Code** and **Subdomain** fields cannot be changed after creation — they are permanent identifiers.
+The **Code** and **Subdomain** fields cannot be changed after creation, they are permanent identifiers.
 
 ---
 
@@ -61,9 +61,9 @@ You can map your own domain to your MCPCore server. Enter the domain in the **Cu
 
 SSL certificates are provisioned and managed automatically. The dashboard shows the current SSL status:
 
-- **Pending** — certificate is being provisioned
-- **Active** — SSL is active and the custom domain is ready
-- **Failed** — check your DNS configuration
+- **Pending**: certificate is being provisioned
+- **Active**: SSL is active and the custom domain is ready
+- **Failed**: check your DNS configuration
 
 <Note>
   Custom domains require a paid plan. MCPCore periodically verifies SSL status and DNS configuration.
@@ -104,6 +104,6 @@ To confirm, you'll be asked to type the server name before the delete button bec
 
 If you need to temporarily block all access:
 
-1. **Deactivate** the server (toggle switch) — simplest option, fully reversible
-2. **Switch to API Key mode** and keep the key secret — clients without the key get `401`
-3. **Set rate limit to 0 and deactivate** — belt and suspenders for critical servers
+1. **Deactivate** the server (toggle switch), the simplest option, fully reversible
+2. **Switch to API Key mode** and keep the key secret, clients without the key get `401`
+3. **Set rate limit to 0 and deactivate**, belt and suspenders for critical servers

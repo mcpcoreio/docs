@@ -22,7 +22,7 @@ You copy the ready-to-use config snippet from the server's **Integration** tab a
     Anthropic's desktop app. Config file at `~/Library/Application Support/Claude/claude_desktop_config.json`.
   </Card>
   <Card title="Cursor" icon="code" href="/connect/cursor">
-    AI-powered code editor. Direct HTTP transport — no `npx` needed.
+    AI-powered code editor. Direct HTTP transport, no `npx` needed.
   </Card>
   <Card title="VS Code" icon="code" href="/connect/vscode">
     Native MCP support via `.vscode/mcp.json` or User Settings.
@@ -71,12 +71,12 @@ Most clients use a **command-based** config that runs `mcp-remote` to bridge HTT
 | Security mode | What to add to the config |
 |---|---|
 | Public | Nothing extra |
-| Unlisted | Use the full URL with the embedded key |
-| API Key | Add `--header "Authorization: Bearer <key>"` (command) or `headers.Authorization` (URL-based) |
-| OAuth | Not yet supported in all clients — check client-specific docs |
+| API Key | Add `--header "X-API-Key: <key>"` (command) or `headers["X-API-Key"]` (URL-based) |
+| OAuth 2.0 | Nothing to configure manually for most clients; the client handles discovery and login automatically. See [OAuth 2.0 client compatibility](/servers/security/oauth2#client-compatibility) for which clients need the `mcp-remote` proxy |
+| Bearer Token | Add `--header "Authorization: Bearer <token>"` (command) or `headers.Authorization` (URL-based) |
 
 ---
 
 ## The Integration tab
 
-The easiest way to get the right config is to use the **Integration** tab on your server's detail page. Select your client, and the tab generates the correct snippet with your subdomain and API key pre-filled — just copy and paste.
+The easiest way to get the right config is to use the **Integration** tab on your server's detail page. Select your client, and the tab generates the correct snippet with your subdomain and key pre-filled, just copy and paste.

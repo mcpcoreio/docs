@@ -1,6 +1,6 @@
 ---
 title: "Testing Tools"
-description: "Run your tools with real parameters from the dashboard's Run panel — no AI client needed."
+description: "Run your tools with real parameters from the dashboard's Run panel, no AI client needed."
 ---
 
 ## The Run panel
@@ -23,7 +23,7 @@ Every tool has a built-in **Run panel** that lets you execute the tool with cust
   <Step title="Fill in parameters">
     The Run panel renders a form field for each parameter you've defined. Required parameters are marked.
 
-    Enter real values — the code runs with exactly what you provide.
+    Enter real values, the code runs with exactly what you provide.
   </Step>
   <Step title="Click Run tool">
     Click the **Run tool** button. The tool executes in the sandbox with your inputs.
@@ -31,10 +31,10 @@ Every tool has a built-in **Run panel** that lets you execute the tool with cust
   <Step title="Inspect the result">
     The response section shows:
 
-    - **Return value** — the JSON the AI would receive
-    - **Console output** — any `console.log()` / `console.error()` calls your code made
-    - **Execution time** — how long the tool took to run
-    - **Error** — if the tool threw an exception, the full stack trace
+    - **Return value**: the JSON the AI would receive
+    - **Console output**: any `console.log()` / `console.error()` calls your code made
+    - **Execution time**: how long the tool took to run
+    - **Error**: if the tool threw an exception, the full stack trace
   </Step>
 </Steps>
 
@@ -52,7 +52,7 @@ const rows = await db.select("orders", { user_id: params.userId });
 console.log("Found", rows.length, "orders");
 
 if (rows.length === 0) {
-  console.warn("No orders found — returning empty result");
+  console.warn("No orders found, returning empty result");
   return { orders: [] };
 }
 
@@ -77,13 +77,13 @@ Common failure patterns:
 | `res.status()` is `401` / `403` | Wrong or expired credentials in secret                               |
 | `JSON.parse()` throws           | Upstream API returned non-JSON (check `res.body()` in a log)         |
 | `db.select()` throws            | Wrong DB host/port/credentials, or table doesn't exist               |
-| Execution timeout               | Tool taking > 10s — inspect what step is slow with `console.time()` |
+| Execution timeout               | Tool taking > 10s, inspect what step is slow with `console.time()` |
 
 ---
 
 ## Testing vs production
 
-Runs from the Run panel are **real executions** — they consume API credits, write to databases, and send real requests to external services. Keep this in mind when testing tools that perform write operations or send notifications.
+Runs from the Run panel are **real executions**, they consume API credits, write to databases, and send real requests to external services. Keep this in mind when testing tools that perform write operations or send notifications.
 
 <Note>
   Test runs appear in [Traffic Logs](/observability/traffic-logs) with the source `dashboard-run` so you can distinguish them from AI-initiated calls.
@@ -93,4 +93,4 @@ Runs from the Run panel are **real executions** — they consume API credits, wr
 
 ## Testing with secrets
 
-Secrets (`env.*`) are available during Run panel executions — no special setup needed. The same encrypted values your production code uses are injected into test runs.
+Secrets (`env.*`) are available during Run panel executions, no special setup needed. The same encrypted values your production code uses are injected into test runs.

@@ -11,7 +11,7 @@ description: "Connect your MCPCore server to Claude Desktop using the mcp-remote
 
 ---
 
-## Step 1 — Get your config snippet
+## Step 1: Get your config snippet
 
 Open your server's detail page, click the **Integration** tab, and select **Claude Desktop**. Copy the generated config snippet.
 
@@ -38,7 +38,24 @@ For API Key mode, the snippet includes the auth header:
       "args": [
         "-y", "mcp-remote@latest",
         "https://your-subdomain.mcpcore.io/mcp",
-        "--header", "Authorization: Bearer <your-api-key>"
+        "--header", "X-API-Key: <your-api-key>"
+      ]
+    }
+  }
+}
+```
+
+For Bearer Token mode:
+
+```json
+{
+  "mcpServers": {
+    "your-server-code": {
+      "command": "npx",
+      "args": [
+        "-y", "mcp-remote@latest",
+        "https://your-subdomain.mcpcore.io/mcp",
+        "--header", "Authorization: Bearer <your-jwt>"
       ]
     }
   }
@@ -47,7 +64,7 @@ For API Key mode, the snippet includes the auth header:
 
 ---
 
-## Step 2 — Open the config file
+## Step 2: Open the config file
 
 **macOS:**
 ```
@@ -63,7 +80,7 @@ If the file doesn't exist, create it with `{}` as the initial content.
 
 ---
 
-## Step 3 — Merge the snippet
+## Step 3: Merge the snippet
 
 If the file already has a `mcpServers` object, add your new server entry alongside the existing ones:
 
@@ -81,13 +98,13 @@ If the file already has a `mcpServers` object, add your new server entry alongsi
 
 ---
 
-## Step 4 — Restart Claude Desktop
+## Step 4: Restart Claude Desktop
 
 Fully quit and reopen Claude Desktop. MCP connections are established at startup.
 
 ---
 
-## Step 5 — Verify
+## Step 5: Verify
 
 Look for the tools icon (plug or hammer) in the Claude Desktop chat input bar. Click it to see available tools from your server.
 
@@ -97,11 +114,11 @@ Look for the tools icon (plug or hammer) in the Claude Desktop chat input bar. C
 
 | Problem | Solution |
 |---|---|
-| Tools not visible after restart | Check JSON syntax — a missing comma or bracket breaks the whole file |
-| `401 Unauthorized` in logs | Verify the API key in the `--header` argument |
+| Tools not visible after restart | Check JSON syntax, a missing comma or bracket breaks the whole file |
+| `401 Unauthorized` in logs | Verify the key or token in the `--header` argument |
 | `Could not connect` | Check internet access; verify the subdomain URL is correct |
 | Tool calls fail | Open [Traffic Logs](/observability/traffic-logs) to see the error detail |
 
 <Note>
-  Validate your JSON at [jsonlint.com](https://jsonlint.com) before saving — syntax errors are the most common cause of connection failures in Claude Desktop.
+  Validate your JSON at [jsonlint.com](https://jsonlint.com) before saving, syntax errors are the most common cause of connection failures in Claude Desktop.
 </Note>

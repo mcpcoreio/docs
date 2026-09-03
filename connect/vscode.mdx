@@ -11,7 +11,7 @@ description: "Connect your MCPCore server to VS Code using the native MCP HTTP t
 
 ---
 
-## Step 1 — Get your config snippet
+## Step 1: Get your config snippet
 
 Open your server's detail page, click the **Integration** tab, and select **VS Code**. Copy the generated snippet.
 
@@ -37,7 +37,23 @@ For API Key mode:
       "type": "http",
       "url": "https://your-subdomain.mcpcore.io/mcp",
       "headers": {
-        "Authorization": "Bearer <your-api-key>"
+        "X-API-Key": "<your-api-key>"
+      }
+    }
+  }
+}
+```
+
+For Bearer Token mode:
+
+```json
+{
+  "servers": {
+    "your-server-code": {
+      "type": "http",
+      "url": "https://your-subdomain.mcpcore.io/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-jwt>"
       }
     }
   }
@@ -46,7 +62,7 @@ For API Key mode:
 
 ---
 
-## Step 2 — Add to your workspace config
+## Step 2: Add to your workspace config
 
 Create or open `.vscode/mcp.json` in your workspace root and paste the snippet:
 
@@ -64,13 +80,13 @@ If you want the server available across all workspaces, add it to your VS Code U
 
 ---
 
-## Step 3 — Reload VS Code
+## Step 3: Reload VS Code
 
-Save the config file. VS Code picks up MCP configuration changes automatically — you may need to open a new chat to see the updated tools.
+Save the config file. VS Code picks up MCP configuration changes automatically, though you may need to open a new chat to see the updated tools.
 
 ---
 
-## Step 4 — Verify
+## Step 4: Verify
 
 Open **Copilot Chat** or **Agent mode** in VS Code and reference one of your tools. Your MCPCore tools are available in any AI-powered feature.
 
@@ -81,6 +97,6 @@ Open **Copilot Chat** or **Agent mode** in VS Code and reference one of your too
 | Problem | Solution |
 |---|---|
 | Tools not appearing | Ensure VS Code 1.99+ and that the `servers` key (not `mcpServers`) is used |
-| `401 Unauthorized` | Verify the `Authorization` header value |
+| `401 Unauthorized` | Verify the header name and value match your server's security mode |
 | JSON parse error | Validate `.vscode/mcp.json` syntax |
 | Tool calls fail | Check [Traffic Logs](/observability/traffic-logs) |

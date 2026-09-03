@@ -1,6 +1,6 @@
 ---
 title: "Traffic Logs"
-description: "A complete record of every HTTP request your MCP server has received — who called what, when, and how fast."
+description: "A complete record of every HTTP request your MCP server has received: who called what, when, and how fast."
 ---
 
 ## What are Traffic Logs?
@@ -67,7 +67,7 @@ Toggle the **Live** switch to enable automatic log refreshing every **15 seconds
 - All applied filters are preserved during refresh
 - New logs appear at the top of the list
 
-This is useful for monitoring a server in real time — for example, while testing a new tool or debugging an issue in production.
+This is useful for monitoring a server in real time, for example while testing a new tool or debugging an issue in production.
 
 ---
 
@@ -75,7 +75,7 @@ This is useful for monitoring a server in real time — for example, while testi
 
 Click any log row to open the full detail modal. The detail view is split into two columns:
 
-### Left column — Metadata
+### Left column: Metadata
 
 | Field | Description |
 |---|---|
@@ -89,9 +89,9 @@ Click any log row to open the full detail modal. The detail view is split into t
 | **Subdomain** | The server that received the request |
 | **Timestamp** | Full date and time of the request |
 
-### Right column — Request & Response
+### Right column: Request & Response
 
-**Request section** — The full JSON body the client sent. For `tools/call` requests, this includes the tool name and parameter values:
+**Request section**: The full JSON body the client sent. For `tools/call` requests, this includes the tool name and parameter values:
 
 ```json
 {
@@ -105,7 +105,7 @@ Click any log row to open the full detail modal. The detail view is split into t
 }
 ```
 
-**Response section** — The full JSON response your tool returned:
+**Response section**: The full JSON response your tool returned:
 
 ```json
 {
@@ -122,7 +122,7 @@ Click any log row to open the full detail modal. The detail view is split into t
 
 | Logged | Not logged |
 |---|---|
-| Full request body and parameters | Secret values (`env.*`) — not included in MCP protocol layer |
+| Full request body and parameters | Secret values (`env.*`), not included in MCP protocol layer |
 | Full response body | Raw HTTP response bodies from external APIs (unless you log them) |
 | All `console.*` output | Internal MCPCore infrastructure details |
 | Error messages and stack traces | Encrypted credentials in request headers |
@@ -132,7 +132,7 @@ Click any log row to open the full detail modal. The detail view is split into t
 | CDN headers (IP, country) | |
 
 <Note>
-  Secret values (`env.*`) are not exposed at the MCP request/response level — they are never sent to the AI client or included in the MCP protocol layer. However, if you call `console.log(env.MY_SECRET)` in your tool code, that value **will** appear in your Traffic Logs. Never log raw secret values intentionally.
+  Secret values (`env.*`) are not exposed at the MCP request/response level, they are never sent to the AI client or included in the MCP protocol layer. However, if you call `console.log(env.MY_SECRET)` in your tool code, that value **will** appear in your Traffic Logs. Never log raw secret values intentionally.
 </Note>
 
 ---
@@ -155,6 +155,6 @@ Traffic logs are retained for **30 days** on the Free plan and **90 days** on pa
 
 **Monitoring in real time:** Enable auto-refresh while testing a new tool or running a demo. Watch incoming requests appear live.
 
-**Tracking session behaviour:** Filter by session ID to see the full sequence of MCP calls within a single client session — from `initialize` through `tools/list` to individual `tools/call` invocations.
+**Tracking session behaviour:** Filter by session ID to see the full sequence of MCP calls within a single client session, from `initialize` through `tools/list` to individual `tools/call` invocations.
 
 **Verifying auth configuration:** After switching security modes, check the logs for `401` or `403` responses to confirm non-authenticated clients are being rejected.

@@ -1,6 +1,6 @@
 ---
 title: "Public Mode"
-description: "No authentication required — any caller with the endpoint URL can invoke your tools."
+description: "No authentication required. Any caller with the endpoint URL can invoke your tools."
 ---
 
 ## How it works
@@ -11,12 +11,12 @@ When a server is set to **Public** mode, MCPCore forwards every incoming MCP req
 
 ## When to use it
 
-- **Demos and prototypes** — share a link and let anyone test your tools
-- **Read-only public data** — tools that query open APIs (GitHub public repos, weather APIs, etc.)
-- **Local development** — fastest to set up when iterating on tool logic
+- **Demos and prototypes**: share a link and let anyone test your tools
+- **Read-only public data**: tools that query open APIs (GitHub public repos, weather APIs, etc.)
+- **Local development**: fastest to set up when iterating on tool logic
 
 <Warning>
-  Do not use Public mode for tools that access private data, perform write operations, or consume paid APIs. Anyone with your endpoint URL can call these tools — including automated scanners.
+  Do not use Public mode for tools that access private data, perform write operations, or consume paid APIs. Anyone with your endpoint URL can call these tools, including automated scanners.
 </Warning>
 
 ---
