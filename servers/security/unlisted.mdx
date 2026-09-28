@@ -1,0 +1,59 @@
+---
+title: "Unlisted Mode"
+description: "The endpoint URL contains a long secret key. Only callers who know the full URL can reach your tools."
+---
+
+## How it works
+
+In **Unlisted** mode, your server is reachable only through a URL that ends with a secret key:
+
+```
+https://your-subdomain.mcpcore.io/mcp/<secret-key>
+```
+
+Requests to `/mcp` without the key, or with a wrong key, receive `403 Forbidden` before any tool code runs.
+
+MCPCore generates a random 48-character key when you select this mode. Keys must be at least 32 characters and may contain letters, numbers, hyphens and underscores.
+
+---
+
+## When to use it
+
+- **Personal tools**: you are the only client and want a quick setup without headers
+- **Clients that cannot send custom headers**: the secret travels in the URL instead
+
+<Warning>
+  Treat the full URL like a password. Anyone who has it can call your tools. If it leaks, regenerate the key from the server's **Edit** form. The old URL stops working immediately.
+</Warning>
+
+---
+
+## Configure
+
+<Steps>
+  <Step title="Open the Edit form">
+    Go to your server and open the **Edit** form.
+  </Step>
+  <Step title="Select Unlisted">
+    Under **Security Mode**, select **Unlisted**. MCPCore generates a secret key for you.
+  </Step>
+  <Step title="Save">
+    Click **Save**. Copy the full endpoint URL from the server's detail page.
+  </Step>
+</Steps>
+
+---
+
+## Client configuration
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "url": "https://your-subdomain.mcpcore.io/mcp/<secret-key>"
+    }
+  }
+}
+```
+
+For stronger protection with per-request credentials, use [API Key mode](/servers/security/api-key) or [OAuth 2.0](/servers/security/oauth2).

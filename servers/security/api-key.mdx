@@ -5,11 +5,9 @@ description: "Clients authenticate with a per-server key generated from the dash
 
 ## How it works
 
-In **API Key** mode, MCPCore checks every incoming request for a valid `X-API-Key` header. Requests that omit the header or provide an unrecognised key receive a `401 Unauthorized` response before any tool code runs.
+In **API Key** mode, MCPCore checks every incoming request for a valid key in the `X-API-Key` header (`Authorization: Bearer <key>` is also accepted). Requests that omit the key or provide a key that does not belong to this server receive a `401 Unauthorized` response before any tool code runs.
 
-MCPCore generates the key for you when you select this mode. The key is shown once at creation, so store it securely. It remains valid until you explicitly revoke it.
-
-You can create multiple keys, one per integration, team member, or client, and revoke them individually without affecting the others.
+MCPCore generates the key for you when you select this mode. Each key belongs to a single server. Only the server owner can view it in the dashboard. Regenerating the key from the **Edit** form revokes the previous key immediately.
 
 ---
 
@@ -17,7 +15,7 @@ You can create multiple keys, one per integration, team member, or client, and r
 
 - **Internal tooling**, you control all the clients and can distribute the key securely
 - **Server-to-server integrations**, your backend includes the key on every request
-- **Team tools**, issue one key per team or one key per integration and revoke per-client when needed
+- **Team tools**, share the key only with the clients that need it and regenerate it when someone leaves
 - **Quick production lockdown**, the simplest way to move a server off Public mode without setting up OAuth
 
 ---
@@ -34,7 +32,7 @@ You can create multiple keys, one per integration, team member, or client, and r
     MCPCore automatically generates an API key and displays it in the form.
   </Step>
   <Step title="Copy the key">
-    Copy the key immediately, it is shown only once. Store it securely (a password manager, vault, or environment variable in your CI system).
+    Copy the key and store it securely (a password manager, vault, or environment variable in your CI system).
   </Step>
   <Step title="Save">
     Click **Save**. The server now requires the `X-API-Key` header for all requests.
