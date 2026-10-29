@@ -18,18 +18,17 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
   <Step title="Open the dashboard">
     Go to [app.mcpcore.io](https://app.mcpcore.io) and navigate to **My Servers**.
   </Step>
-  <Step title="Click New Server">
-    Click the **New Server** button in the top-right corner.
+  <Step title="Click Create Server">
+    Click **Create Server** in the top-right corner. A short wizard walks you through five steps:
 
-    Fill in:
-
-    - **Code**: a unique machine identifier (e.g. `github_tools`)
-    - **Title**: a short, descriptive name (e.g. `GitHub Tools`)
-    - **Subdomain**: your server's URL prefix (e.g. `github-tools`)
-    - **Security mode**: start with **Public** for now, you can change it later
+    - **Basics**: a title (e.g. `GitHub Tools`)
+    - **Category**: what the server does
+    - **Domain**: your server's URL prefix (e.g. `github-tools`)
+    - **Security**: start with **Public** for now, you can change it later
+    - **Review**: check everything and click **Create**
   </Step>
-  <Step title="Save">
-    Click **Create server**. You'll be taken to the server detail page, where you can see the endpoint URL and start adding tools.
+  <Step title="Continue to your first tool">
+    The success screen shows your endpoint URL. Click **Create your first tool** and choose **Write code** to follow this guide, or **Build a workflow** to [build the tool without code](/tools/workflows/overview).
   </Step>
 </Steps>
 
@@ -38,8 +37,8 @@ This guide walks you through creating an MCP server, writing a tool, testing it 
 ## Step 2: Write a tool
 
 <Steps>
-  <Step title="Go to Tools">
-    On the server detail page, navigate to the **Tools** section and click **Create New Tool**.
+  <Step title="Open the code editor">
+    If you skipped the success screen, open the server detail page, click **Create New Tool** in the **Tools** section and choose **Write code**.
   </Step>
   <Step title="Name your tool">
     Give your tool a name. Tool names become part of the MCP schema the AI sees, so use lowercase snake_case (e.g. `fetch_repo_stats`).

@@ -10,9 +10,22 @@ A **tool** is the fundamental unit of work in MCPCore. It has:
 - A **name**: how the AI client identifies and calls it (e.g. `fetch_repo_stats`)
 - A **description**: a plain-language explanation of what the tool does; the AI uses this to decide when to call it
 - **Parameters**: the typed inputs the AI passes at call time
-- **Code**: the JavaScript that runs when the tool is invoked
+- **Logic**: JavaScript code or a no-code [workflow](/tools/workflows/overview) that runs when the tool is invoked
 
 When the AI connects to your server, it receives the full list of tools with their schemas. It then decides autonomously which tools to call, in what order, and with what parameters.
+
+---
+
+## Code or workflow?
+
+When you click **Create New Tool**, MCPCore asks how you want to build it:
+
+| Option               | Best for                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------ |
+| **Write code**       | Full control. JavaScript in a VS Code-style editor, with ready-made snippets and AI help.  |
+| **Build a workflow** | No code. Connect ready-made steps like Database, Query, HTTP Request, Transform and Return. |
+
+Both produce the same kind of tool: AI clients see no difference. A tool always reopens in the editor it was built with. To build without code, follow the [workflow builder guide](/tools/workflows/overview). The steps below cover the code editor.
 
 ---
 
@@ -20,7 +33,7 @@ When the AI connects to your server, it receives the full list of tools with the
 
 <Steps>
   <Step title="Open the Tools section">
-    On the server detail page, click the **Tools** tab, then click **New Tool**.
+    On the server detail page, click **Create New Tool** in the **Tools** section, then choose **Write code**.
   </Step>
   <Step title="Name your tool">
     Choose a clear, descriptive name in **lowercase snake_case**:
@@ -50,7 +63,7 @@ When the AI connects to your server, it receives the full list of tools with the
   <Step title="Write the code">
     Write JavaScript in the [code editor](/tools/editor). The sandbox gives you access to `sdk`, `params`, `env`, and `console`. See [Sandbox](/tools/sandbox) for the complete API.
 
-    Or use the **AI Tool Builder** to generate the code automatically, see below.
+    Use the **Snippets** panel to insert ready-made blocks for HTTP calls, database queries and secrets, or let the **AI Tool Builder** generate the code, see below.
   </Step>
   <Step title="Save">
     Click **Save**. The tool is live immediately on your server's endpoint.
@@ -132,7 +145,10 @@ return {
 
 <CardGroup cols={2}>
   <Card icon="code" href="/tools/editor" title="Code Editor">
-    Explore the VS Code-style editor with AI completions and integrated terminal.
+    Explore the VS Code-style editor with snippets, AI completions and integrated terminal.
+  </Card>
+  <Card icon="diagram-project" href="/tools/workflows/overview" title="Workflow Builder">
+    Build tools by connecting steps, no code required.
   </Card>
   <Card icon="book" href="/tools/examples" title="Code Examples">
     Ready-to-use examples for HTTP, databases, Lodash, and more.

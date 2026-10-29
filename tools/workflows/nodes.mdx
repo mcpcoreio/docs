@@ -1,0 +1,143 @@
+---
+title: "Workflow Steps"
+description: "Reference for every step you can use in the workflow builder."
+---
+
+Steps are grouped in the palette as **Data**, **Integrations**, **Logic** and **Output**. Steps with more than one group of settings show them as small stages in the inspector, for example **Provider → Credentials** for a Database step.
+
+Each step gets an id such as `query_1` or `http_request_2`. You use this id to read the step's output in later steps: `{{nodes.query_1.output}}`. See [Variables](/tools/workflows/expressions).
+
+---
+
+## Start
+
+Added automatically and cannot be deleted. It runs when an AI client calls the tool. Its output is the tool's parameters, which you read as `{{params.name}}`.
+
+---
+
+## Database
+
+Opens a connection that later **Query** steps use. It does not run any SQL by itself.
+
+| Field         | Required | Notes                                                    |
+| ------------- | -------- | -------------------------------------------------------- |
+| Database type | Yes      | PostgreSQL, MySQL / MariaDB or Microsoft SQL Server       |
+| Port          | No       | Leave empty for the default port (5432, 3306 or 1433)    |
+| Host          | Yes      | Secret, for example `DB_HOST`                            |
+| Database name | Yes      | Secret, for example `DB_NAME`                            |
+| User          | Yes      | Secret, for example `DB_USER`                            |
+| Password      | Yes      | Secret, for example `DB_PASSWORD`                        |
+
+**Output:** `{connected: true, provider: "pg"}`
+
+<Note>
+  Database hosts must be reachable from the internet and use a standard database port. Private and internal addresses are blocked by the sandbox.
+</Note>
+
+---
+
+## Query
+
+Runs SQL on a Database step that runs before it.
+
+| Field         | Required | Notes                                                                 |
+| ------------- | -------- | --------------------------------------------------------------------- |
+| Database step | Yes      | The Database step to use                                              |
+| SQL           | Yes      | Use `?` placeholders for values                                       |
+| Bindings      | No       | One value per `?`, in the same order. Usually a variable like `{{params.id}}` |
+
+The number of bindings must match the number of `?` placeholders. Click **Load tables** to list the tables of the connected database and insert a table name into your query with one click.
+
+```sql
+SELECT id, email, created_at FROM users WHERE id = ? LIMIT 1
+```
+
+Binding: `{{params.id}}`
+
+**Output:** an array of rows, for example `[{"id": 1, "email": "ada@example.com"}]`. Read the first row with `{{nodes.query_1.output[0]}}`.
+
+---
+
+## HTTP Request
+
+Calls a REST API and uses its JSON response.
+
+| Field                    | Required | Notes                                                                 |
+| ------------------------ | -------- | --------------------------------------------------------------------- |
+| Method                   | Yes      | GET, POST, PUT, PATCH or DELETE                                       |
+| URL                      | Yes      | Must start with `https://`. Variables are URL-encoded automatically   |
+| Bearer token secret      | No       | Sent as `Authorization: Bearer <secret>`                              |
+| Headers                  | No       | Name and value rows. Values can contain variables                     |
+| Body                     | No       | **No body**, **Send all tool parameters**, or **Custom JSON**          |
+| JSON body                | When Custom JSON | Must be valid JSON. String values can contain variables       |
+| Stop the tool when the response is not 2xx | No | On by default. Turn it off to handle error responses yourself |
+
+Example URL: `https://api.example.com/items/{{params.id}}`
+
+**Output:** the parsed JSON response, or the raw text when the response is not JSON.
+
+---
+
+## Transform
+
+Builds a new object from parameters and the outputs of earlier steps. Use it to keep only the fields you need or to rename them.
+
+| Field         | Required | Notes                                                  |
+| ------------- | -------- | ------------------------------------------------------ |
+| Output fields | Yes      | Name and value rows. At least one row with a name      |
+
+| Name      | Value                                      |
+| --------- | ------------------------------------------ |
+| `title`   | `{{nodes.http_request_1.output.title}}`    |
+| `greeting`| `Hello {{params.name}}!`                   |
+| `status`  | `open`                                     |
+
+**Output:** `{"title": "...", "greeting": "Hello Ada!", "status": "open"}`
+
+---
+
+## Condition
+
+Compares a value and continues on the **true** or the **false** branch. Connect each branch handle to the steps that should run in that case.
+
+| Field        | Required | Notes                                    |
+| ------------ | -------- | ---------------------------------------- |
+| Value        | Yes      | Usually a variable                       |
+| Operator     | Yes      | See below                                |
+| Compare with | Depends  | Hidden for **is empty** and **is not empty** |
+
+| Operator           | True when                                                   |
+| ------------------ | ----------------------------------------------------------- |
+| is equal to        | Both sides are equal as text (`true` equals `"true"`)       |
+| is not equal to    | Both sides differ as text                                   |
+| is greater than    | Both sides are numbers and the value is larger              |
+| is less than       | Both sides are numbers and the value is smaller             |
+| contains           | The text contains the compare value, or the list contains an item equal to it |
+| is empty           | The value is missing, `""`, an empty list or an empty object |
+| is not empty       | The opposite of **is empty**                                |
+
+**Output:** `true` or `false`.
+
+---
+
+## Static Data
+
+Returns fixed JSON, for example mock data, a lookup table or a constant response.
+
+| Field | Required | Notes              |
+| ----- | -------- | ------------------ |
+| JSON  | Yes      | Must be valid JSON |
+
+**Output:** the parsed JSON.
+
+---
+
+## Return
+
+Sends the final result back to the AI client and ends the tool.
+
+| Field           | Required | Notes                                                                  |
+| --------------- | -------- | ---------------------------------------------------------------------- |
+| Value to return | No       | Leave empty to return the output of the step connected to this one     |
+
+You can add one Return step per branch. The first Return step that runs ends the tool. If no Return step runs, the tool returns `null`.

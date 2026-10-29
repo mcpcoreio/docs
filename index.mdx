@@ -5,7 +5,7 @@ description: "MCPCore is the fastest way to build, deploy, and manage MCP server
 
 ## What is MCPCore?
 
-**MCPCore** is a managed platform for the [Model Context Protocol (MCP)](https://modelcontextprotocol.io). It lets you write tool logic in JavaScript and get a live, MCP-compliant endpoint in under 30 seconds, with no Docker, no servers, and no `node_modules`.
+**MCPCore** is a managed platform for the [Model Context Protocol (MCP)](https://modelcontextprotocol.io). It lets you write tool logic in JavaScript, or build it visually without code, and get a live, MCP-compliant endpoint in under 30 seconds, with no Docker, no servers, and no `node_modules`.
 
 MCPCore currently implements MCP specification version **2026-07-28**, the current stable release of the protocol.
 
@@ -13,7 +13,8 @@ You write the code that matters. MCPCore handles everything else:
 
 - **MCP server hosting**, your tools run in an isolated, always-on sandbox
 - **AI Tool Builder**, describe what you want in plain language and let AI generate the tool code, parameters, and naming for you
-- **Professional code editor**, a VS Code-style editor with syntax highlighting, AI-powered completions, and an integrated terminal
+- **Professional code editor**, a VS Code-style editor with syntax highlighting, ready-made snippets, AI-powered completions, and an integrated terminal
+- **No-code workflow builder**, connect Database, Query, HTTP Request, Transform and Condition steps on a canvas and test them step by step
 - **Authentication**, choose from 4 security modes (Public, API Key, OAuth 2.0, Bearer Token)
 - **Custom domains**, use your own domain with automatic SSL provisioning
 - **Encrypted secrets**, store API keys and credentials securely, referenced in code as `env.MY_KEY`
@@ -40,10 +41,13 @@ External APIs, Databases, Services
     A server groups related tools under a single endpoint URL. Create as many servers as you need, one per project, one per team, or one per environment.
   </Card>
   <Card title="Tools" icon="wrench" href="/tools/create">
-    A tool is a callable JavaScript function. The AI decides when to call it and what parameters to pass. You decide what it does.
+    A tool is a callable function, written in JavaScript or built as a workflow. The AI decides when to call it and what parameters to pass. You decide what it does.
   </Card>
   <Card title="Code Editor" icon="code" href="/tools/editor">
     A professional VS Code-style IDE with AI-powered completions, integrated terminal, and dark theme, right in your browser.
+  </Card>
+  <Card title="Workflow Builder" icon="diagram-project" href="/tools/workflows/overview">
+    Build tools without code by connecting ready-made steps. Start from a template and test every step live.
   </Card>
   <Card title="Security Modes" icon="shield" href="/servers/security-overview">
     Every server has an independent security mode: Public, API Key, OAuth 2.0, or Bearer Token. Switching modes never requires changing your tool code.

@@ -67,6 +67,16 @@
             "pages": [
               "tools/create",
               "tools/editor",
+              {
+                "group": "Workflow Builder",
+                "pages": [
+                  "tools/workflows/overview",
+                  "tools/workflows/nodes",
+                  "tools/workflows/expressions",
+                  "tools/workflows/testing",
+                  "tools/workflows/templates"
+                ]
+              },
               "tools/sandbox",
               "tools/parameters",
               "tools/secrets",

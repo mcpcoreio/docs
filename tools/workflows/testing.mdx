@@ -1,0 +1,56 @@
+---
+title: "Testing Workflows"
+description: "Run a workflow from the editor and watch every step execute."
+---
+
+## Run a test
+
+Click **Run** in the editor toolbar. If the tool has parameters, enter test values first. The workflow runs in the real sandbox with your server's secrets, exactly as it will when an AI client calls it.
+
+While it runs, each step on the canvas shows its state:
+
+| Step look              | Meaning                                    |
+| ---------------------- | ------------------------------------------ |
+| Blinking blue border   | The step is running                        |
+| Green border           | The step finished successfully             |
+| Red border and message | The step failed; the error is shown under the step and in the **Output** panel |
+| No change              | The step was skipped, for example on the other branch of a Condition |
+
+When the run ends, the **Output** panel at the bottom shows the logs and the value the tool returned.
+
+---
+
+## Inspect step outputs
+
+After a test run, select any step and open **Output** in the inspector to see exactly what that step produced. Use it to:
+
+- Check the rows a Query returned before you build a Transform on top of them
+- Find the right path for a [variable](/tools/workflows/expressions), for example `{{nodes.http_request_1.output.data[0].id}}`
+- See why a Condition went down the true or the false branch
+
+---
+
+## Fix validation issues
+
+The editor checks the workflow while you build it. A step with a problem gets a **red border**, and the inspector shows the message under the field that needs attention.
+
+Common messages:
+
+| Message                                    | Fix                                                        |
+| ------------------------------------------ | ---------------------------------------------------------- |
+| `<Field> is required`                      | Fill in the field                                          |
+| `Connect this step to a previous step`     | Draw a connection into the step                            |
+| `Add a Return step to send a result back.` | Add a Return step and connect it                           |
+| `Steps cannot be connected in a loop.`     | Remove the connection that leads back to an earlier step   |
+| `Secret <KEY> does not exist`              | Create the secret or pick another one                      |
+| `The Database step must run before this query` | Connect the Database step before the Query step        |
+| `URL must start with https://`             | Use an HTTPS URL                                           |
+| `Body must be valid JSON` / `Must be valid JSON` | Fix the JSON syntax                                  |
+
+While there are issues, **Run** and **Save** are disabled and the toolbar shows how many issues are left.
+
+---
+
+## Test from an AI client
+
+A saved workflow tool behaves exactly like the last test run. To check it end to end, connect your server to an AI client from the **Integration** tab and ask it to use the tool. Every call appears in [Traffic Logs](/observability/traffic-logs), and failures in [Error Logs](/observability/error-logs).

@@ -1,0 +1,65 @@
+---
+title: "Variables"
+description: "Use tool parameters, secrets and the outputs of earlier steps inside workflow fields."
+---
+
+## Syntax
+
+Wrap a variable in double curly braces anywhere a field accepts text: `{{params.id}}`. Click the variable button next to a field to see the variables that are available there and insert one without typing.
+
+There are three roots:
+
+| Variable                       | What it is                                         | Example                                  |
+| ------------------------------ | -------------------------------------------------- | ---------------------------------------- |
+| `{{params.<name>}}`            | A parameter the AI passed when calling the tool    | `{{params.email}}`                       |
+| `{{env.<KEY>}}`                | An [environment secret](/tools/secrets) of the server | `{{env.API_TOKEN}}`                  |
+| `{{nodes.<step-id>.output}}`   | The output of an earlier step                      | `{{nodes.query_1.output}}`               |
+
+After the root you can read nested values with `.field` and list items with `[index]`:
+
+```text
+{{nodes.query_1.output[0].email}}
+{{nodes.http_request_1.output.data.items[2].title}}
+{{params.address.city}}
+```
+
+Missing values don't throw errors: if `output[0]` doesn't exist, the variable is simply empty.
+
+---
+
+## Whole value or inside text
+
+How a variable is used depends on whether it is the entire field or part of a longer text:
+
+| Field value                    | Result                                                      |
+| ------------------------------ | ----------------------------------------------------------- |
+| `{{nodes.query_1.output}}`     | The original value: an array stays an array, a number stays a number |
+| `Hello {{params.name}}!`       | Text. Objects and arrays are inserted as JSON text           |
+| `42`, `true`, `null`, `[1, 2]` | Plain values without variables are read as JSON when possible |
+
+In **URL** fields, variables that come after other text are URL-encoded automatically. With `https://api.example.com/search?q={{params.query}}`, a query like `red shoes` becomes `red%20shoes`.
+
+In **JSON body** fields, put variables inside string values. A value that is only a variable keeps its original type:
+
+```json
+{
+  "name": "{{params.name}}",
+  "age": "{{params.age}}",
+  "tags": "{{nodes.transform_1.output.tags}}"
+}
+```
+
+Here `age` is sent as a number and `tags` as an array when the source values have those types.
+
+---
+
+## Rules
+
+- A step can only use the output of a step that runs **before** it, meaning a step connected earlier in the chain. Otherwise the field shows `Step <id> must run before this step`.
+- Referencing a step that doesn't exist shows `Step <id> does not exist`.
+- Any other text inside `{{ }}` shows `Unknown variable {{...}}`. Only `params`, `env` and `nodes.<id>.output` are allowed; there are no functions or operators inside variables.
+- Prefer secret fields such as **Bearer token secret** or the Database step credentials over `{{env.KEY}}` in free text, so secrets never appear in URLs or logs by accident.
+
+<Tip>
+  Run the workflow once before you write variables for a step. The inspector then shows each step's real output, so you can see exactly which fields are available.
+</Tip>

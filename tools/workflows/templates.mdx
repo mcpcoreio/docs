@@ -1,0 +1,70 @@
+---
+title: "Workflow Templates"
+description: "Ready-made workflows you can load, adjust and save as your own tool."
+---
+
+When you start a new workflow tool, the **Start from a template** gallery opens. Choosing a template loads its steps onto the canvas. If the tool name, description or parameters are still empty, they are filled in from the template as well.
+
+Every template is a normal workflow: change, add or remove any step afterwards.
+
+---
+
+## Return static JSON
+
+The simplest tool. Returns fixed data so you can test your server right away.
+
+**Steps:** Start → Static Data → Return
+
+**To make it work:** nothing, run it as is. Then change the JSON in the Static Data step.
+
+---
+
+## Transform JSON input
+
+Reads tool parameters and returns a new, reshaped JSON object.
+
+**Steps:** Start → Transform → Return
+
+**Parameters:** `name` (string, required), `language` (string, optional)
+
+**To make it work:** nothing, run it with a test name. The Transform step shows how to mix text and variables: `Hello {{params.name}}!`.
+
+---
+
+## Query a database
+
+Connects with your secrets and runs a parameterized SQL query.
+
+**Steps:** Start → Database → Query → Return
+
+**Parameters:** `id` (number, required)
+
+**To make it work:**
+
+1. In the **Database** step, choose your database type and pick the secrets for host, database name, user and password. Create them with **Create a new secret** if needed.
+2. In the **Query** step, click **Load tables** and adjust `SELECT * FROM users WHERE id = ? LIMIT 1` to your table.
+3. The binding `{{params.id}}` fills the `?`. The Return step sends back the first row with `{{nodes.query_1.output[0]}}`.
+
+---
+
+## Call a REST API
+
+Sends a GET request and returns the JSON response.
+
+**Steps:** Start → HTTP Request → Return
+
+**Parameters:** `id` (number, required, 1–200)
+
+**To make it work:** nothing, it uses a public demo API. Replace the URL with your own API and pick a **Bearer token secret** if it requires authentication.
+
+---
+
+## API → transform → return
+
+Calls an API, keeps only the fields you need and branches on the result.
+
+**Steps:** Start → HTTP Request → Condition → Transform (true / false) → Return (one per branch)
+
+**Parameters:** `id` (number, required, 1–200)
+
+**To make it work:** nothing, run it with different ids. The Condition checks `{{nodes.http_request_1.output.completed}}`; completed items return `status: "done"`, the others `status: "open"`. Use it as a pattern for any tool that needs to answer differently depending on an API response.

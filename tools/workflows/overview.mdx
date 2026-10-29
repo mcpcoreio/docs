@@ -1,0 +1,96 @@
+---
+title: "Workflow Builder"
+description: "Build MCP tools without writing code by connecting ready-made steps on a canvas."
+---
+
+## What is a workflow tool?
+
+A **workflow tool** is a tool you build visually. Instead of writing JavaScript, you place steps on a canvas, connect them from left to right, and fill in a few fields. MCPCore turns the workflow into sandbox code when you save it.
+
+To an AI client, a workflow tool looks exactly like a code tool: it has a name, a description and typed parameters, and it returns a result.
+
+<CardGroup cols={2}>
+  <Card icon="diagram-project" title="When to use a workflow">
+    Database lookups, REST API calls, reshaping JSON, simple branching. Most read-style tools fit here.
+  </Card>
+  <Card icon="code" title="When to use code" href="/tools/create">
+    Loops, complex calculations, custom libraries or anything the steps below can't express.
+  </Card>
+</CardGroup>
+
+---
+
+## Create a workflow tool
+
+<Steps>
+  <Step title="Choose Build a workflow">
+    On the server detail page, click **Create New Tool** and choose **Build a workflow**. You get the same choice right after creating a server.
+  </Step>
+  <Step title="Start from a template or from scratch">
+    A gallery of [ready-made workflows](/tools/workflows/templates) opens first. Pick one to load its steps, tool name and parameters, or close the gallery to start with an empty canvas.
+  </Step>
+  <Step title="Describe the tool">
+    In the left panel, set the tool **name** (lowercase `snake_case`), a **description** the AI will read, and the **parameters** the AI passes when it calls the tool. See [Parameters](/tools/parameters).
+  </Step>
+  <Step title="Add and connect steps">
+    Drag steps from the palette onto the canvas, then connect them from left to right. Every workflow begins with a **Start** step and ends with at least one **Return** step. See [Steps](/tools/workflows/nodes).
+  </Step>
+  <Step title="Configure each step">
+    Select a step to open its settings in the inspector on the right. Use the variable button next to a field to insert [variables](/tools/workflows/expressions) such as tool parameters or the output of an earlier step.
+  </Step>
+  <Step title="Test and save">
+    Click **Run** to [test the workflow step by step](/tools/workflows/testing). When every step looks right, click **Create** (or **Save** for an existing tool). The tool is live immediately.
+  </Step>
+</Steps>
+
+---
+
+## Editor layout
+
+| Area            | Position | What it contains                                                    |
+| --------------- | -------- | ------------------------------------------------------------------- |
+| **Tool panel**  | Left     | Tool name, description, parameters and the active toggle            |
+| **Palette**     | Canvas   | Steps grouped as Data, Integrations, Logic and Output               |
+| **Canvas**      | Center   | Your steps and their connections. Use **Fit to screen** to recenter |
+| **Inspector**   | Right    | Settings of the selected step, and its output after a test run      |
+| **Output**      | Bottom   | Logs and the final result of a test run                             |
+
+---
+
+## How it runs
+
+When you save, MCPCore compiles the workflow into JavaScript and runs it in the same isolated [sandbox](/tools/sandbox) as code tools. The same limits apply: execution timeout, memory and network rules.
+
+- Steps run in the order of their connections. A step runs only after every step it depends on has finished.
+- A **Condition** step sends execution down its **true** or **false** branch; steps on the other branch are skipped.
+- The first **Return** step that runs ends the tool and sends its value to the AI client.
+- Database connections are closed automatically when the tool finishes.
+
+<Note>
+  Values from parameters and earlier steps are always sent to the database as query bindings, never pasted into the SQL text. A parameter such as `' OR 1=1 --` is treated as plain data, so workflow queries are safe from SQL injection.
+</Note>
+
+---
+
+## Secrets in workflows
+
+Database credentials and API tokens are never typed into a step. Fields such as **Host**, **Password** or **Bearer token secret** let you pick one of your server's [environment secrets](/tools/secrets). If the secret doesn't exist yet, choose **Create a new secret** to add it without leaving the editor; it becomes available in the field right away.
+
+---
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card icon="cubes" href="/tools/workflows/nodes" title="Steps">
+    Reference for every step type and its fields.
+  </Card>
+  <Card icon="code" href="/tools/workflows/expressions" title="Variables">
+    Use parameters, secrets and step outputs inside fields.
+  </Card>
+  <Card icon="play" href="/tools/workflows/testing" title="Testing">
+    Run the workflow and watch each step execute.
+  </Card>
+  <Card icon="layer-group" href="/tools/workflows/templates" title="Templates">
+    Five ready-made workflows to start from.
+  </Card>
+</CardGroup>

@@ -18,7 +18,7 @@ The tool editor follows a VS Code-inspired layout with four main areas:
 | **Activity bar** | Far left | Quick access icons for navigation |
 | **Configuration panel** | Left | Tool settings: parameters, active status toggle |
 | **Code editor + Terminal** | Center | The main editing area with an integrated output terminal below |
-| **AI Assistant** | Right | AI Tool Builder prompt panel for code generation |
+| **Snippets / AI Assistant** | Right | Ready-made code snippets, or the AI Tool Builder prompt panel |
 
 The center area is resizable. Drag the divider between the code editor and the terminal to adjust the split.
 
@@ -163,6 +163,25 @@ View and manage the tool's input parameters. Each parameter shows its name, type
 ### Active toggle
 
 Enable or disable the tool. Inactive tools are not exposed to AI clients.
+
+---
+
+## Snippets panel
+
+Click **Snippets** in the activity bar to open ready-made code blocks on the right. Pick a snippet, fill in its fields, then click **Insert into code**. The code is inserted at your cursor position.
+
+| Snippet                         | Fields                                                    |
+| ------------------------------- | --------------------------------------------------------- |
+| **HTTP GET request**            | URL, optional bearer token secret                         |
+| **HTTP request with JSON body** | Method, URL, optional bearer token secret                 |
+| **Database query**              | Database type, host / database / user / password secrets, SQL |
+| **Static response**             | Message                                                   |
+| **Use a secret**                | Secret                                                    |
+| **Validate parameters**         | Parameter name                                            |
+
+Secret fields list the [environment secrets](/tools/secrets) of your server. If the secret you need doesn't exist yet, create it right from the field without leaving the editor.
+
+All snippets use the real [sandbox API](/tools/sandbox): `res.status` is a property, `res.json()` is a function, and SQL values are passed as `?` bindings.
 
 ---
 
