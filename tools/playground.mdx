@@ -37,7 +37,7 @@ Get a key from the [Anthropic Console](https://console.anthropic.com) or the [Op
     On the server detail page, open the **Playground** tab.
   </Step>
   <Step title="Pick a provider and model">
-    Choose **Anthropic** and one of Claude Opus 5.5, Claude Sonnet 5.5 or Claude Haiku 5.5, or choose **OpenAI** and type the model name (for example `gpt-5`, which is used when the field is empty).
+    Choose **Anthropic** or **OpenAI**, then pick a model from the list. See [Models](#models).
   </Step>
   <Step title="Enter your API key">
     Paste the key into the key field.
@@ -51,6 +51,27 @@ Get a key from the [Anthropic Console](https://console.anthropic.com) or the [Op
 </Steps>
 
 The model remembers the earlier messages of the chat, so you can ask follow-up questions such as *"and the one before that?"*. Click **New chat** to start over.
+
+### Models
+
+| Provider  | Model             | Good for                                                       |
+| --------- | ----------------- | -------------------------------------------------------------- |
+| Anthropic | Claude Opus 5.5 (default) | The best balance of quality and cost for testing tools |
+| Anthropic | Claude Fable 5.1  | Anthropic's most capable model, for the hardest multi-step tasks. Costs more |
+| Anthropic | Claude Sonnet 5.5 | Fast everyday use at a lower price                             |
+| Anthropic | Claude Haiku 5.5  | The fastest and cheapest Claude model                          |
+| OpenAI    | GPT-6.1 Sol (default) | Complex work, close to GPT-6 Astra at a lower cost         |
+| OpenAI    | GPT-6.1 Terra     | Fast and efficient                                             |
+| OpenAI    | GPT-6 Astra       | OpenAI's most capable model                                    |
+| OpenAI    | GPT-6 Luna        | The most efficient GPT-6 model for simple tasks                |
+| OpenAI    | GPT-5.6 Sol       | Previous generation flagship                                   |
+| OpenAI    | GPT-5.5           | Previous generation                                            |
+
+Which models your key can use depends on your provider account. If a model is not available for your key, the provider returns an error and the chat shows it.
+
+<Tip>
+  To check that your tool descriptions work for every AI client, try the same question with a smaller model such as Claude Haiku 5.5 or GPT-6 Luna. If a small model picks the right tool, larger models will too.
+</Tip>
 
 ### Reading a tool call card
 
