@@ -32,9 +32,11 @@ const res = await sdk.http({
 ### Response methods
 
 ```javascript
-res.status()          // HTTP status code (number)  e.g. 200
-res.body()            // Response body as a string, parse with JSON.parse()
-res.headers()         // Response headers as an object
+res.status            // HTTP status code (number)  e.g. 200
+res.ok                // true when the status is 2xx
+res.headers           // Response headers as an object
+res.json()            // Response body parsed as JSON
+res.body()            // Response body as a raw string
 ```
 
 ### Example: GET with auth
@@ -49,11 +51,11 @@ const res = await sdk.http({
   },
 });
 
-if (res.status() !== 200) {
-  throw new Error(`GitHub API error: ${res.status()}`);
+if (res.status !== 200) {
+  throw new Error(`GitHub API error: ${res.status}`);
 }
 
-return JSON.parse(res.body());
+return res.json();
 ```
 
 ### Example: POST with JSON body
@@ -74,7 +76,7 @@ const res = await sdk.http({
   }),
 });
 
-return { status: res.status() };
+return { status: res.status };
 ```
 
 ---
@@ -85,10 +87,10 @@ Connect to a relational database and run queries. `sdk.db()` is powered by **[Kn
 
 ```javascript
 const db = await sdk.db({
-  type:       "pg",          // "pg" | "mysql" | "mssql"
+  type:       "pg",          // "pg" | "mysql2" | "mssql"
   connection: {
     host:     env.DB_HOST,
-    port:     env.DB_PORT,
+    port:     Number(env.DB_PORT),
     database: env.DB_NAME,
     user:     env.DB_USER,
     password: env.DB_PASSWORD,
@@ -117,58 +119,47 @@ const pendingOrders = await db.select("orders", {
 return { count: pendingOrders.length, orders: pendingOrders };
 ```
 
-### `db.insert(table, data)`
+### Writing data
 
-Insert a single row and return the inserted record.
+Use `db.query()` for inserts, updates and deletes. On PostgreSQL, add `RETURNING *` to get the affected rows back.
 
 ```javascript
-const record = await db.insert("events", {
-  user_id:    params.userId,
-  event_type: params.type,
-  created_at: new Date().toISOString(),
-});
+const [record] = await db.query(
+  "INSERT INTO events (user_id, event_type, created_at) VALUES (?, ?, ?) RETURNING *",
+  [params.userId, params.type, new Date().toISOString()]
+);
 
 return { id: record.id };
 ```
 
-### `db.update(table, data, where)`
-
-Update rows matching the `where` condition.
-
 ```javascript
-const updated = await db.update(
-  "subscriptions",
-  { status: "cancelled", cancelled_at: new Date().toISOString() },
-  { id: params.subscriptionId }
+const updated = await db.query(
+  "UPDATE subscriptions SET status = ?, cancelled_at = ? WHERE id = ? RETURNING id",
+  ["cancelled", new Date().toISOString(), params.subscriptionId]
 );
 
-return { affected: updated.rowCount };
+return { affected: updated.length };
 ```
 
-### `db.delete(table, where)`
+### `db.destroy()`
 
-Delete rows matching the `where` condition.
-
-```javascript
-const result = await db.delete("sessions", { user_id: params.userId });
-return { deleted: result.rowCount };
-```
+Connections are closed automatically when the tool finishes. Call `await db.destroy()` to close one earlier.
 
 ### `db.query(sql, values?)`
 
-Run a raw parameterised SQL query for complex operations.
+Run a parameterised SQL query. Use `?` placeholders and pass values in the same order. The result is an array of rows.
 
 ```javascript
 const result = await db.query(
-  "SELECT product_id, SUM(quantity) as total FROM order_items WHERE created_at > $1 GROUP BY product_id ORDER BY total DESC LIMIT 10",
+  "SELECT product_id, SUM(quantity) as total FROM order_items WHERE created_at > ? GROUP BY product_id ORDER BY total DESC LIMIT 10",
   [params.since]
 );
 
-return { topProducts: result.rows };
+return { topProducts: result };
 ```
 
 <Warning>
-  Always use parameterised queries (`$1`, `$2`, and so on) when embedding user input in SQL. Never concatenate `params.*` values directly into a SQL string.
+  Always use `?` placeholders when embedding user input in SQL. Never concatenate `params.*` values directly into a SQL string.
 </Warning>
 
 ---
@@ -231,7 +222,7 @@ console.log("Processing request for user:", params.userId);
 console.info("Fetched", rows.length, "rows from database");
 console.warn("Rate limit approaching:", remaining, "requests left");
 console.error("Database query failed:", error.message);
-console.debug("Raw response:", res.body());
+console.log("Raw response:", res.body());
 ```
 
 | Method | Log level | When to use |
@@ -255,12 +246,12 @@ Throw an error to signal a failure to the AI:
 ```javascript
 const res = await sdk.http({ method: "GET", url: `...` });
 
-if (res.status() === 404) {
+if (res.status === 404) {
   throw new Error(`Repository not found: ${params.repo}`);
 }
 
-if (res.status() !== 200) {
-  throw new Error(`Upstream API returned ${res.status()}: ${res.body()}`);
+if (res.status !== 200) {
+  throw new Error(`Upstream API returned ${res.status}: ${res.body()}`);
 }
 ```
 

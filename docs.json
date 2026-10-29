@@ -47,6 +47,7 @@
                   "servers/security/unlisted",
                   "servers/security/api-key",
                   "servers/security/oauth2",
+                  "servers/security/oauth-example",
                   "servers/security/bearer-token"
                 ]
               },
@@ -85,6 +86,7 @@
             "group": "Connect AI Clients",
             "pages": [
               "connect/overview",
+              "connect/codex",
               "connect/claude-desktop",
               "connect/cursor",
               "connect/vscode",

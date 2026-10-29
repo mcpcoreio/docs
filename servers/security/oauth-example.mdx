@@ -1,0 +1,90 @@
+---
+title: "Example OAuth Server"
+description: "A minimal, MCP-compatible OAuth 2.1 authorization server in Node.js that you can download and run in minutes."
+---
+
+Don't have an identity provider yet? Start with our example server. It is a small Express app that implements everything MCP clients need to sign in to an MCPCore server in [OAuth 2.0 mode](/servers/security/oauth2).
+
+<Card title="Download from GitHub" icon="github" href="https://github.com/mcpcoreio/mcp-oauth-server">
+  Clone the repository, set three environment variables and run `npm start`.
+</Card>
+
+<Warning>
+  The example keeps users, clients and tokens in memory and ships with a single demo account. Use it to learn and test, then plug in your own user store before going to production.
+</Warning>
+
+## What it implements
+
+| Endpoint | Purpose |
+|---|---|
+| `/.well-known/oauth-authorization-server` | RFC 8414 metadata. This is the URL you paste into MCPCore. |
+| `/jwks` | Public RS256 signing key that MCPCore uses to verify tokens |
+| `/register` | RFC 7591 Dynamic Client Registration, so clients register themselves |
+| `/authorize` | Sign-in page. Authorization code flow with mandatory PKCE (S256) |
+| `/token` | Issues JWT access tokens and rotating refresh tokens |
+
+## Quick start
+
+<Steps>
+  <Step title="Install and configure">
+    ```bash
+    git clone https://github.com/mcpcoreio/mcp-oauth-server.git
+    cd mcp-oauth-server
+    npm install
+    cp .env.example .env
+    ```
+
+    Set `ISSUER` to the public HTTPS URL of the server and choose a `DEMO_PASSWORD`. Narrow `RESOURCE_PATTERN` to your own MCPCore server, for example `^https://my-server\.mcpcore\.io/mcp$`.
+  </Step>
+  <Step title="Expose it over HTTPS">
+    MCPCore only fetches metadata over HTTPS on port 443. While testing locally, use a tunnel:
+
+    ```bash
+    cloudflared tunnel --url http://localhost:4000
+    ```
+
+    Use the tunnel URL as `ISSUER`, then run `npm start`.
+  </Step>
+  <Step title="Connect your MCPCore server">
+    In the dashboard, open your server, go to the **Security** step and select **OAuth 2.0**. Paste:
+
+    ```
+    https://<your-issuer>/.well-known/oauth-authorization-server
+    ```
+  </Step>
+  <Step title="Sign in from an MCP client">
+    Add the server to Claude, Codex, Cursor or MCP Inspector. The client opens the sign-in page, you log in with the demo account, and the tools become available.
+  </Step>
+</Steps>
+
+## How tokens are issued
+
+The token endpoint signs an RS256 JWT with the claims MCPCore validates:
+
+```js
+const payload = {
+    iss: config.issuer,
+    sub: subject,
+    aud: audience,
+    client_id: clientId,
+    scope,
+    iat: issuedAt,
+    exp: issuedAt + config.accessTokenTtlSeconds,
+    jti: createRandomToken(16),
+};
+```
+
+`aud` is the `resource` parameter the client sent to `/authorize` (RFC 8707), for example `https://my-server.mcpcore.io/mcp`. MCPCore rejects tokens whose audience does not match the server URL exactly, so a token issued for one server can never be used on another.
+
+PKCE is verified before any token is issued:
+
+```js
+const expected = crypto.createHash("sha256").update(codeVerifier).digest("base64url");
+```
+
+## Going to production
+
+- Replace the in-memory store in `helper/store.js` with a database.
+- Replace the demo login in `controller/oauth-controller.js` with your own user authentication.
+- Set `PRIVATE_KEY_PEM` so the signing key survives restarts, and rotate it periodically.
+- Keep access tokens short-lived (15–60 minutes). Refresh tokens are already rotated on every use.

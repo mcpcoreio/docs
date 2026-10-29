@@ -1,0 +1,60 @@
+---
+title: "Codex"
+description: "Connect your MCPCore server to OpenAI Codex CLI and the Codex IDE extension."
+---
+
+Codex supports remote MCP servers over Streamable HTTP natively, so no proxy or `npx` command is needed.
+
+## Add the server
+
+Open `~/.codex/config.toml` (create it if it doesn't exist) and add a block for your server. Copy the ready-made snippet from the **Integration** tab of your server in the dashboard, or write it by hand:
+
+<Tabs>
+  <Tab title="Public">
+    ```toml
+    [mcp_servers.my_server]
+    url = "https://my-server.mcpcore.io/mcp"
+    ```
+  </Tab>
+  <Tab title="Unlisted">
+    ```toml
+    [mcp_servers.my_server]
+    url = "https://my-server.mcpcore.io/mcp/<secret-key>"
+    ```
+  </Tab>
+  <Tab title="API Key">
+    ```toml
+    [mcp_servers.my_server]
+    url = "https://my-server.mcpcore.io/mcp"
+    http_headers = { "Authorization" = "Bearer <your-api-key>" }
+    ```
+  </Tab>
+  <Tab title="OAuth 2.0">
+    ```toml
+    [mcp_servers.my_server]
+    url = "https://my-server.mcpcore.io/mcp"
+    ```
+
+    Then sign in once:
+
+    ```bash
+    codex mcp login my_server
+    ```
+  </Tab>
+</Tabs>
+
+The table name after `mcp_servers.` is the server name Codex shows. Use letters, numbers, `_` or `-`.
+
+## Verify
+
+Restart Codex and run:
+
+```bash
+codex mcp list
+```
+
+Your server should be listed. Ask Codex to use one of your tools to confirm it works.
+
+<Tip>
+  Keep API keys out of version control. If you share `config.toml` across machines, store the key in an environment variable and reference it with `bearer_token_env_var = "MCPCORE_API_KEY"` instead of `http_headers`.
+</Tip>

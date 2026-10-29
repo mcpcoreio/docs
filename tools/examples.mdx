@@ -24,11 +24,11 @@ const res = await sdk.http({
   },
 });
 
-if (res.status() !== 200) {
-  throw new Error(`GitHub API error ${res.status()}: ${res.body()}`);
+if (res.status !== 200) {
+  throw new Error(`GitHub API error ${res.status}: ${res.body()}`);
 }
 
-const data = JSON.parse(res.body());
+const data = res.json();
 
 return {
   name:     data.full_name,
@@ -64,11 +64,11 @@ const res = await sdk.http({
   }),
 });
 
-if (res.status() >= 400) {
-  throw new Error(`SendGrid error ${res.status()}: ${res.body()}`);
+if (res.status >= 400) {
+  throw new Error(`SendGrid error ${res.status}: ${res.body()}`);
 }
 
-return { status: res.status(), message: "Email sent successfully" };
+return { status: res.status, message: "Email sent successfully" };
 ```
 
 ---
@@ -96,8 +96,8 @@ const res = await sdk.http({
 });
 
 return {
-  status: res.status(),
-  accepted: res.status() >= 200 && res.status() < 300,
+  status: res.status,
+  accepted: res.status >= 200 && res.status < 300,
 };
 ```
 
@@ -115,7 +115,7 @@ const db = await sdk.db({
   type: "pg",
   connection: {
     host:     env.DB_HOST,
-    port:     env.DB_PORT,
+    port:     Number(env.DB_PORT),
     database: env.DB_NAME,
     user:     env.DB_USER,
     password: env.DB_PASSWORD,
@@ -149,19 +149,17 @@ const db = await sdk.db({
   type: "pg",
   connection: {
     host:     env.DB_HOST,
-    port:     env.DB_PORT,
+    port:     Number(env.DB_PORT),
     database: env.DB_NAME,
     user:     env.DB_USER,
     password: env.DB_PASSWORD,
   },
 });
 
-const record = await db.insert("users", {
-  name:       params.name,
-  email:      params.email,
-  role:       params.role ?? "member",
-  created_at: new Date().toISOString(),
-});
+const [record] = await db.query(
+  "INSERT INTO users (name, email, role, created_at) VALUES (?, ?, ?, ?) RETURNING id",
+  [params.name, params.email, params.role ?? "member", new Date().toISOString()]
+);
 
 console.log("Created user:", record.id);
 return { id: record.id, message: "User created" };
@@ -181,7 +179,7 @@ const db = await sdk.db({
   type: "pg",
   connection: {
     host:     env.DB_HOST,
-    port:     env.DB_PORT,
+    port:     Number(env.DB_PORT),
     database: env.DB_NAME,
     user:     env.DB_USER,
     password: env.DB_PASSWORD,
@@ -197,9 +195,9 @@ const result = await db.query(
           c.name as category_name
    FROM products p
    JOIN categories c ON c.id = p.category_id
-   WHERE c.slug = $1
+   WHERE c.slug = ?
    ORDER BY p.created_at DESC
-   LIMIT $2 OFFSET $3`,
+   LIMIT ? OFFSET ?`,
   [params.category, pageSize, offset]
 );
 
@@ -207,15 +205,15 @@ const countResult = await db.query(
   `SELECT COUNT(*) as total
    FROM products p
    JOIN categories c ON c.id = p.category_id
-   WHERE c.slug = $1`,
+   WHERE c.slug = ?`,
   [params.category]
 );
 
 return {
   page,
   pageSize,
-  total: parseInt(countResult.rows[0].total),
-  products: result.rows,
+  total: parseInt(countResult[0].total),
+  products: result,
 };
 ```
 
@@ -263,7 +261,7 @@ const db = await sdk.db({
   type: "pg",
   connection: {
     host:     env.DB_HOST,
-    port:     env.DB_PORT,
+    port:     Number(env.DB_PORT),
     database: env.DB_NAME,
     user:     env.DB_USER,
     password: env.DB_PASSWORD,
@@ -309,7 +307,7 @@ const res = await sdk.http({
   headers: { Authorization: `Bearer ${env.API_KEY}` },
 });
 
-const data = JSON.parse(res.body());
+const data = res.json();
 const _ = sdk.lodash;
 
 // Remove duplicates by ID
@@ -347,11 +345,11 @@ const res = await sdk.http({
   },
 });
 
-if (res.status() !== 200) {
-  throw new Error(`GitHub API error: ${res.status()}`);
+if (res.status !== 200) {
+  throw new Error(`GitHub API error: ${res.status}`);
 }
 
-const repo = JSON.parse(res.body());
+const repo = res.json();
 console.log("Fetched repo:", repo.full_name);
 
 // 2. Store in database
@@ -359,20 +357,17 @@ const db = await sdk.db({
   type: "pg",
   connection: {
     host:     env.DB_HOST,
-    port:     env.DB_PORT,
+    port:     Number(env.DB_PORT),
     database: env.DB_NAME,
     user:     env.DB_USER,
     password: env.DB_PASSWORD,
   },
 });
 
-const record = await db.insert("repo_snapshots", {
-  repo_name:  repo.full_name,
-  stars:      repo.stargazers_count,
-  forks:      repo.forks_count,
-  language:   repo.language,
-  captured_at: new Date().toISOString(),
-});
+const [record] = await db.query(
+  "INSERT INTO repo_snapshots (repo_name, stars, forks, language, captured_at) VALUES (?, ?, ?, ?, ?) RETURNING id",
+  [repo.full_name, repo.stargazers_count, repo.forks_count, repo.language, new Date().toISOString()]
+);
 
 console.log("Saved snapshot:", record.id);
 
@@ -401,16 +396,16 @@ const res = await sdk.http({
   headers: { Authorization: `Bearer ${env.API_KEY}` },
 });
 
-if (res.status() === 404) {
+if (res.status === 404) {
   return { found: false, message: "User not found in external system" };
 }
 
-if (res.status() !== 200) {
-  console.error("API error:", res.status(), res.body());
-  throw new Error(`External API returned ${res.status()}`);
+if (res.status !== 200) {
+  console.error("API error:", res.status, res.body());
+  throw new Error(`External API returned ${res.status}`);
 }
 
-const user = JSON.parse(res.body());
+const user = res.json();
 console.log("Found user:", user.name);
 
 // 2. Enrich with database data
@@ -418,7 +413,7 @@ const db = await sdk.db({
   type: "pg",
   connection: {
     host:     env.DB_HOST,
-    port:     env.DB_PORT,
+    port:     Number(env.DB_PORT),
     database: env.DB_NAME,
     user:     env.DB_USER,
     password: env.DB_PASSWORD,
