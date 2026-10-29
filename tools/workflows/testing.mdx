@@ -18,6 +18,27 @@ While it runs, each step on the canvas shows its state:
 
 When the run ends, the **Output** panel at the bottom shows the logs and the value the tool returned.
 
+The log has one line per step:
+
+```text
+▶ Get users started
+✓ Get users completed
+▶ Get latest post started (item 1)
+↻ Get latest post failed, retry 1 of 2: HTTP 503: Service Unavailable
+✓ Get latest post completed (item 1)
+✗ Get order failed: HTTP 404: Not Found
+```
+
+`(item N)` marks steps inside a [For Each](/tools/workflows/nodes#for-each) body, and `↻` marks a [retry](/tools/workflows/nodes#retries).
+
+---
+
+## Test loops and error branches
+
+**For Each steps.** While the loop runs, the For Each step shows its progress, for example **Item 3 of 10**. Steps inside the body show the state of the item that is running. After the run, select a body step and open **Output** in the inspector. Use the arrows to page through the output of each item.
+
+**Error branches.** When a step fails and its error branch is on, the step turns red, the steps on its **error** output run and the steps on its normal output are skipped. The tool itself can still finish successfully. To test the branch, make the step fail on purpose, for example with an id that does not exist.
+
 ---
 
 ## Inspect step outputs
@@ -39,9 +60,19 @@ Common messages:
 | Message                                    | Fix                                                        |
 | ------------------------------------------ | ---------------------------------------------------------- |
 | `<Field> is required`                      | Fill in the field                                          |
+| `Every row needs a name`                   | Give each header, query parameter or field row a name      |
 | `Connect this step to a previous step`     | Draw a connection into the step                            |
 | `Add a Return step to send a result back.` | Add a Return step and connect it                           |
-| `Steps cannot be connected in a loop.`     | Remove the connection that leads back to an earlier step   |
+| `Steps cannot be connected in a circle. Use a For Each step to repeat steps.` | Remove the connection that leads back to an earlier step. Use [For Each](/tools/workflows/nodes#for-each) to repeat steps |
+| `The workflow needs exactly one Start step.` | Keep one Start step                                      |
+| `Connect the each output to the steps that run for every item` | Connect at least one step to the **each** output of the For Each step |
+| `The For Each body must end in a single step. Merge branches with a Transform step.` | Connect every branch of the body into one last step |
+| `<Step> cannot run inside a For Each body` | Move Return, Database or For Each steps out of the body    |
+| `Steps inside a For Each body can only connect to each other. Continue from the done output.` | Connect the next steps to **done** instead |
+| `Use loop.item and loop.index only inside a For Each body` | Use these variables only in body steps           |
+| `Connect the error output or choose Stop the tool` | Connect the **error** output or change **When this step fails** |
+| `Use nodes.<id>.error only on the error branch of <id>` | Use the error variable only in steps on that error branch |
+| `The query has N ? placeholder(s) but M binding(s)` | Add or remove bindings so every `?` has one value |
 | `Secret <KEY> does not exist`              | Create the secret or pick another one                      |
 | `The Database step must run before this query` | Connect the Database step before the Query step        |
 | `URL must start with https://`             | Use an HTTPS URL                                           |
@@ -51,6 +82,23 @@ While there are issues, **Run** and **Save** are disabled and the toolbar shows 
 
 ---
 
+## Run-time errors
+
+These errors appear while the workflow runs, not while you build it:
+
+| Message                                         | Cause                                                          |
+| ----------------------------------------------- | -------------------------------------------------------------- |
+| `Items must be a list`                          | The **List to loop over** of a For Each step is not an array   |
+| `Step limit reached: a single run can execute at most 1000 steps.` | The run executed too many steps, usually a large loop body |
+| `Call limit reached: a single run can make at most 100 HTTP and database calls.` | Too many calls in one run. Retries count too |
+| `HTTP <status>: ...`                            | An HTTP Request got a response that is not 2xx                 |
+
+---
+
 ## Test from an AI client
 
-A saved workflow tool behaves exactly like the last test run. To check it end to end, connect your server to an AI client from the **Integration** tab and ask it to use the tool. Every call appears in [Traffic Logs](/observability/traffic-logs), and failures in [Error Logs](/observability/error-logs).
+A saved workflow tool behaves exactly like the last test run. To check it end to end, try it in the [Playground](/tools/playground) with a real model, or connect your server to an AI client from the **Integration** tab and ask it to use the tool. Every call appears in [Traffic Logs](/observability/traffic-logs), and failures in [Error Logs](/observability/error-logs).
+
+<Note>
+  **Run** tests the workflow on the canvas, including unsaved changes. AI clients always call the **live** version. After **Save draft**, the canvas and the live tool can differ until you publish. See [Version history](/tools/versions).
+</Note>

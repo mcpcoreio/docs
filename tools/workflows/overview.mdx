@@ -11,10 +11,10 @@ To an AI client, a workflow tool looks exactly like a code tool: it has a name, 
 
 <CardGroup cols={2}>
   <Card icon="diagram-project" title="When to use a workflow">
-    Database lookups, REST API calls, reshaping JSON, simple branching. Most read-style tools fit here.
+    Database lookups, REST API calls, reshaping JSON, branching, looping over a list and handling errors. Most read-style tools fit here.
   </Card>
   <Card icon="code" title="When to use code" href="/tools/create">
-    Loops, complex calculations, custom libraries or anything the steps below can't express.
+    Complex calculations, nested loops, custom libraries or anything the steps can't express.
   </Card>
 </CardGroup>
 
@@ -26,8 +26,8 @@ To an AI client, a workflow tool looks exactly like a code tool: it has a name, 
   <Step title="Choose Build a workflow">
     On the server detail page, click **Create New Tool** and choose **Build a workflow**. You get the same choice right after creating a server.
   </Step>
-  <Step title="Start from a template or from scratch">
-    A gallery of [ready-made workflows](/tools/workflows/templates) opens first. Pick one to load its steps, tool name and parameters, or close the gallery to start with an empty canvas.
+  <Step title="Start from a template, from AI or from scratch">
+    A gallery of [ready-made workflows](/tools/workflows/templates) opens first. Pick one to load its steps, tool name and parameters, or close the gallery to start with an empty canvas. You can also [describe the tool to the AI](/tools/workflows/generate-with-ai) and let it build the steps.
   </Step>
   <Step title="Describe the tool">
     In the left panel, set the tool **name** (lowercase `snake_case`), a **description** the AI will read, and the **parameters** the AI passes when it calls the tool. See [Parameters](/tools/parameters).
@@ -39,9 +39,17 @@ To an AI client, a workflow tool looks exactly like a code tool: it has a name, 
     Select a step to open its settings in the inspector on the right. Use the variable button next to a field to insert [variables](/tools/workflows/expressions) such as tool parameters or the output of an earlier step.
   </Step>
   <Step title="Test and save">
-    Click **Run** to [test the workflow step by step](/tools/workflows/testing). When every step looks right, click **Create** (or **Save** for an existing tool). The tool is live immediately.
+    Click **Run** to [test the workflow step by step](/tools/workflows/testing). When every step looks right, click **Create** (or **Save & publish** for an existing tool). The tool is live immediately. Use **Save draft** to keep changes without touching the live tool, see [Version history](/tools/versions).
   </Step>
 </Steps>
+
+---
+
+## Describe it with AI
+
+Click **AI Assistant** (the sparkles button) in the left bar and describe the tool in plain words, for example *"Get open GitHub issues for a repo and return the title and url of the ones older than 7 days"*. MCPCore builds the steps, connects them and fills in the tool name, description and parameters. The result opens unsaved, so you review and test it before anything goes live.
+
+See [Generate with AI](/tools/workflows/generate-with-ai) for how it works, what is sent to the AI and how to get good results.
 
 ---
 
@@ -63,6 +71,9 @@ When you save, MCPCore compiles the workflow into JavaScript and runs it in the 
 
 - Steps run in the order of their connections. A step runs only after every step it depends on has finished.
 - A **Condition** step sends execution down its **true** or **false** branch; steps on the other branch are skipped.
+- A **For Each** step runs the steps on its **each** output once per item, then continues on **done**. See [For Each](/tools/workflows/nodes#for-each).
+- A step whose error option is **Continue on the error branch** continues on its **error** output when it fails. See [Error handling](/tools/workflows/nodes#error-handling).
+- A single run executes at most 1,000 steps and makes at most 100 HTTP and database calls, retries included.
 - The first **Return** step that runs ends the tool and sends its value to the AI client.
 - Database connections are closed automatically when the tool finishes.
 
@@ -91,6 +102,12 @@ Database credentials and API tokens are never typed into a step. Fields such as 
     Run the workflow and watch each step execute.
   </Card>
   <Card icon="layer-group" href="/tools/workflows/templates" title="Templates">
-    Five ready-made workflows to start from.
+    Six ready-made workflows to start from.
+  </Card>
+  <Card icon="wand-magic-sparkles" href="/tools/workflows/generate-with-ai" title="Generate with AI">
+    Describe the tool and let the AI build the steps.
+  </Card>
+  <Card icon="clock-rotate-left" href="/tools/versions" title="Version history">
+    Save drafts, compare versions and restore an earlier one.
   </Card>
 </CardGroup>

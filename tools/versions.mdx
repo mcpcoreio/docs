@@ -1,0 +1,130 @@
+---
+title: "Version history"
+description: "Every save keeps a version of your tool. Save drafts, compare versions and restore an earlier version in one click."
+---
+
+## How versions work
+
+Every time you save a tool, MCPCore stores a complete copy of it as a new version: `v1`, `v2`, `v3` and so on. One version is always **Live**. That is the version AI clients call.
+
+- Versions are never changed after they are saved.
+- Restoring never deletes history. It adds a new version on top.
+- Saving a draft never touches the live tool.
+
+This works the same for code tools, workflow tools and tools [imported from OpenAPI](/tools/import-openapi).
+
+---
+
+## What a version contains
+
+| Part of the tool                      | Kept in every version |
+| ------------------------------------- | --------------------- |
+| Name and description                  | Yes                   |
+| Parameters                            | Yes                   |
+| [Behavior](/tools/create#behavior)    | Yes                   |
+| JavaScript code (code tools)          | Yes                   |
+| Steps and connections (workflow tools) | Yes                  |
+| The tool's **Active** toggle          | No                    |
+| Server settings and security mode     | No                    |
+| [Secrets](/tools/secrets)             | No                    |
+
+Because secrets are not part of a version, restoring a version uses the current value of every secret. If you deleted a secret that an old version needs, create it again before you restore.
+
+Tools that existed before version history was introduced start with **v1, Initial version**, which is live.
+
+---
+
+## Save & publish or Save draft
+
+In the tool editor you have two buttons:
+
+| Button             | What happens                                                                 |
+| ------------------ | ---------------------------------------------------------------------------- |
+| **Save & publish** | Saves a new version and makes it live right away                             |
+| **Save draft**     | Saves a new version without touching the live tool                           |
+
+New tools have a single **Create** button. The first save creates **v1** and makes it live.
+
+### Working with drafts
+
+After **Save draft**, the message *"The live tool is unchanged. Publish it from History when it is ready."* confirms that AI clients still use the live version.
+
+When you open a tool that has a draft newer than the live version, a bar above the editor says *"You have an unpublished draft vN. The editor shows the live version."*
+
+| Button         | What happens                                                         |
+| -------------- | -------------------------------------------------------------------- |
+| **Open draft** | Loads the draft into the editor so you can keep working on it        |
+| **Discard**    | Deletes every draft that is newer than the live version              |
+
+You can save several drafts in a row. Each one becomes its own version, and the newest one is shown in the bar.
+
+<Note>
+  **Run** always tests what is in the editor. To test a draft before publishing, open it, run it, then publish.
+</Note>
+
+---
+
+## Browse the history
+
+Click **History** (the clock button) in the left bar of the editor. The panel lists every version, newest first:
+
+| Shown                | Meaning                                                              |
+| -------------------- | -------------------------------------------------------------------- |
+| `v7`                 | The version number                                                   |
+| Green dot, **Live**  | The version AI clients call now                                      |
+| Orange dot, **Draft** | Saved after the live version and not published yet                  |
+| Grey dot             | An earlier version                                                   |
+| Summary              | What changed, for example *Added 1 step, changed Get order* or *Changed description* |
+| Author and time      | Who saved it and when, for example *Ada Lovelace · 3 hours ago*      |
+
+Some versions have a fixed summary: **Initial version** for the first one, **Imported from OpenAPI** for an import, and **Restored from v3** for a restore.
+
+---
+
+## Compare versions
+
+Click a version to open the compare view. By default it is compared with the version before it. For a draft, you can switch between **Previous version** and **Live version**.
+
+- **Changes to the name, description and parameters** are listed at the top, with the old and the new value. For a parameter you see its type, or *none* and *removed* when it was added or deleted.
+- **Code tools** open side by side in a diff view, like a pull request.
+- **Workflow tools** list the steps that were **added**, **removed** or **changed**. For a changed step, every changed setting is shown with its old and new value. When only the connections changed, the summary says *Rewired steps* and the list shows *No step changes.*
+
+---
+
+## Publish a draft or restore a version
+
+The button at the bottom of the compare view depends on the version:
+
+| Version            | Button                    | What happens                                                    |
+| ------------------ | ------------------------- | --------------------------------------------------------------- |
+| The newest draft   | **Publish draft**         | That version becomes live. No new version is created            |
+| Any older version  | **Restore this version**  | Its content is saved as a new version, for example **v8, Restored from v3**, and that new version becomes live |
+| The live version   | None                      | It is already live                                              |
+
+Restoring works like `git revert`: history only grows, so you can always go back to the version you restored from.
+
+A draft also has **Discard draft**, which deletes the drafts that are newer than the live version.
+
+If another tool on the server now uses the name of the version you want to publish, publishing stops with *"Another tool is already named ... Rename it before publishing this version."* Rename one of the tools, then try again.
+
+---
+
+## How many versions are kept
+
+| Plan                 | Versions per tool |
+| -------------------- | ----------------- |
+| Free                 | 10                |
+| Basic                | 30                |
+| Pro and Enterprise   | 100               |
+
+When the limit is reached, the oldest version that is not live is removed. The live version is never removed.
+
+---
+
+## Examples
+
+**Try a change without risk.** Edit the tool, click **Save draft**, then compare the draft with the live version in **History**. Publish when it looks right, or discard it.
+
+**Undo a bad release.** An AI client started getting errors after your last save. Open **History**, click the version from before the change and click **Restore this version**. The fix is live immediately, and the broken version stays in the history for you to look at.
+
+**Re-import an API.** When you [import an OpenAPI document](/tools/import-openapi) again, each existing tool gets a new version. Compare it with the previous one to see what changed in the API.

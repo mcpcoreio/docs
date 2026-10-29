@@ -11,6 +11,18 @@ description: "Connect your MCPCore server to Claude Desktop using the mcp-remote
 
 ---
 
+## Quick install
+
+On the server's **Integration** tab, select **Claude Desktop** and click **Download `<server>.mcpb`**. Double-click the downloaded file. Claude Desktop opens the extension and shows its name and description. Click **Install**.
+
+- For **API key** servers, Claude Desktop asks for the key during installation and stores it securely. The key is not inside the `.mcpb` file, so you can share the file with your team.
+- The extension connects through `mcp-remote`, like the manual setup below, so [Node.js](https://nodejs.org) with `npx` must be installed.
+- To remove the server, open **Settings → Extensions** in Claude Desktop.
+
+To set up the server by hand instead, follow the steps below.
+
+---
+
 ## Step 1: Get your config snippet
 
 Open your server's detail page, click the **Integration** tab, and select **Claude Desktop**. Copy the generated config snippet.

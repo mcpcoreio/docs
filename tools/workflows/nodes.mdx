@@ -67,14 +67,17 @@ Calls a REST API and uses its JSON response.
 | Method                   | Yes      | GET, POST, PUT, PATCH or DELETE                                       |
 | URL                      | Yes      | Must start with `https://`. Variables are URL-encoded automatically   |
 | Bearer token secret      | No       | Sent as `Authorization: Bearer <secret>`                              |
+| Query parameters         | No       | Name and value rows added to the URL. Rows with an empty value are left out |
 | Headers                  | No       | Name and value rows. Values can contain variables                     |
 | Body                     | No       | **No body**, **Send all tool parameters**, or **Custom JSON**          |
 | JSON body                | When Custom JSON | Must be valid JSON. String values can contain variables       |
-| Stop the tool when the response is not 2xx | No | On by default. Turn it off to handle error responses yourself |
+| Treat responses that are not 2xx as errors | No | On by default. Turn it off to handle error responses yourself |
 
 Example URL: `https://api.example.com/items/{{params.id}}`
 
 **Output:** the parsed JSON response, or the raw text when the response is not JSON.
+
+HTTP Request, Database and Query steps also have an **Errors** stage. See [Error handling](#error-handling).
 
 ---
 
@@ -129,6 +132,152 @@ Returns fixed JSON, for example mock data, a lookup table or a constant response
 | JSON  | Yes      | Must be valid JSON |
 
 **Output:** the parsed JSON.
+
+---
+
+## For Each
+
+Runs the steps connected to its **each** output once for every item in a list, then continues from its **done** output. You find it in the **Logic** group of the palette.
+
+| Field             | Required | Notes                                                                 |
+| ----------------- | -------- | --------------------------------------------------------------------- |
+| List to loop over | Yes      | A variable that holds a list, for example `{{nodes.http_request_1.output.items}}` |
+| Maximum items     | Yes      | 1 to 200 (default 50). Longer lists stop after this many items        |
+
+The step has two outputs:
+
+| Output   | What runs there                                                      |
+| -------- | -------------------------------------------------------------------- |
+| **each** | The loop body. These steps run once per item                         |
+| **done** | The rest of the workflow. It runs once, after the last item         |
+
+### Variables inside the loop
+
+| Variable          | Value                                                     |
+| ----------------- | --------------------------------------------------------- |
+| `{{loop.item}}`   | The current item. Read its fields with `{{loop.item.id}}` |
+| `{{loop.index}}`  | The position of the current item, starting at 0           |
+
+Inside the body, `{{nodes.<step-id>.output}}` of a body step always means the output for the **current** item. Steps before the For Each step can be used as usual.
+
+### Output
+
+`{{nodes.loop_1.output}}` is a list with one entry per item: the output of the last step of the loop body for that item. If the body skipped that item (for example on the other branch of a Condition), its entry is `null`.
+
+Example. The list `[{"id": 1}, {"id": 2}]` goes into a body that ends in a Transform with `userId = {{loop.item.id}}` and `position = {{loop.index}}`:
+
+```json
+[
+  {"userId": 1, "position": 0},
+  {"userId": 2, "position": 1}
+]
+```
+
+When the list is longer than **Maximum items**, only the first items are processed and the run log shows a warning such as `For Each processed the first 50 items of 120.`
+
+If the value is not a list (for example an object or an empty variable), the step fails with `Items must be a list`. Point the field at the array inside the response, for example `.output.items` instead of `.output`.
+
+### Rules for the loop body
+
+- It must end in exactly one step. If you branch with a Condition, merge the branches with a Transform step.
+- Return, Database and For Each steps cannot be inside the body. Loops cannot be nested. Open the Database connection before the loop and use it from a Query step inside.
+- Body steps only connect to each other. Continue the workflow from **done**.
+- Steps after **done** read the result through `{{nodes.<for-each-id>.output}}`, not through the body steps.
+- Items run one after another, not in parallel, so an external API never gets a burst of requests at once.
+
+### Example: enrich every item
+
+```text
+Start → HTTP Request (get users) → For Each
+            each → HTTP Request (posts?userId={{loop.item.id}}) → Transform
+            done → Return {{nodes.loop_1.output}}
+```
+
+The [Loop over a list](/tools/workflows/templates#loop-over-a-list) template builds exactly this workflow.
+
+### Run limits
+
+A For Each step can only walk through a list. It never repeats on a condition, so it cannot run forever. Every run of a workflow tool also has fixed limits:
+
+| Limit                                  | Value  | When it is reached                                                       |
+| -------------------------------------- | ------ | ------------------------------------------------------------------------ |
+| Items per For Each step                | 200    | Only the first items are processed, with a warning in the log           |
+| Executed steps per run                 | 1,000  | The tool stops with `Step limit reached: a single run can execute at most 1000 steps.` |
+| HTTP and database calls per run        | 100    | The tool stops with `Call limit reached: a single run can make at most 100 HTTP and database calls.` Retries count too |
+| Total run time                         | The sandbox execution timeout | The tool stops, as for any other tool                      |
+
+<Tip>
+  With 50 items and two HTTP Request steps in the body, a run makes 100 calls and hits the call limit. Keep loop bodies small, or lower **Maximum items**.
+</Tip>
+
+---
+
+## Error handling
+
+HTTP Request, Database and Query steps have an **Errors** stage in the inspector. It decides what happens when the step fails and, for HTTP Request and Database, whether to try again first.
+
+### When this step fails
+
+| Option                       | What happens                                                                  |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| Stop the tool (default)      | The tool ends and returns the error to the AI client. This is how every workflow behaved before error handling existed |
+| Continue on the error branch | The step gets a red **error** output. Connect it to the steps that should run instead |
+
+When the step fails and the error branch is on:
+
+- The steps on the normal output are skipped, and the steps on the **error** output run.
+- When the step succeeds, the error branch is skipped.
+- If the error output is not connected, the step shows `Connect the error output or choose Stop the tool`.
+
+What counts as a failure:
+
+| Step         | Fails when                                                                                   |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| HTTP Request | The request cannot be sent, times out, or (with **Treat responses that are not 2xx as errors** on) the response status is not 2xx. The message then reads `HTTP <status>: <start of the response body>` |
+| Database     | The connection cannot be opened                                                              |
+| Query        | The database returns an error, for example a syntax error or a constraint violation         |
+
+### The error variable
+
+On the error branch, read the failure from the step that failed:
+
+| Variable                            | Value                                                     |
+| ----------------------------------- | --------------------------------------------------------- |
+| `{{nodes.<step-id>.error.message}}` | The error message                                         |
+| `{{nodes.<step-id>.error.status}}`  | The HTTP status code for HTTP Request, otherwise empty    |
+
+These variables only work in steps on that step's error branch. Anywhere else the field shows `Use nodes.<step-id>.error only on the error branch of <step-id>`.
+
+Example: return a clear answer instead of failing when an order is not found.
+
+```text
+HTTP Request (GET /orders/{{params.id}}), When this step fails: Continue on the error branch
+    default → Return {{nodes.http_request_1.output}}
+    error   → Return {"found": false, "reason": "{{nodes.http_request_1.error.message}}"}
+```
+
+Inside a [For Each](#for-each) body, the error branch rescues only the current item. Merge it back into the last step of the body, and the loop continues with the next item. With **Stop the tool**, a failing item stops the whole tool.
+
+### Retries
+
+HTTP Request and Database steps can try again before they count as failed.
+
+| Setting  | Value                                                          |
+| -------- | -------------------------------------------------------------- |
+| Retries  | **Do not retry** (default), or retry up to 1, 2 or 3 times    |
+| Waits    | 0.5 s before the first retry, 1 s before the second, 2 s before the third. A `Retry-After` header is honoured up to 2 s. At most 4 s of waiting per step |
+| HTTP     | Retries network errors, timeouts, 429 and 5xx responses. Never other 4xx responses such as 400, 401 or 404 |
+| Database | Retries only when the connection fails                         |
+
+- Retries run first. Only when they are used up does the **When this step fails** option take effect.
+- Every attempt counts toward the limit of 100 HTTP and database calls per run.
+- A test run logs each retry, for example `↻ Get order failed, retry 1 of 3: HTTP 503: Service Unavailable`.
+- Query steps don't retry, because a write query could run twice.
+- POST and PATCH requests may reach the API more than once when retries are on. Only turn retries on for requests that are safe to repeat.
+
+<Note>
+  Workflows created before error handling existed open with **Stop the tool** and **Do not retry** on every step, so their behavior does not change.
+</Note>
 
 ---
 

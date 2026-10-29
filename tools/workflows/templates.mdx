@@ -5,7 +5,7 @@ description: "Ready-made workflows you can load, adjust and save as your own too
 
 When you start a new workflow tool, the **Start from a template** gallery opens. Choosing a template loads its steps onto the canvas. If the tool name, description or parameters are still empty, they are filled in from the template as well.
 
-Every template is a normal workflow: change, add or remove any step afterwards.
+Every template is a normal workflow: change, add or remove any step afterwards. If no template fits, close the gallery and [describe the tool to the AI](/tools/workflows/generate-with-ai) instead.
 
 ---
 
@@ -68,3 +68,25 @@ Calls an API, keeps only the fields you need and branches on the result.
 **Parameters:** `id` (number, required, 1–200)
 
 **To make it work:** nothing, run it with different ids. The Condition checks `{{nodes.http_request_1.output.completed}}`; completed items return `status: "done"`, the others `status: "open"`. Use it as a pattern for any tool that needs to answer differently depending on an API response.
+
+---
+
+## Loop over a list
+
+Fetches a list, calls an API for every item with [For Each](/tools/workflows/nodes#for-each) and returns the combined result.
+
+**Tool:** `get_users_with_latest_post`
+
+**Steps:** Start → HTTP Request (get users) → For Each → **each:** HTTP Request (get latest post) → Transform. **done:** Return
+
+**Parameters:** `limit` (number, optional, 1 to 10)
+
+**How it works:**
+
+1. **Get users** calls `https://jsonplaceholder.typicode.com/users?_limit={{params.limit}}`. When the AI leaves `limit` empty, the query parameter is still sent, and the demo API returns all users.
+2. **For Each** walks through `{{nodes.http_request_1.output}}`, with **Maximum items** set to 10.
+3. Inside the loop, **Get latest post** calls `posts?userId={{loop.item.id}}&_limit=1`. It retries up to 2 times, so a short outage of the API does not fail the tool.
+4. **Transform** builds one entry per user: `name` from `{{loop.item.name}}` and `latestPost` from `{{nodes.http_request_2.output[0].title}}`.
+5. **Return**, on the **done** output, sends back `{{nodes.loop_1.output}}`: the list of all entries.
+
+**To make it work:** nothing, run it with a limit such as 3. Then replace the two URLs with your own API.

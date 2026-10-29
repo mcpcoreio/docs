@@ -1,0 +1,86 @@
+---
+title: "Gemini CLI"
+description: "Connect your MCPCore server to Google's Gemini CLI with one command or settings.json."
+---
+
+Gemini CLI supports remote MCP servers over Streamable HTTP natively, so no proxy or `npx` command is needed.
+
+## Prerequisites
+
+- [Gemini CLI](https://github.com/google-gemini/gemini-cli) installed
+- A MCPCore server with at least one tool
+
+---
+
+## Quick install
+
+On the server's **Integration** tab, select **Gemini CLI** and copy the command from **Quick install**:
+
+<Tabs>
+  <Tab title="Public">
+    ```bash
+    gemini mcp add --transport http my-server https://my-server.mcpcore.io/mcp
+    ```
+  </Tab>
+  <Tab title="Unlisted">
+    ```bash
+    gemini mcp add --transport http my-server https://my-server.mcpcore.io/mcp/<secret-key>
+    ```
+  </Tab>
+  <Tab title="API Key">
+    ```bash
+    export MCPCORE_API_KEY="<your-api-key>"
+    gemini mcp add --transport http my-server https://my-server.mcpcore.io/mcp --header "Authorization: Bearer $MCPCORE_API_KEY"
+    ```
+
+    The command reads the key from the `MCPCORE_API_KEY` variable of your shell. Turn on **Include my API key** to get the command with the key filled in.
+  </Tab>
+</Tabs>
+
+---
+
+## Manual setup
+
+Merge the server into `~/.gemini/settings.json` (or `.gemini/settings.json` in your project). The **Manual setup** snippet on the Integration tab looks like this:
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "httpUrl": "https://my-server.mcpcore.io/mcp"
+    }
+  }
+}
+```
+
+For API Key mode:
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "httpUrl": "https://my-server.mcpcore.io/mcp",
+      "headers": {
+        "Authorization": "Bearer <your-api-key>"
+      }
+    }
+  }
+}
+```
+
+---
+
+## Verify
+
+Start Gemini CLI and run `/mcp`. Your server and its tools should be listed. Ask Gemini to use one of your tools to confirm it works.
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| Server is disconnected | Check the URL and that the server is active |
+| `401 Unauthorized` | Check the `Authorization` header and that `MCPCORE_API_KEY` was set when you ran the command |
+| JSON parse error | Validate the syntax of `settings.json` |
+| Tool calls fail | Check [Traffic Logs](/observability/traffic-logs) |

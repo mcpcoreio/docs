@@ -7,13 +7,15 @@ description: "Use tool parameters, secrets and the outputs of earlier steps insi
 
 Wrap a variable in double curly braces anywhere a field accepts text: `{{params.id}}`. Click the variable button next to a field to see the variables that are available there and insert one without typing.
 
-There are three roots:
+There are five roots:
 
 | Variable                       | What it is                                         | Example                                  |
 | ------------------------------ | -------------------------------------------------- | ---------------------------------------- |
 | `{{params.<name>}}`            | A parameter the AI passed when calling the tool    | `{{params.email}}`                       |
 | `{{env.<KEY>}}`                | An [environment secret](/tools/secrets) of the server | `{{env.API_TOKEN}}`                  |
 | `{{nodes.<step-id>.output}}`   | The output of an earlier step                      | `{{nodes.query_1.output}}`               |
+| `{{loop.item}}`, `{{loop.index}}` | The current item and its position inside a [For Each](/tools/workflows/nodes#for-each) body | `{{loop.item.id}}` |
+| `{{nodes.<step-id>.error}}`    | Why a step failed, on its [error branch](/tools/workflows/nodes#error-handling) | `{{nodes.http_request_1.error.message}}` |
 
 After the root you can read nested values with `.field` and list items with `[index]`:
 
@@ -57,8 +59,48 @@ Here `age` is sent as a number and `tags` as an array when the source values hav
 
 - A step can only use the output of a step that runs **before** it, meaning a step connected earlier in the chain. Otherwise the field shows `Step <id> must run before this step`.
 - Referencing a step that doesn't exist shows `Step <id> does not exist`.
-- Any other text inside `{{ }}` shows `Unknown variable {{...}}`. Only `params`, `env` and `nodes.<id>.output` are allowed; there are no functions or operators inside variables.
+- Any other text inside `{{ }}` shows `Unknown variable {{...}}`. Only `params`, `env`, `loop`, `nodes.<id>.output` and `nodes.<id>.error` are allowed; there are no functions or operators inside variables.
+- `loop.item` and `loop.index` only work inside a For Each body, and `nodes.<id>.error` only on the error branch of that step.
 - Prefer secret fields such as **Bearer token secret** or the Database step credentials over `{{env.KEY}}` in free text, so secrets never appear in URLs or logs by accident.
+
+---
+
+## Loop variables
+
+Inside a [For Each](/tools/workflows/nodes#for-each) body you can read the current item:
+
+| Variable                  | Example value for the second item of `[{"id": 7, "name": "Ada"}, {"id": 9, "name": "Linus"}]` |
+| ------------------------- | ----------------------------------------------------------- |
+| `{{loop.item}}`           | `{"id": 9, "name": "Linus"}`                                |
+| `{{loop.item.name}}`      | `Linus`                                                     |
+| `{{loop.index}}`          | `1`                                                         |
+
+In the body, `{{nodes.<body-step>.output}}` is the output for the current item. After the loop, `{{nodes.<for-each-id>.output}}` holds the list of results, one per item.
+
+---
+
+## Error variables
+
+On the [error branch](/tools/workflows/nodes#error-handling) of a step, read why it failed:
+
+| Variable                                  | Example                                   |
+| ----------------------------------------- | ----------------------------------------- |
+| `{{nodes.http_request_1.error.message}}`  | `HTTP 404: {"message":"Not Found"}`       |
+| `{{nodes.http_request_1.error.status}}`   | `404`                                     |
+| `{{nodes.query_1.error.message}}`         | The database error message                |
+
+`status` is only set for HTTP Request steps. On the error branch, `{{nodes.<id>.output}}` of the failed step is empty.
+
+---
+
+## Query parameters
+
+The HTTP Request step has a **Query parameters** list next to the URL. Each row is a name and a value, and values can contain variables. Rows whose value ends up empty are left out of the URL, so optional tool parameters that the AI does not send don't produce `?status=&limit=`.
+
+| Row            | `params.status` | URL                                        |
+| -------------- | --------------- | ------------------------------------------ |
+| `status = {{params.status}}` | `open` | `https://api.example.com/issues?status=open` |
+| `status = {{params.status}}` | not sent | `https://api.example.com/issues`        |
 
 <Tip>
   Run the workflow once before you write variables for a step. The inspector then shows each step's real output, so you can see exactly which fields are available.

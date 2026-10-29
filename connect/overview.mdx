@@ -11,7 +11,59 @@ Every MCPCore server has a permanent subdomain endpoint:
 https://your-subdomain.mcpcore.io/mcp
 ```
 
-You copy the ready-to-use config snippet from the server's **Integration** tab and paste it into your AI client's config file. The client connects, discovers your tools, and is ready to use them.
+Open the server's **Integration** tab and pick your client. Most clients have a **Quick install** block at the top, so you don't have to edit a config file:
+
+| Client          | Quick install                                                     | Guide                                        |
+| --------------- | ----------------------------------------------------------------- | -------------------------------------------- |
+| Cursor          | **Add to Cursor** button                                          | [Cursor](/connect/cursor#quick-install)      |
+| VS Code         | **Install in VS Code** and **VS Code Insiders** buttons           | [VS Code](/connect/vscode#quick-install)     |
+| Claude Code     | `claude mcp add` command                                          | [Claude Code](/connect/claude-code)          |
+| Codex           | `codex mcp add` command                                           | [Codex](/connect/codex#quick-install)        |
+| Gemini CLI      | `gemini mcp add` command                                          | [Gemini CLI](/connect/gemini-cli)            |
+| Claude Desktop  | Download a `.mcpb` extension and double-click it                  | [Claude Desktop](/connect/claude-desktop#quick-install) |
+| Windsurf, Cline | No quick install. Copy the config snippet                         | [Windsurf](/connect/windsurf), [Cline](/connect/cline) |
+
+Below the quick install, every client has a **Manual setup** snippet you can paste into its config file. The client connects, discovers your tools, and is ready to use them.
+
+---
+
+## Quick install and your API key
+
+For **API key** servers, quick install keeps your key out of links and commands by default:
+
+| Client          | Where the key comes from                                                    |
+| --------------- | --------------------------------------------------------------------------- |
+| VS Code         | VS Code asks for it during installation and stores it as a secret           |
+| Claude Desktop  | Claude Desktop asks for it during installation. It is not stored in the `.mcpb` file |
+| Cursor          | Cursor reads it from the `MCPCORE_API_KEY` environment variable             |
+| Claude Code, Gemini CLI | The command reads `$MCPCORE_API_KEY` from your shell                |
+| Codex           | Codex reads the `MCPCORE_API_KEY` environment variable every time it connects |
+
+Set the variable before you run the command or start the app:
+
+```bash
+export MCPCORE_API_KEY="<your-api-key>"
+```
+
+On Windows PowerShell use `$env:MCPCORE_API_KEY = "<your-api-key>"`, or set it permanently in the system environment variables.
+
+To put the key into the link or command directly, turn on **Include my API key** (not available for Codex and Claude Desktop, which never need it).
+
+<Warning>
+  Turn on **Include my API key** only on your own machine. Links and commands can end up in browser history, shell history and screenshots. For **unlisted** servers the secret is part of the URL, so treat those links and commands like a password too.
+</Warning>
+
+---
+
+## README install badges
+
+For **public** and **OAuth** servers, the Cursor and VS Code tabs have **Copy README install badges**. It copies Markdown for an **Add to Cursor** and an **Install in VS Code** badge. Paste it into your README or docs, and anyone can add your server with one click:
+
+```markdown
+[![Add to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=...&config=...) [![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_MCP_Server-0098FF?logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=...&config=...)
+```
+
+The badges are not offered for API key, bearer token and unlisted servers, because a public link would either not work or expose a secret.
 
 ---
 
@@ -23,6 +75,12 @@ You copy the ready-to-use config snippet from the server's **Integration** tab a
   </Card>
   <Card title="Claude Desktop" icon="robot" href="/connect/claude-desktop">
     Anthropic's desktop app. Config file at `~/Library/Application Support/Claude/claude_desktop_config.json`.
+  </Card>
+  <Card title="Claude Code" icon="terminal" href="/connect/claude-code">
+    Anthropic's coding agent. Add the server with `claude mcp add`.
+  </Card>
+  <Card title="Gemini CLI" icon="terminal" href="/connect/gemini-cli">
+    Google's command-line agent. Add the server with `gemini mcp add`.
   </Card>
   <Card title="Cursor" icon="code" href="/connect/cursor">
     AI-powered code editor. Direct HTTP transport, no `npx` needed.
@@ -82,4 +140,6 @@ Most clients use a **command-based** config that runs `mcp-remote` to bridge HTT
 
 ## The Integration tab
 
-The easiest way to get the right config is to use the **Integration** tab on your server's detail page. Select your client, and the tab generates the correct snippet with your subdomain and key pre-filled, just copy and paste.
+The easiest way to get the right config is to use the **Integration** tab on your server's detail page. Select your client, use **Quick install**, or copy the **Manual setup** snippet with your subdomain and key pre-filled.
+
+After connecting, the [Clients](/observability/analytics#clients) table in the server's Analytics tab shows which clients call your server.

@@ -1,0 +1,105 @@
+---
+title: "Claude Code"
+description: "Connect your MCPCore server to Claude Code with one command or a project .mcp.json file."
+---
+
+Claude Code supports remote MCP servers over Streamable HTTP natively, so no proxy or `npx` command is needed.
+
+## Prerequisites
+
+- [Claude Code](https://claude.com/claude-code) installed
+- A MCPCore server with at least one tool
+
+---
+
+## Quick install
+
+On the server's **Integration** tab, select **Claude Code** and copy the command from **Quick install**:
+
+<Tabs>
+  <Tab title="Public">
+    ```bash
+    claude mcp add --transport http my-server https://my-server.mcpcore.io/mcp
+    ```
+  </Tab>
+  <Tab title="Unlisted">
+    ```bash
+    claude mcp add --transport http my-server https://my-server.mcpcore.io/mcp/<secret-key>
+    ```
+  </Tab>
+  <Tab title="API Key">
+    ```bash
+    export MCPCORE_API_KEY="<your-api-key>"
+    claude mcp add --transport http my-server https://my-server.mcpcore.io/mcp --header "Authorization: Bearer $MCPCORE_API_KEY"
+    ```
+
+    The command reads the key from the `MCPCORE_API_KEY` variable of your shell. Turn on **Include my API key** to get the command with the key filled in.
+  </Tab>
+  <Tab title="OAuth 2.0">
+    ```bash
+    claude mcp add --transport http my-server https://my-server.mcpcore.io/mcp
+    ```
+
+    Then run `/mcp` inside Claude Code and choose the server to sign in.
+  </Tab>
+</Tabs>
+
+By default `claude mcp add` adds the server for you in the current project. Add `--scope user` to use it in every project, or `--scope project` to save it in the project's `.mcp.json` so your team gets it too.
+
+---
+
+## Manual setup
+
+Add the server to `.mcp.json` in your project root. The **Manual setup** snippet on the Integration tab looks like this:
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "type": "http",
+      "url": "https://my-server.mcpcore.io/mcp"
+    }
+  }
+}
+```
+
+For API Key mode:
+
+```json
+{
+  "mcpServers": {
+    "my-server": {
+      "type": "http",
+      "url": "https://my-server.mcpcore.io/mcp",
+      "headers": {
+        "Authorization": "Bearer ${MCPCORE_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+The snippet on the Integration tab contains your real key. Before you commit `.mcp.json`, replace the key with `${MCPCORE_API_KEY}` as shown above: `.mcp.json` supports environment variables, so the key stays out of version control.
+
+---
+
+## Verify
+
+Run:
+
+```bash
+claude mcp list
+```
+
+Your server should be listed as connected. Inside Claude Code, `/mcp` shows the server and its tools. Ask Claude to use one of your tools to confirm it works.
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| Server shows as failed | Check the URL and that the server is active |
+| `401 Unauthorized` | Check that `MCPCORE_API_KEY` is set in the shell you started Claude Code from |
+| Tools missing | Make sure the tools are active and published. Drafts are not served |
+| Tool calls fail | Check [Traffic Logs](/observability/traffic-logs) |

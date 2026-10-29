@@ -67,16 +67,20 @@
             "pages": [
               "tools/create",
               "tools/editor",
+              "tools/import-openapi",
               {
                 "group": "Workflow Builder",
                 "pages": [
                   "tools/workflows/overview",
+                  "tools/workflows/generate-with-ai",
                   "tools/workflows/nodes",
                   "tools/workflows/expressions",
                   "tools/workflows/testing",
                   "tools/workflows/templates"
                 ]
               },
+              "tools/versions",
+              "tools/playground",
               "tools/sandbox",
               "tools/parameters",
               "tools/secrets",
@@ -98,8 +102,10 @@
               "connect/overview",
               "connect/codex",
               "connect/claude-desktop",
+              "connect/claude-code",
               "connect/cursor",
               "connect/vscode",
+              "connect/gemini-cli",
               "connect/windsurf",
               "connect/cline"
             ]

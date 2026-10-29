@@ -24,6 +24,7 @@ When you click **Create New Tool**, MCPCore asks how you want to build it:
 | -------------------- | ------------------------------------------------------------------------------------------ |
 | **Write code**       | Full control. JavaScript in a VS Code-style editor, with ready-made snippets and AI help.  |
 | **Build a workflow** | No code. Connect ready-made steps like Database, Query, HTTP Request, Transform and Return. |
+| **Import from OpenAPI** | You already have an API with an OpenAPI or Swagger document. Each endpoint becomes a workflow tool. See [Import from OpenAPI](/tools/import-openapi). |
 
 Both produce the same kind of tool: AI clients see no difference. A tool always reopens in the editor it was built with. To build without code, follow the [workflow builder guide](/tools/workflows/overview). The steps below cover the code editor.
 
@@ -60,15 +61,39 @@ Both produce the same kind of tool: AI clients see no difference. A tool always 
   <Step title="Add parameters">
     Define the inputs your code will receive via `params.*`. See [Parameters](/tools/parameters) for the full schema reference.
   </Step>
+  <Step title="Set the behavior (optional)">
+    Under **Behavior**, tell AI clients what the tool does to your data. See [Behavior](#behavior) below.
+  </Step>
   <Step title="Write the code">
     Write JavaScript in the [code editor](/tools/editor). The sandbox gives you access to `sdk`, `params`, `env`, and `console`. See [Sandbox](/tools/sandbox) for the complete API.
 
     Use the **Snippets** panel to insert ready-made blocks for HTTP calls, database queries and secrets, or let the **AI Tool Builder** generate the code, see below.
   </Step>
   <Step title="Save">
-    Click **Save**. The tool is live immediately on your server's endpoint.
+    Click **Create**. The tool is live immediately on your server's endpoint. Later edits are saved with **Save & publish** or **Save draft**, and every save is kept in the [version history](/tools/versions).
   </Step>
 </Steps>
+
+---
+
+## Behavior
+
+The **Behavior** field tells AI clients what a tool does to your data. MCPCore sends it with the tool as standard MCP tool annotations. Clients such as Claude, Cursor and VS Code use it to decide whether to ask the user before running the tool.
+
+| Behavior                       | Use it for                                          | Sent to AI clients                                 |
+| ------------------------------ | --------------------------------------------------- | -------------------------------------------------- |
+| **Not specified** (default)    | Tools created before this field existed             | Nothing. Each client uses its own default          |
+| **Read-only**                  | Lookups, searches, reports                          | `readOnlyHint: true`                               |
+| **Changes data**               | Creating or updating records, sending messages      | `readOnlyHint: false`, `destructiveHint: false`    |
+| **Deletes or overwrites data** | Deleting records, replacing files, bulk updates     | `readOnlyHint: false`, `destructiveHint: true`     |
+
+- The [Playground](/tools/playground) turns tools marked **Deletes or overwrites data** off until you allow them.
+- [Imported](/tools/import-openapi) tools get a behavior from their HTTP method: GET is **Read-only**, DELETE is **Deletes or overwrites data**, and the rest **Changes data**.
+- The behavior is part of every [version](/tools/versions) of the tool.
+
+<Warning>
+  The behavior is a hint for AI clients, not a permission. It does not stop the tool from writing data. Protect write tools with the [security mode](/servers/security-overview) of the server and with database users that only have the rights they need.
+</Warning>
 
 ---
 
@@ -164,5 +189,11 @@ return {
   </Card>
   <Card icon="play" href="/tools/testing" title="Testing">
     Run tools with real parameters from the dashboard's Run panel.
+  </Card>
+  <Card icon="clock-rotate-left" href="/tools/versions" title="Version history">
+    Save drafts, compare versions and restore an earlier one.
+  </Card>
+  <Card icon="comments" href="/tools/playground" title="Playground">
+    Chat with a real model and watch it call your tools.
   </Card>
 </CardGroup>

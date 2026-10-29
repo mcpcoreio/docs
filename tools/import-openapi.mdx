@@ -1,0 +1,199 @@
+---
+title: "Import from OpenAPI"
+description: "Turn the endpoints of an existing API into workflow tools from its OpenAPI or Swagger document."
+---
+
+## What it does
+
+If your API has an OpenAPI 3.x or Swagger 2.0 document, MCPCore can read it and create one [workflow tool](/tools/workflows/overview) per endpoint you pick. Each tool gets:
+
+- A name and a description the AI can understand
+- Typed parameters for the path, query, header and body values of the endpoint
+- An HTTP Request step with the URL, method, authentication and body already filled in
+- A [behavior](/tools/create#behavior) that tells AI clients whether the endpoint reads, changes or deletes data
+
+You can open and edit every tool afterwards like any other workflow.
+
+---
+
+## Import an API
+
+<Steps>
+  <Step title="Open the importer">
+    On the server detail page, click **Create New Tool** and choose **Import from OpenAPI**.
+  </Step>
+  <Step title="Source: load the document">
+    Choose **From a URL** and paste the address of the document, or choose **Upload or paste** to upload a `.json`, `.yaml` or `.yml` file or paste its content. JSON and YAML are both supported.
+  </Step>
+  <Step title="Connect: check the address and the key">
+    The importer shows the API title and version. Check the **Base URL** every tool will call. If the API uses an API key or a bearer token, enter it once. See [Authentication](#authentication).
+  </Step>
+  <Step title="Endpoints: pick what the AI may call">
+    Every endpoint is listed with its method, tool name, path and description. Read-only endpoints (GET) are selected by default. Endpoints that write data (POST, PUT, PATCH) or delete data (DELETE) are labelled **Writes data** or **Destructive** and left unselected, so you add them on purpose. For selected endpoints with a documented JSON response, click **Returns** to keep only the fields you need.
+  </Step>
+  <Step title="Create">
+    Review the list and click **Create N tools**. Each tool is created on your server and is live right away. The list shows the result for every tool. Click **Go to server** when it is done.
+  </Step>
+</Steps>
+
+<Tip>
+  Import only what an AI client really needs. More than 15 tools make it harder for the model to pick the right one, and the importer warns you when you go past that.
+</Tip>
+
+---
+
+## Loading the document
+
+| Source            | Rules                                                                 |
+| ----------------- | --------------------------------------------------------------------- |
+| From a URL        | Must be public and use `https://`. MCPCore downloads it for you, so private network addresses, redirects and documents behind a login are not allowed. Up to 2 MB, with an 8 second timeout |
+| Upload or paste   | Up to 2 MB. Use this for documents that are not public               |
+
+Only references inside the same document (`#/components/...` or `#/definitions/...`) are resolved. If the document points to other files, bundle it into one file first, for example with `npx @redocly/cli bundle`.
+
+---
+
+## Authentication
+
+The importer reads the security scheme of the document and asks for the matching key on the **Connect** step.
+
+| Scheme in the document         | What the importer does                                                      |
+| ------------------------------ | --------------------------------------------------------------------------- |
+| None                           | Shows *This API does not declare any authentication.*                       |
+| HTTP bearer                    | Every HTTP Request step uses the secret as **Bearer token secret**          |
+| API key in a header            | Every HTTP Request step sends the header, for example `X-API-Key: {{env.PETSTORE_KEY}}` |
+| API key in the query string    | Every HTTP Request step adds the query parameter, for example `api_key={{env.PETSTORE_KEY}}` |
+| OAuth 2.0, OpenID Connect, HTTP Basic | Shows **Authentication needs manual setup**. The tools are created without it, so add the headers in each HTTP Request step |
+
+The key is saved once as an encrypted [secret](/tools/secrets). The importer suggests a name from the API title, for example `PETSTORE_KEY`. You can change it: uppercase letters, numbers and underscores. If a secret with that name already exists, leave the value empty to keep the current one. The header or query parameter that carries the key is not added as a tool parameter, so the AI never sees or sends it.
+
+---
+
+## What each tool contains
+
+| Part        | Comes from                                                                 |
+| ----------- | -------------------------------------------------------------------------- |
+| Name        | `operationId` in `snake_case`, for example `getPetById` becomes `get_pet_by_id`. Without one, the method and path: `GET /pets/{id}` becomes `get_pets_by_id`. Duplicate names get `_2`, `_3` |
+| Description | `summary`, then `description`, then the method and path                    |
+| Parameters  | Path, query and header parameters, and the top-level fields of a JSON body. Path parameters are always required. Others keep the `required` flag of the document |
+| Steps       | Start, HTTP Request, an optional Transform for the fields you picked, Return |
+| Behavior    | GET is marked **Read-only**, DELETE **Deletes or overwrites data**, POST, PUT and PATCH **Changes data** |
+
+Request bodies:
+
+- A JSON body with properties becomes one parameter per top-level field, and the HTTP Request step sends them as a JSON object.
+- A JSON body without properties (for example an array) becomes a single `body` parameter that is sent as is.
+- Bodies that are not JSON, such as file uploads or form data, show *Uses a body format other than JSON. Edit the request manually after import.*
+
+Optional query parameters that the AI leaves empty are not added to the URL. Responses that are not 2xx are treated as errors, so the AI client sees what went wrong.
+
+---
+
+## Example
+
+A small part of a pet store document:
+
+```yaml
+openapi: 3.0.0
+info:
+  title: Petstore
+  version: 1.0.0
+servers:
+  - url: https://petstore.example.com/v1
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+security:
+  - apiKey: []
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      summary: List pets, optionally filtered by status
+      parameters:
+        - name: status
+          in: query
+          schema: {type: string}
+        - name: limit
+          in: query
+          schema: {type: integer}
+      responses:
+        "200":
+          description: A list of pets
+  /pets/{petId}:
+    get:
+      operationId: getPetById
+      summary: Get one pet by its id
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        "200":
+          description: A pet
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: {type: integer}
+                  name: {type: string}
+                  status: {type: string}
+                  ownerEmail: {type: string}
+    delete:
+      operationId: deletePet
+      summary: Delete a pet
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema: {type: integer}
+      responses:
+        "204":
+          description: Deleted
+```
+
+What happens:
+
+1. **Connect** shows the base URL `https://petstore.example.com/v1` and asks for the API key, saved as `PETSTORE_KEY`.
+2. **Endpoints** lists three tools. `list_pets` and `get_pet_by_id` are selected. `delete_pet` is labelled **Destructive** and not selected.
+3. For `get_pet_by_id` you open **Returns** and keep `id`, `name` and `status`, so `ownerEmail` never reaches the AI.
+4. **Create** adds two tools:
+
+| Tool            | Parameters                              | HTTP Request                                                         |
+| --------------- | --------------------------------------- | -------------------------------------------------------------------- |
+| `list_pets`     | `status` (string, optional), `limit` (number, optional) | `GET https://petstore.example.com/v1/pets` with query parameters `status` and `limit`, and the header `X-API-Key` |
+| `get_pet_by_id` | `petId` (number, required)              | `GET https://petstore.example.com/v1/pets/{{params.petId}}`, then a Transform with `id`, `name`, `status` |
+
+When an AI client asks *"Which pets are available?"*, it calls `list_pets` with `status: "available"`, and the tool requests `https://petstore.example.com/v1/pets?status=available`. The empty `limit` is left out.
+
+---
+
+## After the import
+
+- Every tool starts with the version **Imported from OpenAPI** in its [version history](/tools/versions).
+- Open a tool to rename it, improve its description or add steps, for example a [Condition](/tools/workflows/nodes#condition) or [error handling](/tools/workflows/nodes#error-handling).
+- Try the tools in the [Playground](/tools/playground) to see whether the model picks the right one.
+- Improve endpoints without a summary or description: the tool then only has the method and path as its description, which gives the AI little to go on.
+
+---
+
+## Importing again
+
+When an endpoint creates a tool name that already exists on the server, the row is labelled **Updates existing tool**. Importing it again saves a new live version of that tool, and the earlier one stays in its [version history](/tools/versions), so you can compare the two or restore the earlier one at any time.
+
+The importer never deletes tools. If an endpoint was removed from the API, delete its tool yourself.
+
+---
+
+## Limits
+
+- OAuth 2.0, OpenID Connect and HTTP Basic authentication are not imported.
+- Request bodies that are not JSON need to be edited by hand.
+- Only references inside the same document are resolved.
+- Only the first server URL of the document is used. Change the **Base URL** on the **Connect** step to use another one.
+- The base URL must use `https://`.

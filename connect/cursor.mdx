@@ -11,6 +11,18 @@ description: "Connect your MCPCore server to Cursor using its native HTTP MCP tr
 
 ---
 
+## Quick install
+
+On the server's **Integration** tab, select **Cursor** and click **Add to Cursor**. Cursor opens and shows the server it is about to add. Confirm, and the server appears in Cursor's MCP settings.
+
+For **API key** servers, the link does not contain your key. The server is added with the header `Authorization: Bearer ${env:MCPCORE_API_KEY}`, so set the `MCPCORE_API_KEY` environment variable and restart Cursor. To put the key into the link instead, turn on **Include my API key** before you click.
+
+For public and OAuth servers, **Copy README install badges** gives you an **Add to Cursor** badge for your README. See [README install badges](/connect/overview#readme-install-badges).
+
+To set up the server by hand instead, follow the steps below.
+
+---
+
 ## Step 1: Get your config snippet
 
 Open your server's detail page, click the **Integration** tab, and select **Cursor**. Copy the generated snippet.

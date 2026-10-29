@@ -1,0 +1,99 @@
+---
+title: "Generate with AI"
+description: "Describe a tool in plain words and let MCPCore build the workflow steps, connections, name and parameters for you."
+---
+
+## What it does
+
+Instead of placing steps one by one, you describe the tool you want. MCPCore asks Claude to design the workflow and puts the result on the canvas:
+
+- The tool **name**, **description** and **parameters**
+- The steps, with their settings filled in
+- The connections between the steps, laid out from left to right
+
+The result is a normal workflow. Nothing is saved until you save it, so you can review, test and change every step first.
+
+---
+
+## Build a workflow from a description
+
+<Steps>
+  <Step title="Open a workflow tool">
+    Create a new tool with **Build a workflow**, or open an existing workflow tool.
+  </Step>
+  <Step title="Open the AI panel">
+    Click **AI Assistant** (the sparkles button) in the left bar of the editor.
+  </Step>
+  <Step title="Describe the tool">
+    Write what the tool should do, up to 2,000 characters, or pick one of the suggestions. Click **Build Workflow**.
+  </Step>
+  <Step title="Review the result">
+    The steps appear on the canvas. A message tells you whether everything is ready or how many issues are left. Steps with a problem get a red border.
+  </Step>
+  <Step title="Add missing secrets">
+    If the workflow uses a secret your server doesn't have yet, a bar above the canvas lists it, for example `GITHUB_TOKEN`. Click the name to create the secret without leaving the editor.
+  </Step>
+  <Step title="Test and save">
+    Click **Run** to [test the workflow](/tools/workflows/testing), then **Create** or **Save & publish**. Use **Save draft** if you want to keep it without making it live.
+  </Step>
+</Steps>
+
+<Warning>
+  Generating replaces the steps, name, description and parameters that are on the canvas. Your saved tool is not touched until you save. If you saved by mistake, restore the earlier version from [Version history](/tools/versions).
+</Warning>
+
+---
+
+## Write a good description
+
+The more concrete the description, the better the workflow. Mention:
+
+| What                     | Example                                                        |
+| ------------------------ | -------------------------------------------------------------- |
+| Where the data comes from | "the GitHub REST API", "our PostgreSQL `orders` table"        |
+| What the AI passes in    | "for a repo name", "by customer email"                         |
+| What to keep or filter   | "only issues older than 7 days", "the last 5 orders"           |
+| What to return           | "the title and url", "a short summary"                         |
+| How to handle failures   | "retry twice if the API is down", "return found: false if the customer does not exist" |
+
+Examples:
+
+- *Get open GitHub issues for a repo and return the title and url of the ones older than 7 days*
+- *Look up a customer by email in PostgreSQL and return their last 5 orders*
+- *Call a weather API for a city and return a short summary*
+- *Fetch all products from our API, then for each product call the stock endpoint and return name and stock*
+
+The AI can use every step type, including [For Each](/tools/workflows/nodes#for-each) loops, Conditions and [error branches with retries](/tools/workflows/nodes#error-handling).
+
+---
+
+## What the AI follows
+
+The generated workflow follows the same rules as one you build by hand, and a few extra ones:
+
+- URLs always use `https://`.
+- SQL always uses `?` placeholders with bindings. It does not write `DELETE`, `DROP`, `UPDATE` or `TRUNCATE` unless you ask for it.
+- Secret fields hold the secret name only, never a value.
+- The workflow stays as small as the task allows.
+
+MCPCore checks the result with the normal [validation](/tools/workflows/testing#fix-validation-issues). If there are problems, it automatically asks the AI once more to fix them. Anything still left is shown on the canvas.
+
+---
+
+## Privacy
+
+- Your description and the **names** of your server's secrets are sent to the AI, so it can pick an existing secret. Secret **values** are never sent.
+- Your data, databases and APIs are not contacted while generating. They are only called when you press **Run** or when an AI client calls the saved tool.
+
+---
+
+## Limits
+
+| Limit                 | Value                                                        |
+| --------------------- | ------------------------------------------------------------ |
+| Description length    | 2,000 characters                                             |
+| Generations per day   | 20 per user, shared with the code [AI Tool Builder](/tools/create#ai-tool-builder) |
+| Plans                 | Plans with AI generation                                     |
+| Model                 | Claude Opus 5.5                                              |
+
+When the daily limit is reached, the panel shows `Daily AI generation limit reached (20/day). Please try again tomorrow.` If the request is not about building a tool, the AI answers that it can only help build workflow tools.

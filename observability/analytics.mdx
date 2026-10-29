@@ -155,6 +155,47 @@ Use this to:
 - **Understand AI behaviour**: a tool called unexpectedly often may have a too-broad description
 - **Prioritise optimisation**: focus on the most-called tools first
 
+### Clients
+
+**Type:** Table
+
+Shows which AI clients call this server in the selected time range, ordered by request count:
+
+| Column          | What it shows                                                         |
+| --------------- | --------------------------------------------------------------------- |
+| **Client**      | The client name and icon                                              |
+| **Requests**    | Tool calls from this client, with a bar for its share of all calls    |
+| **Error rate**  | Share of its calls that failed. Shown in red above 5%                 |
+| **Avg latency** | Mean execution time of its calls                                      |
+| **Top tool**    | The tool this client calls most                                       |
+
+#### How the client is detected
+
+Every MCP client sends its name when it connects, and with the current MCP version also with every request. MCPCore reads that name, and falls back to the `User-Agent` header when there is none. The name is matched to one of these clients:
+
+| Shown as          | Matches                                         |
+| ----------------- | ----------------------------------------------- |
+| Claude Code       | Claude Code                                     |
+| Claude            | Claude Desktop, claude.ai and other Anthropic clients, including the [Playground](/tools/playground) with Claude |
+| Codex             | OpenAI Codex CLI and IDE extension             |
+| ChatGPT           | ChatGPT and other OpenAI clients                |
+| Cursor            | Cursor                                          |
+| VS Code           | VS Code and GitHub Copilot                      |
+| Windsurf          | Windsurf                                        |
+| Cline             | Cline                                           |
+| Gemini CLI        | Gemini CLI                                      |
+| mcp-remote proxy  | Clients connected through `mcp-remote` that don't send their own name |
+| MCP Inspector     | The MCP Inspector                               |
+| Unknown client    | Everything else                                 |
+
+Only this short name is stored, never the client version, user or machine. Requests from before this table existed, and from clients that don't identify themselves, appear as **Unknown client**.
+
+#### Using the Clients table
+
+- **Compare clients.** If one client has a much higher error rate, it may send parameters in a different shape. Open [Traffic Logs](/observability/traffic-logs) to see its requests.
+- **Write for your audience.** If most calls come from coding agents such as Claude Code or Cursor, tool descriptions can be more technical than for chat apps.
+- **Check a rollout.** After sharing an install link or [README badge](/connect/overview#readme-install-badges), watch the client appear in the table.
+
 ### Session trend
 
 **Type:** Area chart

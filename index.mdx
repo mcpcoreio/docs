@@ -14,11 +14,16 @@ You write the code that matters. MCPCore handles everything else:
 - **MCP server hosting**, your tools run in an isolated, always-on sandbox
 - **AI Tool Builder**, describe what you want in plain language and let AI generate the tool code, parameters, and naming for you
 - **Professional code editor**, a VS Code-style editor with syntax highlighting, ready-made snippets, AI-powered completions, and an integrated terminal
-- **No-code workflow builder**, connect Database, Query, HTTP Request, Transform and Condition steps on a canvas and test them step by step
+- **No-code workflow builder**, connect Database, Query, HTTP Request, Transform, Condition and For Each steps on a canvas, handle errors with retries and error branches, and test every step live
+- **Generate workflows with AI**, describe a tool in plain words and get the steps, connections and parameters
+- **Import from OpenAPI**, turn the endpoints of an existing API into tools in a few clicks
+- **Version history**, save drafts, compare versions side by side and restore any earlier version
+- **Playground**, chat with Claude or an OpenAI model using your own key and watch it call your tools
+- **One-click client install**, add a server to Cursor, VS Code, Claude Desktop, Claude Code, Codex or Gemini CLI without editing config files
 - **Authentication**, choose from 4 security modes (Public, API Key, OAuth 2.0, Bearer Token)
 - **Custom domains**, use your own domain with automatic SSL provisioning
 - **Encrypted secrets**, store API keys and credentials securely, referenced in code as `env.MY_KEY`
-- **Observability**, real-time traffic logs, error traces with AI-assisted debugging, and analytics dashboards with interactive charts
+- **Observability**, real-time traffic logs, error traces with AI-assisted debugging, and analytics dashboards with interactive charts, including which AI clients call your server
 
 ## How it fits together
 
@@ -55,6 +60,15 @@ External APIs, Databases, Services
   <Card title="Observability" icon="chart-line" href="/observability/traffic-logs">
     Every request is logged. Inspect call history, error traces, latency trends, and geographic distribution from the dashboard.
   </Card>
+  <Card title="Import from OpenAPI" icon="file-import" href="/tools/import-openapi">
+    Turn an existing REST API into MCP tools from its OpenAPI or Swagger document.
+  </Card>
+  <Card title="Version history" icon="clock-rotate-left" href="/tools/versions">
+    Every save is a version. Publish drafts when they are ready and roll back in one click.
+  </Card>
+  <Card title="Playground" icon="comments" href="/tools/playground">
+    Test your tools with a real model, right in the browser, using your own API key.
+  </Card>
   <Card title="Code Examples" icon="book" href="/tools/examples">
     Ready-to-use examples for HTTP requests, database queries, data transformation, and more.
   </Card>
@@ -67,6 +81,6 @@ External APIs, Databases, Services
     Create a server, write a tool, and test it live.
   </Card>
   <Card title="Connect an AI client" icon="plug" href="/connect/overview">
-    Add your endpoint to Claude Desktop, Cursor, or VS Code.
+    Install your server in Cursor, VS Code, Claude Desktop, Claude Code, Codex or Gemini CLI with one click or one command.
   </Card>
 </CardGroup>

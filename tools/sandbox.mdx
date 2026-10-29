@@ -180,6 +180,25 @@ const flat    = _.flatMap(groups, group => group.items);
 
 ---
 
+## `sdk.sleep()`: Wait before trying again
+
+Pauses the tool for a number of milliseconds, for example before retrying a rate-limited request. One call waits at most 2,000 ms; longer values are cut to 2,000 ms.
+
+```javascript
+let res = await sdk.http({method: "GET", url: "https://api.example.com/report"});
+
+if (res.status === 429) {
+  await sdk.sleep(1000);
+  res = await sdk.http({method: "GET", url: "https://api.example.com/report"});
+}
+
+return JSON.parse(res.body());
+```
+
+The total run time of the tool still counts toward the execution timeout. Workflow tools use the same function for their [retries](/tools/workflows/nodes#retries).
+
+---
+
 ## `params`: Tool inputs
 
 `params` is a plain object containing the values the AI passed when calling the tool. The keys are the parameter names you defined in the tool schema.

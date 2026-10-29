@@ -5,7 +5,26 @@ description: "Connect your MCPCore server to OpenAI Codex CLI and the Codex IDE 
 
 Codex supports remote MCP servers over Streamable HTTP natively, so no proxy or `npx` command is needed.
 
-## Add the server
+## Quick install
+
+On the server's **Integration** tab, select **Codex** and copy the command from **Quick install**:
+
+```bash
+codex mcp add my_server --url https://my-server.mcpcore.io/mcp
+```
+
+For **API key** servers, the command adds `--bearer-token-env-var MCPCORE_API_KEY`. Codex then reads the key from the `MCPCORE_API_KEY` environment variable every time it connects, and the key is never written to `config.toml`:
+
+```bash
+export MCPCORE_API_KEY="<your-api-key>"
+codex mcp add my_server --url https://my-server.mcpcore.io/mcp --bearer-token-env-var MCPCORE_API_KEY
+```
+
+For OAuth servers, run `codex mcp login my_server` after adding it.
+
+---
+
+## Add the server by hand
 
 Open `~/.codex/config.toml` (create it if it doesn't exist) and add a block for your server. Copy the ready-made snippet from the **Integration** tab of your server in the dashboard, or write it by hand:
 

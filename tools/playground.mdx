@@ -1,0 +1,107 @@
+---
+title: "Playground"
+description: "Chat with Claude or an OpenAI model in the browser and watch it call the tools of your MCP server."
+---
+
+## What it is for
+
+The **Playground** tab on the server detail page lets you talk to a real model that is connected to your server. For every answer you see which tool the model picked, the parameters it sent and the result your tool returned.
+
+Use it to:
+
+- Check that your tool **names and descriptions** lead the model to the right tool
+- See which **parameters** the model fills in, and whether it understands the optional ones
+- Try a tool end to end after you publish it, without setting up an AI client
+- Compare how Claude and OpenAI models use the same tools
+
+[Run](/tools/testing) in the tool editor tests one tool with values you type. The Playground tests the whole server the way an AI client uses it: the model decides which tools to call, in what order and with which values.
+
+---
+
+## Use your own API key
+
+The Playground uses your own key from **Anthropic** or **OpenAI**, and the provider bills the usage to your account.
+
+- The key is sent straight from your browser to the provider. MCPCore never receives or stores it.
+- By default the key is forgotten when you leave the page. Tick **Remember the key in this browser tab** to keep it until the tab is closed.
+- Anthropic and OpenAI each have their own key field. Switching the provider starts a new chat.
+
+Get a key from the [Anthropic Console](https://console.anthropic.com) or the [OpenAI platform](https://platform.openai.com/api-keys).
+
+---
+
+## Chat with your tools
+
+<Steps>
+  <Step title="Open the Playground tab">
+    On the server detail page, open the **Playground** tab.
+  </Step>
+  <Step title="Pick a provider and model">
+    Choose **Anthropic** and one of Claude Opus 5.5, Claude Sonnet 5.5 or Claude Haiku 5.5, or choose **OpenAI** and type the model name (for example `gpt-5`, which is used when the field is empty).
+  </Step>
+  <Step title="Enter your API key">
+    Paste the key into the key field.
+  </Step>
+  <Step title="Ask something">
+    Type a question, or click one of the suggestions built from the descriptions of your first tools. The model answers and calls your tools when they help.
+  </Step>
+  <Step title="Inspect the tool calls">
+    Every tool call appears as a card in the answer, for example **Called** `get_order`. Click it to see the **Parameters** the model sent and the **Result** your tool returned.
+  </Step>
+</Steps>
+
+The model remembers the earlier messages of the chat, so you can ask follow-up questions such as *"and the one before that?"*. Click **New chat** to start over.
+
+### Reading a tool call card
+
+| Icon           | Meaning                                                          |
+| -------------- | ---------------------------------------------------------------- |
+| Green check    | The tool ran and returned a result                               |
+| Red alert      | The tool returned an error. The card shows **Error** instead of **Result** |
+| Clock          | The call has no result yet                                       |
+
+A failed tool call is not the end of the answer: the model sees the error and usually explains it or tries again with other values. That tells you how well your error messages help an AI client.
+
+---
+
+## Which tools the model sees
+
+- Every **active** tool on the server, in its **live** version. Drafts are not used until you [publish them](/tools/versions).
+- Tools marked **Deletes or overwrites data** in their [behavior](/tools/create#behavior) are turned off, see below.
+- The model reads exactly what an AI client reads: tool name, description and parameter schema.
+
+---
+
+## Safety
+
+- Tool calls run against your live server, your APIs and your databases, just like calls from any other AI client. They appear in [Traffic Logs](/observability/traffic-logs) and [Analytics](/observability/analytics), and count as normal requests to your server.
+- Tools marked as **Deletes or overwrites data** are turned off by default. When the server has such tools, a switch above the chat reads **Allow N tools that delete or overwrite data**. Turn it on only on purpose. While it is on, the Playground warns *"These tools run for real against your API and data."*
+- Tools marked **Changes data** or with no behavior set are available. Set the behavior of every tool that writes data, so the Playground and AI clients can treat it carefully.
+
+---
+
+## Server types
+
+| Security mode | Playground                                                          |
+| ------------- | ------------------------------------------------------------------- |
+| Public        | Works                                                               |
+| Unlisted      | Works. The secret URL is sent to the provider only to connect       |
+| API Key       | Works. The server's API key is sent to the provider so it can connect |
+| Bearer Token  | Not supported. The Playground has no JWT to send, so the provider cannot connect. Test from an AI client |
+| OAuth 2.0     | Not supported yet. Test from a client that supports OAuth, such as Claude Desktop or Cursor |
+
+The provider connects to your server from its own cloud over the public internet. The server must be active and its endpoint reachable.
+
+---
+
+## Messages and errors
+
+| Message                                                          | What to do                                                   |
+| ---------------------------------------------------------------- | ------------------------------------------------------------ |
+| The API key was rejected. Check that it is correct and active.  | Paste a valid key for the selected provider                  |
+| The provider is rate limiting this key. Wait a moment and try again. | Wait, or raise the limits of your provider account      |
+| The provider could not connect to this MCP server. Make sure the server is active. | Check that the server is active and its endpoint works |
+| The model declined to answer this request.                       | Rephrase the request                                         |
+| The answer was cut off because it reached the length limit.     | Ask for a shorter answer, or split the question              |
+
+When a request fails, your message is put back into the input so you can send it again.
