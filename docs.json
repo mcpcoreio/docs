@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "MCPCore",
   "colors": {
-    "primary": "#d2fa00",
-    "light": "#e4fc66",
-    "dark": "#a9c40d"
+    "primary": "#4d6600",
+    "light": "#d2fa00",
+    "dark": "#c8ee00"
   },
   "css": "/custom.css",
   "logo": {

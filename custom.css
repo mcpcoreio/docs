@@ -3,3 +3,11 @@
  * The primary brand color (#d2fa00) is very bright, white text is unreadable.
  * Force dark text so buttons and highlighted links remain legible.
  */
+#topbar-cta-button .text-white,
+#topbar-cta-button svg,
+a.bg-primary-dark,
+a.bg-primary-dark .text-white,
+button.bg-primary-dark,
+button.bg-primary-dark .text-white {
+  color: #0b0f00 !important;
+}
