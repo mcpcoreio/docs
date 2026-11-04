@@ -100,6 +100,7 @@
             "group": "Connect AI Clients",
             "pages": [
               "connect/overview",
+              "connect/chatgpt",
               "connect/codex",
               "connect/claude-desktop",
               "connect/claude-code",

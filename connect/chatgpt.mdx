@@ -1,0 +1,77 @@
+---
+title: "ChatGPT"
+description: "Add your MCPCore server to ChatGPT as a custom MCP server, on a free account, without Developer Mode."
+---
+
+ChatGPT connects to remote MCP servers by URL. A free account is enough, and you do not need to turn on Developer Mode. ChatGPT changes this screen from time to time, so the labels you see may differ slightly.
+
+## Prerequisites
+
+- A ChatGPT account
+- A MCPCore server with at least one tool
+- Your server's **Endpoint**, from its **Overview** tab:
+
+```
+https://your-subdomain.mcpcore.io/mcp
+```
+
+---
+
+## Choose a security mode that works
+
+The ChatGPT form offers **OAuth**, **No authentication** and **OAuth or no authentication**. It has no field for an API key or a custom header.
+
+| MCPCore security mode | In ChatGPT                                                             |
+| --------------------- | ---------------------------------------------------------------------- |
+| Public                | Choose **No authentication**                                           |
+| Unlisted              | Choose **No authentication** and paste the full URL with its secret key |
+| OAuth 2.0             | Choose **OAuth**                                                       |
+| API Key, Bearer Token | Not available from this form. Use another mode, or another client      |
+
+Treat an Unlisted URL like a password. See [Security Overview](/servers/security-overview) for how the modes compare.
+
+---
+
+## Add the server
+
+<Steps>
+  <Step title="Open Plugins">
+    In ChatGPT, open **Plugins** from the sidebar.
+  </Step>
+  <Step title="Add a custom MCP server">
+    Click **Add** at the top right, then **Add custom MCP server**.
+  </Step>
+  <Step title="Fill in the form">
+    Enter a **Name**. Under **Connection**, keep **Server URL** selected and paste your endpoint. Choose the **Authentication** option from the table above.
+  </Step>
+  <Step title="Read the warning">
+    ChatGPT asks you to connect only servers you trust. Tick **I understand and want to continue**.
+  </Step>
+  <Step title="Create and confirm">
+    Click **Create as a plugin**, then confirm on the **Connect** screen. ChatGPT shows that your server is connected.
+  </Step>
+</Steps>
+
+---
+
+## Use it in a chat
+
+Start a new chat, type `@` and the server's name, and pick it from the list. Then ask your question in plain words:
+
+```
+@Demo Store how much is product 121, and is it in stock?
+```
+
+Under the answer, open **Worked for a couple of seconds** to see what ChatGPT did.
+
+---
+
+## Troubleshooting
+
+**The server doesn't connect.** Make sure the URL ends in `/mcp` and the server is **Active**. A new server can take a minute to go live.
+
+**ChatGPT doesn't use your tool.** Mention the server with `@` in the chat. Then improve the tool's name and description, because that is what ChatGPT reads to choose a tool.
+
+**You see an authentication error.** Your server's security mode has to match the option you picked in the form.
+
+Test your tools first in the [Playground](/tools/playground) to tell a tool problem from a connection problem.
