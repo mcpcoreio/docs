@@ -12,7 +12,7 @@ Your tool code runs in an isolated V8 runtime with a 64 MB memory limit. There i
 | `sdk` | Built-in helpers: HTTP client, database client, Lodash |
 | `params` | The input parameters the AI passed at call time |
 | `env` | Your encrypted server secrets, accessible by name |
-| `console` | Structured log output visible in Traffic Logs |
+| `console` | Log output shown in the Run panel during test runs |
 
 ---
 
@@ -234,26 +234,24 @@ const apiKey   = env.OPENAI_API_KEY;
 
 ## `console`: Structured logging
 
-Log messages from your tool code. All output is captured and visible in the [Traffic Logs](/observability/traffic-logs) dashboard.
+Log messages from your tool code. During a test run, the output appears in the Run panel's **Logs** section. During live calls, it isn't shown in the dashboard or in [Traffic Logs](/observability/traffic-logs): it goes to MCPCore's server logs without masking, so never log secret values. To see something in Traffic Logs, include it in the tool's response.
 
 ```javascript
 console.log("Processing request for user:", params.userId);
-console.info("Fetched", rows.length, "rows from database");
+console.log("Fetched", rows.length, "rows from database");
 console.warn("Rate limit approaching:", remaining, "requests left");
 console.error("Database query failed:", error.message);
-console.log("Raw response:", res.body());
+console.log("Response status:", res.status);
 ```
 
 | Method | Log level | When to use |
 |---|---|---|
 | `console.log` | INFO | General progress messages |
-| `console.info` | INFO | Important milestones |
 | `console.warn` | WARN | Recoverable issues, degraded operation |
 | `console.error` | ERROR | Failures that affect the result |
-| `console.debug` | DEBUG | Verbose detail for development |
 
 <Note>
-  Log output is truncated at 10 KB per entry. For large payloads, log a summary rather than the full object.
+  During live calls, a tool run can write up to 100 lines of up to 2,000 characters each. For large payloads, log a summary rather than the full object.
 </Note>
 
 ---

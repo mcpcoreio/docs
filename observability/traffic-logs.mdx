@@ -132,7 +132,7 @@ Click any log row to open the full detail modal. The detail view is split into t
 | CDN headers (IP, country) | |
 
 <Note>
-  Secret values (`env.*`) are not exposed at the MCP request/response level, they are never sent to the AI client or included in the MCP protocol layer. However, if you call `console.log(env.MY_SECRET)` in your tool code, that value **will** appear in your Traffic Logs. Never log raw secret values intentionally.
+  MCPCore doesn't add secret values (`env.*`) to MCP messages. Traffic Logs do record each tool's response without masking, so a value your tool returns or includes in an error **will** reach the AI client and appear here. Return only what the AI needs.
 </Note>
 
 ---
@@ -143,9 +143,9 @@ Logs are displayed **10 per page**. Click **Load More** at the bottom to fetch t
 
 ---
 
-## Retention
+## Log history
 
-Traffic logs are retained for **30 days** on the Free plan and **90 days** on paid plans. Older logs are permanently deleted.
+Your plan sets how far back you can view logs: **7 days** on Free, **30 days** on Basic, **90 days** on Pro and **365 days** on Enterprise. Older records aren't deleted when they pass this window, so they become viewable again if you upgrade.
 
 ---
 
