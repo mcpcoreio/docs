@@ -33,6 +33,8 @@ MCPCore generates the key for you when you select this mode. Each key belongs to
   </Step>
   <Step title="Copy the key">
     Copy the key and store it securely (a password manager, vault, or environment variable in your CI system).
+
+    MCPCore stores only a hash of the key, so it is shown once. If you lose it, regenerate it from **Edit**. The old key stops working when you save.
   </Step>
   <Step title="Save">
     Click **Save**. The server now requires the `X-API-Key` header for all requests.
