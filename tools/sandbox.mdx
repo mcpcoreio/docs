@@ -12,6 +12,7 @@ Your tool code runs in an isolated V8 runtime with a 64 MB memory limit. There i
 | `sdk` | Built-in helpers: HTTP client, database client, Lodash |
 | `params` | The input parameters the AI passed at call time |
 | `env` | Your encrypted server secrets, accessible by name |
+| `headers` | Headers of the incoming MCP request. `Cookie` and `X-Api-Key` are removed, along with proxy and client IP headers. `Authorization` is passed through, so tool code can read it |
 | `console` | Log output shown in the Run panel during test runs |
 
 ---
@@ -234,7 +235,7 @@ const apiKey   = env.OPENAI_API_KEY;
 
 ## `console`: Structured logging
 
-Log messages from your tool code. During a test run, the output appears in the Run panel's **Logs** section. During live calls, it isn't shown in the dashboard or in [Traffic Logs](/observability/traffic-logs): it goes to MCPCore's server logs without masking, so never log secret values. To see something in Traffic Logs, include it in the tool's response.
+Log messages from your tool code. During a test run, the output appears in the Run panel's **Logs** section. During live calls, it isn't shown in the dashboard or in [Traffic Logs](/observability/traffic-logs): it goes to MCPCore's server logs, where exact secret values of 6 characters or more are masked. Shorter or encoded values aren't, so never log secret values. To see something in Traffic Logs, include it in the tool's response.
 
 ```javascript
 console.log("Processing request for user:", params.userId);

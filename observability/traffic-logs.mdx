@@ -132,7 +132,7 @@ Click any log row to open the full detail modal. The detail view is split into t
 | CDN headers (IP, country) | |
 
 <Note>
-  MCPCore doesn't add secret values (`env.*`) to MCP messages. Traffic Logs do record each tool's response without masking, so a value your tool returns or includes in an error **will** reach the AI client and appear here. Return only what the AI needs.
+  MCPCore doesn't add secret values (`env.*`) to MCP messages. A value your tool returns or includes in an error **will** reach the AI client. In Traffic Logs, exact values of 6 characters or more appear as `[REDACTED]`; shorter values and values your code has encoded or changed aren't masked. Return only what the AI needs.
 </Note>
 
 ---
